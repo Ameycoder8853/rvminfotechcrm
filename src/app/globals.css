@@ -220,25 +220,133 @@ body {
 }
 
 /* ==========================================
-   Clerk Component Overrides
+   Clerk Component Overrides — Dark Theme
+   Uses aggressive selectors to ensure
+   all text is visible on dark backgrounds
    ========================================== */
 
+/* Nuclear approach: force ALL text inside Clerk components to be light */
+.cl-rootBox h1,
+.cl-rootBox h2,
+.cl-rootBox h3,
+.cl-rootBox p,
+.cl-rootBox span,
+.cl-rootBox label,
+.cl-rootBox a,
+.cl-rootBox div {
+  color: #f1f5f9 !important;
+}
+
+/* Card container */
 .cl-card {
-  background: var(--surface) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-lg) !important;
+  background: #1c1f32 !important;
+  border: 1px solid #2a2d44 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
+/* Footer area */
+.cl-footer {
+  background: transparent !important;
+}
+
+.cl-footerAction span,
+.cl-footerAction a {
+  color: #94a3b8 !important;
+}
+
+.cl-footerAction a {
+  color: #818cf8 !important;
+}
+
+.cl-footerAction a:hover {
+  color: #a5b4fc !important;
+}
+
+/* Social buttons */
 .cl-socialButtonsBlockButton {
-  background: var(--background-secondary) !important;
-  border-color: var(--border) !important;
+  background: #111320 !important;
+  border-color: #2a2d44 !important;
 }
 
+.cl-socialButtonsBlockButton span {
+  color: #f1f5f9 !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background: #252842 !important;
+}
+
+/* Divider */
+.cl-dividerLine {
+  background: #2a2d44 !important;
+}
+
+.cl-dividerText {
+  color: #64748b !important;
+}
+
+/* Form labels */
+.cl-formFieldLabel {
+  color: #f1f5f9 !important;
+}
+
+/* Input fields */
+.cl-formFieldInput,
+.cl-formFieldInput input {
+  background: #111320 !important;
+  border-color: #2a2d44 !important;
+  color: #f1f5f9 !important;
+}
+
+.cl-formFieldInput::placeholder,
+.cl-formFieldInput input::placeholder {
+  color: #64748b !important;
+}
+
+.cl-formFieldInput:focus,
+.cl-formFieldInput input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Primary action button */
 .cl-formButtonPrimary {
-  background: var(--accent) !important;
+  background: #6366f1 !important;
+  color: #ffffff !important;
 }
 
 .cl-formButtonPrimary:hover {
-  background: var(--accent-hover) !important;
+  background: #818cf8 !important;
 }
+
+/* Error / Success text */
+.cl-formFieldErrorText,
+.cl-formFieldErrorText span {
+  color: #ef4444 !important;
+}
+
+.cl-formFieldSuccessText,
+.cl-formFieldSuccessText span {
+  color: #22c55e !important;
+}
+
+/* "Secured by Clerk" footer */
+.cl-internal-b7uh4d {
+  color: #4a5068 !important;
+}
+
+/* User button popover */
+.cl-userButtonPopoverCard {
+  background: #1c1f32 !important;
+  border: 1px solid #2a2d44 !important;
+}
+
+.cl-userButtonPopoverActionButton {
+  color: #f1f5f9 !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background: #252842 !important;
+}
+
