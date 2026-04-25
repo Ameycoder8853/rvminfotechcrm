@@ -1,0 +1,55 @@
+﻿Γû▓ Next.js 16.2.4 (Turbopack)
+- Environments: .env.local
+
+node.exe : ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
+https://nextjs.org/docs/messages/middleware-to-proxy
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ΓÜá The "middle...leware-to-proxy:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 5.9s
+  Running TypeScript ...
+  Finished TypeScript in 7.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/24) ...
+  Generating static pages using 7 workers (6/24) 
+  Generating static pages using 7 workers (12/24) 
+  Generating static pages using 7 workers (18/24) 
+Γ£ô Generating static pages using 7 workers (24/24) in 821ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî ╞Æ /
+Γö£ Γùï /_not-found
+Γö£ Γùï /amc
+Γö£ ╞Æ /api/attendance
+Γö£ ╞Æ /api/contacts
+Γö£ ╞Æ /api/expenses
+Γö£ ╞Æ /api/leads
+Γö£ ╞Æ /api/orders
+Γö£ ╞Æ /api/quotes
+Γö£ ╞Æ /api/tickets
+Γö£ ╞Æ /api/webhooks/clerk
+Γö£ Γùï /attendance
+Γö£ Γùï /contacts
+Γö£ Γùï /dashboard
+Γö£ Γùï /diary
+Γö£ Γùï /expenses
+Γö£ Γùï /installations
+Γö£ Γùï /leads
+Γö£ Γùï /orders
+Γö£ Γùï /quotes
+Γö£ Γùï /settings
+Γö£ ╞Æ /sign-in/[[...sign-in]]
+Γö£ ╞Æ /sign-up/[[...sign-up]]
+Γöö Γùï /tickets
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
