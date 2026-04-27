@@ -65,6 +65,58 @@
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
 }
 
+/* ==========================================
+   Light Theme
+   ========================================== */
+
+[data-theme="light"] {
+  /* Core Palette */
+  --background: #f8f9fc;
+  --background-secondary: #ffffff;
+  --background-tertiary: #f1f3f8;
+  --surface: #ffffff;
+  --surface-hover: #f1f3f8;
+  --surface-active: #e8eaf0;
+
+  /* Border */
+  --border: #e2e4eb;
+  --border-hover: #c7c9d4;
+  --border-focus: #6366f1;
+
+  /* Text */
+  --foreground: #0f172a;
+  --foreground-secondary: #475569;
+  --foreground-muted: #94a3b8;
+
+  /* Accent — Indigo */
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-muted: rgba(99, 102, 241, 0.1);
+  --accent-foreground: #ffffff;
+
+  /* Status Colors */
+  --success: #16a34a;
+  --success-muted: rgba(22, 163, 74, 0.1);
+  --warning: #d97706;
+  --warning-muted: rgba(217, 119, 6, 0.1);
+  --danger: #dc2626;
+  --danger-muted: rgba(220, 38, 38, 0.1);
+  --info: #2563eb;
+  --info-muted: rgba(37, 99, 235, 0.1);
+
+  /* Sidebar */
+  --sidebar-bg: #ffffff;
+  --sidebar-hover: #f1f3f8;
+  --sidebar-active: #eef0f6;
+  --sidebar-border: #e2e4eb;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -220,29 +272,51 @@ body {
 }
 
 /* ==========================================
-   Clerk Component Overrides — Dark Theme
-   Uses aggressive selectors to ensure
-   all text is visible on dark backgrounds
+   Clerk Component Overrides — Dynamic Theme
+   Covers: sign-in, sign-up, user button,
+   popover, modals, and all portaled elements
    ========================================== */
 
-/* Nuclear approach: force ALL text inside Clerk components to be light */
-.cl-rootBox h1,
-.cl-rootBox h2,
-.cl-rootBox h3,
-.cl-rootBox p,
-.cl-rootBox span,
-.cl-rootBox label,
-.cl-rootBox a,
-.cl-rootBox div {
-  color: #f1f5f9 !important;
+/* Universal approach: force colors using variables for all Clerk elements */
+.cl-rootBox,
+.cl-userButtonPopoverRootBox,
+.cl-userButtonPopoverCard,
+.cl-modalContent,
+.cl-profilePage,
+.cl-userPreview {
+  --cl-chassis-background: var(--surface) !important;
+  --cl-chassis-foreground: var(--foreground) !important;
 }
 
-/* Card container */
-.cl-card {
-  background: #1c1f32 !important;
-  border: 1px solid #2a2d44 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+/* Force all text inside ANY Clerk-rendered element to follow theme */
+.cl-rootBox *,
+.cl-userButtonPopoverRootBox *,
+.cl-userButtonPopoverCard *,
+.cl-modalContent *,
+.cl-profilePage *,
+.cl-userPreview * {
+  color: var(--foreground) !important;
+}
+
+/* Specific color for secondary text */
+.cl-headerSubtitle,
+.cl-userPreviewSecondaryIdentifier,
+.cl-footerActionText,
+.cl-formFieldInfoText,
+.cl-formFieldHintText,
+.cl-identityPreviewSecondaryIdentifier {
+  color: var(--foreground-secondary) !important;
+}
+
+/* Card / panel backgrounds */
+.cl-card,
+.cl-userButtonPopoverCard,
+.cl-modalContent,
+.cl-profilePage {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
 /* Footer area */
@@ -250,103 +324,140 @@ body {
   background: transparent !important;
 }
 
-.cl-footerAction span,
-.cl-footerAction a {
-  color: #94a3b8 !important;
+.cl-footerAction span {
+  color: var(--foreground-secondary) !important;
 }
 
 .cl-footerAction a {
-  color: #818cf8 !important;
+  color: var(--accent) !important;
 }
 
 .cl-footerAction a:hover {
-  color: #a5b4fc !important;
+  color: var(--accent-hover) !important;
 }
 
 /* Social buttons */
 .cl-socialButtonsBlockButton {
-  background: #111320 !important;
-  border-color: #2a2d44 !important;
-}
-
-.cl-socialButtonsBlockButton span {
-  color: #f1f5f9 !important;
+  background: var(--background-secondary) !important;
+  border: 1px solid var(--border) !important;
 }
 
 .cl-socialButtonsBlockButton:hover {
-  background: #252842 !important;
+  background: var(--surface-hover) !important;
+  border-color: var(--border-hover) !important;
 }
 
 /* Divider */
 .cl-dividerLine {
-  background: #2a2d44 !important;
+  background: var(--border) !important;
 }
 
 .cl-dividerText {
-  color: #64748b !important;
-}
-
-/* Form labels */
-.cl-formFieldLabel {
-  color: #f1f5f9 !important;
+  color: var(--foreground-muted) !important;
 }
 
 /* Input fields */
 .cl-formFieldInput,
-.cl-formFieldInput input {
-  background: #111320 !important;
-  border-color: #2a2d44 !important;
-  color: #f1f5f9 !important;
+.cl-formFieldInput input,
+.cl-formFieldInput textarea {
+  background: var(--background-secondary) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
 }
 
 .cl-formFieldInput::placeholder,
 .cl-formFieldInput input::placeholder {
-  color: #64748b !important;
+  color: var(--foreground-muted) !important;
 }
 
 .cl-formFieldInput:focus,
 .cl-formFieldInput input:focus {
-  border-color: #6366f1 !important;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-muted) !important;
 }
 
-/* Primary action button */
+/* Primary button */
 .cl-formButtonPrimary {
-  background: #6366f1 !important;
-  color: #ffffff !important;
+  background: var(--accent) !important;
+  color: white !important;
+  border: none !important;
 }
 
 .cl-formButtonPrimary:hover {
-  background: #818cf8 !important;
+  background: var(--accent-hover) !important;
 }
 
 /* Error / Success text */
 .cl-formFieldErrorText,
 .cl-formFieldErrorText span {
-  color: #ef4444 !important;
+  color: var(--danger) !important;
 }
 
 .cl-formFieldSuccessText,
 .cl-formFieldSuccessText span {
-  color: #22c55e !important;
+  color: var(--success) !important;
 }
 
-/* "Secured by Clerk" footer */
-.cl-internal-b7uh4d {
-  color: #4a5068 !important;
-}
-
-/* User button popover */
-.cl-userButtonPopoverCard {
-  background: #1c1f32 !important;
-  border: 1px solid #2a2d44 !important;
-}
-
+/* User Button Popover Specifics */
 .cl-userButtonPopoverActionButton {
-  color: #f1f5f9 !important;
+  color: var(--foreground) !important;
+}
+
+.cl-userButtonPopoverActionButton svg {
+  color: var(--foreground-secondary) !important;
 }
 
 .cl-userButtonPopoverActionButton:hover {
-  background: #252842 !important;
+  background: var(--surface-hover) !important;
 }
+
+.cl-userButtonPopoverActions {
+  border-top: 1px solid var(--border) !important;
+}
+
+/* User info section in popover */
+.cl-userPreviewMainIdentifier {
+  color: var(--foreground) !important;
+  font-weight: 700 !important;
+}
+
+.cl-userPreviewSecondaryIdentifier {
+  color: var(--foreground-secondary) !important;
+}
+
+/* "Secured by Clerk" — hide or dim */
+.cl-internal-b7uh4d,
+.cl-userButtonPopoverFooter,
+.cl-userButtonPopoverFooter * {
+  color: var(--foreground-muted) !important;
+  opacity: 0.5;
+}
+
+/* Modal and Profile Page specific resets */
+.cl-navbar {
+  border-right: 1px solid var(--border) !important;
+}
+
+.cl-navbarButton {
+  color: var(--foreground-secondary) !important;
+}
+
+.cl-navbarButton:hover {
+  background: var(--surface-hover) !important;
+}
+
+.cl-navbarButton[data-active="true"] {
+  background: var(--accent-muted) !important;
+  color: var(--accent) !important;
+}
+
+.cl-scrollBox {
+  background: var(--surface) !important;
+}
+
+/* Light theme scrollbar adjustment */
+[data-theme="light"] * {
+  scrollbar-color: var(--border-hover) transparent;
+}
+
 

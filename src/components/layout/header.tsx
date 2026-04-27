@@ -1,8 +1,10 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search, Menu, Sun, Moon } from "lucide-react";
 import { useState } from "react";
+import { useTheme } from "@/components/theme-provider";
+import ThemeToggle from "@/components/theme-toggle";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -10,6 +12,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-30 h-[var(--header-height)] border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-xl">
@@ -46,8 +49,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </button>
         </div>
 
-        {/* Right: Notifications + Profile */}
+        {/* Right: Theme Toggle + Notifications + Profile */}
         <div className="flex items-center gap-2">
+          <ThemeToggle />
+
           {/* Notification Bell */}
           <button className="relative p-2 rounded-lg text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface)] transition-colors">
             <Bell size={20} />

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatusBadge from "@/components/shared/status-badge";
 import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 // Mock data
-const leads = [
+const initialLeads = [
   { id: "1", title: "Enterprise Cloud Solution", company: "TechVision Pvt Ltd", contact: "Priya Sharma", value: "₹4,50,000", status: "proposal", source: "website", assignedTo: "Amit", date: "22 Apr 2026" },
   { id: "2", title: "Network Infrastructure", company: "Sunrise Industries", contact: "Rajesh Kumar", value: "₹3,20,000", status: "negotiation", source: "referral", assignedTo: "Priya", date: "20 Apr 2026" },
   { id: "3", title: "Office Automation Suite", company: "CloudNet Solutions", contact: "Sneha Patel", value: "₹2,85,000", status: "qualified", source: "exhibition", assignedTo: "Rajesh", date: "18 Apr 2026" },
@@ -28,14 +29,49 @@ const kanbanColumns = [
 type ViewMode = "table" | "kanban";
 
 export default function LeadsPage() {
-  const [view, setView] = useState<ViewMode>("table");
+  const [view, setView] = useState<ViewMode>("kanban");
   const [searchQuery, setSearchQuery] = useState("");
+  const [leads, setLeads] = useState(initialLeads);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const filteredLeads = leads.filter(
     (l) =>
       l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       l.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const updatedLeads = Array.from(leads);
+    const leadIndex = updatedLeads.findIndex((l) => l.id === draggableId);
+    if (leadIndex === -1) return;
+
+    const lead = { ...updatedLeads[leadIndex], status: destination.droppableId };
+    
+    // Remove from old position and add to new (if sorting within column, but here we mostly care about status change)
+    // For a real Kanban, we'd need to handle sorting order too, but for now we update status.
+    updatedLeads[leadIndex] = lead;
+    setLeads(updatedLeads);
+
+    // TODO: Connect to API to persist change
+    console.log(`Moved lead ${draggableId} to ${destination.droppableId}`);
+  };
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -98,11 +134,11 @@ export default function LeadsPage() {
 
       {/* Table View */}
       {view === "table" && (
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)]">
+                <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/50">
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">Lead</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] hidden md:table-cell">Company</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">Value</th>
@@ -150,50 +186,87 @@ export default function LeadsPage() {
 
       {/* Kanban View */}
       {view === "kanban" && (
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
-          {kanbanColumns.map((col) => {
-            const colLeads = filteredLeads.filter((l) => l.status === col.key);
-            return (
-              <div
-                key={col.key}
-                className="min-w-[280px] w-[280px] shrink-0 bg-[var(--background-secondary)] rounded-xl border border-[var(--border)]"
-              >
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)]">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
-                  <span className="text-sm font-semibold text-[var(--foreground)]">{col.label}</span>
-                  <span className="ml-auto text-xs text-[var(--foreground-muted)] bg-[var(--surface)] px-2 py-0.5 rounded-full">
-                    {colLeads.length}
-                  </span>
-                </div>
-                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
-                  {colLeads.length === 0 && (
-                    <p className="text-xs text-[var(--foreground-muted)] text-center py-6">No leads</p>
-                  )}
-                  {colLeads.map((lead) => (
-                    <div
-                      key={lead.id}
-                      className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 hover:border-[var(--border-hover)] transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <p className="text-sm font-medium text-[var(--foreground)] leading-tight">
-                          {lead.title}
-                        </p>
-                        <GripVertical size={14} className="text-[var(--foreground-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-4 overflow-x-auto pb-6 -mx-4 px-4 scrollbar-thin scrollbar-thumb-[var(--border)]">
+            {kanbanColumns.map((col) => {
+              const colLeads = filteredLeads.filter((l) => l.status === col.key);
+              return (
+                <div
+                  key={col.key}
+                  className="min-w-[300px] w-[300px] shrink-0 flex flex-col bg-[var(--background-secondary)]/30 rounded-xl border border-[var(--border)] h-[calc(100vh-280px)]"
+                >
+                  <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)] bg-[var(--surface)]/50 rounded-t-xl">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
+                    <span className="text-sm font-bold text-[var(--foreground)]">{col.label}</span>
+                    <span className="ml-auto text-xs font-medium text-[var(--foreground-muted)] bg-[var(--surface)] px-2 py-0.5 rounded-full border border-[var(--border)]">
+                      {colLeads.length}
+                    </span>
+                  </div>
+                  
+                  <Droppable droppableId={col.key}>
+                    {(provided, snapshot) => (
+                      <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className={`p-3 flex-1 overflow-y-auto space-y-3 transition-colors ${
+                          snapshot.isDraggingOver ? "bg-[var(--accent-muted)]/5" : ""
+                        }`}
+                      >
+                        {colLeads.map((lead, index) => (
+                          <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 shadow-sm hover:border-[var(--accent)]/50 transition-all group ${
+                                  snapshot.isDragging ? "shadow-2xl border-[var(--accent)] ring-2 ring-[var(--accent)]/20 rotate-1 scale-[1.02] z-50" : ""
+                                }`}
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <h3 className="text-sm font-bold text-[var(--foreground)] leading-tight group-hover:text-[var(--accent)] transition-colors">
+                                    {lead.title}
+                                  </h3>
+                                  <GripVertical size={14} className="text-[var(--foreground-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
+                                </div>
+                                <p className="text-xs text-[var(--foreground-secondary)] mb-4">{lead.company}</p>
+                                
+                                <div className="flex items-center justify-between">
+                                  <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase tracking-wider text-[var(--foreground-muted)] font-semibold">Value</span>
+                                    <span className="text-xs font-bold text-[var(--foreground)]">{lead.value}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex flex-col items-end mr-1">
+                                      <span className="text-[10px] text-[var(--foreground-muted)]">Owner</span>
+                                      <span className="text-[11px] font-medium text-[var(--foreground-secondary)]">{lead.assignedTo}</span>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center text-xs font-bold text-[var(--accent)] shadow-inner">
+                                      {lead.assignedTo.charAt(0)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                        {colLeads.length === 0 && !snapshot.isDraggingOver && (
+                          <div className="flex flex-col items-center justify-center py-10 opacity-40">
+                            <div className="w-12 h-12 rounded-full bg-[var(--surface)] border-2 border-dashed border-[var(--border)] flex items-center justify-center mb-2">
+                              <Plus size={20} className="text-[var(--foreground-muted)]" />
+                            </div>
+                            <p className="text-xs text-[var(--foreground-muted)] font-medium">Drop here</p>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-[var(--foreground-muted)] mb-2">{lead.company}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[var(--accent)]">{lead.value}</span>
-                        <div className="w-6 h-6 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-[10px] font-bold text-[var(--accent)]">
-                          {lead.assignedTo.charAt(0)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    )}
+                  </Droppable>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </DragDropContext>
       )}
     </div>
   );
