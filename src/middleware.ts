@@ -8,8 +8,6 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks(.*)",
 ]);
 
-const isAdminRoute = createRouteMatcher(["/settings(.*)"]);
-
 export default clerkMiddleware(async (auth, req) => {
   // Allow public routes
   if (isPublicRoute(req)) {
@@ -17,15 +15,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // All other routes require authentication
-  const session = await auth.protect();
-
-  // Admin-only route protection
-  if (isAdminRoute(req)) {
-    const role = (session.sessionClaims?.metadata as { role?: string })?.role;
-    if (role !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-  }
+  await auth.protect();
 
   return NextResponse.next();
 });

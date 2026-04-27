@@ -54,6 +54,17 @@ const statusStyles: Record<string, { bg: string; text: string; dot: string }> = 
   // Attendance
   check_in: { bg: "var(--success-muted)", text: "var(--success)", dot: "var(--success)" },
   check_out: { bg: "var(--warning-muted)", text: "var(--warning)", dot: "var(--warning)" },
+
+  // Communications
+  inbound: { bg: "var(--info-muted)", text: "var(--info)", dot: "var(--info)" },
+  outbound: { bg: "var(--accent-muted)", text: "var(--accent)", dot: "var(--accent)" },
+  missed: { bg: "var(--danger-muted)", text: "var(--danger)", dot: "var(--danger)" },
+  failed: { bg: "var(--danger-muted)", text: "var(--danger)", dot: "var(--danger)" },
+
+  // Invoices
+  paid: { bg: "var(--success-muted)", text: "var(--success)", dot: "var(--success)" },
+  unpaid: { bg: "var(--warning-muted)", text: "var(--warning)", dot: "var(--warning)" },
+  overdue: { bg: "var(--danger-muted)", text: "var(--danger)", dot: "var(--danger)" },
 };
 
 export default function StatusBadge({ status, className }: StatusBadgeProps) {

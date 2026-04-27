@@ -18,6 +18,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Activity,
+  Phone,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -44,36 +46,41 @@ const navigation: NavGroup[] = [
     ],
   },
   {
-    title: "Sales",
+    title: "Sales Core",
     items: [
-      { title: "Leads", href: "/leads", icon: <Target size={20} /> },
-      { title: "Contacts", href: "/contacts", icon: <Users size={20} /> },
+      { title: "Lead Management", href: "/leads", icon: <Target size={20} /> },
+      { title: "Contact Database", href: "/contacts", icon: <Users size={20} /> },
+      { title: "Task Management", href: "/diary", icon: <Calendar size={20} /> },
+    ],
+  },
+  {
+    title: "Communications",
+    items: [
+      { title: "Call App & Email", href: "/comms", icon: <Phone size={20} /> },
+    ],
+  },
+  {
+    title: "Business Billing",
+    items: [
       { title: "Quotations", href: "/quotes", icon: <FileText size={20} /> },
       { title: "Orders", href: "/orders", icon: <ShoppingCart size={20} /> },
+      { title: "Invoice Generate", href: "/invoices", icon: <Receipt size={20} /> },
     ],
   },
   {
-    title: "Service",
+    title: "Field Operations",
     items: [
-      { title: "Tickets", href: "/tickets", icon: <Ticket size={20} /> },
-      { title: "AMC", href: "/amc", icon: <Shield size={20} /> },
-      {
-        title: "Installations",
-        href: "/installations",
-        icon: <Wrench size={20} />,
-      },
+      { title: "Service Tickets", href: "/tickets", icon: <Ticket size={20} /> },
+      { title: "AMC Contracts", href: "/amc", icon: <Shield size={20} /> },
+      { title: "Installations", href: "/installations", icon: <Wrench size={20} />, },
     ],
   },
   {
-    title: "Operations",
+    title: "HR & Staffing",
     items: [
-      { title: "Expenses", href: "/expenses", icon: <Receipt size={20} /> },
-      {
-        title: "Attendance",
-        href: "/attendance",
-        icon: <MapPin size={20} />,
-      },
-      { title: "Diary", href: "/diary", icon: <Calendar size={20} /> },
+      { title: "Staff Activity", href: "/staff-activity", icon: <Activity size={18} /> },
+      { title: "Track Location", href: "/attendance", icon: <MapPin size={20} />, },
+      { title: "Expense Claims", href: "/expenses", icon: <Receipt size={20} /> },
     ],
   },
   {

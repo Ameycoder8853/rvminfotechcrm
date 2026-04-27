@@ -1,94 +1,211 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import StatusBadge from "@/components/shared/status-badge";
-import { MapPin, Clock, LogIn, LogOut } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Clock, LogIn, LogOut, Loader2, Trash2, ShieldAlert } from "lucide-react";
 
-const attendanceLog = [
-  { id: "1", user: "Amit Patel", type: "check_in", time: "09:12 AM", date: "24 Apr 2026", location: "Office — Ahmedabad", lat: 23.0225, lng: 72.5714 },
-  { id: "2", user: "Priya Sharma", type: "check_in", time: "09:30 AM", date: "24 Apr 2026", location: "Client Site — TechVision, Mumbai", lat: 19.076, lng: 72.8777 },
-  { id: "3", user: "Rajesh Kumar", type: "check_out", time: "06:45 PM", date: "23 Apr 2026", location: "Office — Delhi", lat: 28.6139, lng: 77.209 },
-  { id: "4", user: "Vikram Singh", type: "check_in", time: "10:05 AM", date: "24 Apr 2026", location: "Field Visit — Pune", lat: 18.5204, lng: 73.8567 },
-  { id: "5", user: "Sneha Patel", type: "check_out", time: "05:30 PM", date: "23 Apr 2026", location: "Office — Bangalore", lat: 12.9716, lng: 77.5946 },
-  { id: "6", user: "Rahul Verma", type: "check_in", time: "08:45 AM", date: "24 Apr 2026", location: "Installation Site — Hyderabad", lat: 17.385, lng: 78.4867 },
-];
-
-const activeAgents = attendanceLog.filter((a) => a.type === "check_in" && a.date === "24 Apr 2026");
+interface AttendanceRecord {
+  _id: string;
+  user?: { _id: string; firstName: string; lastName: string };
+  type: "check_in" | "check_out";
+  timestamp: string;
+  address: string;
+}
 
 export default function AttendancePage() {
-  const [checkedIn, setCheckedIn] = useState(false);
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [lastAction, setLastAction] = useState<"check_in" | "check_out" | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/attendance");
+      const data = await res.json();
+      if (data.success) {
+        setRecords(data.data);
+        // Find last record for current user to determine button state
+        // (This assumes the API returns records for the logged-in user if not admin, 
+        // or we filter them if it's admin viewing their own)
+        if (data.data.length > 0) {
+          setLastAction(data.data[0].type);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch attendance:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+    fetchData();
+  }, [fetchData]);
+
+  const handleAttendance = async () => {
+    try {
+      setIsProcessing(true);
+      
+      // Get Geolocation
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const type = lastAction === "check_in" ? "check_out" : "check_in";
+
+        // Optional: Reverse geocoding could be done here or on backend
+        // For now we'll send coordinates
+        const res = await fetch("/api/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type,
+            coordinates: { lat: latitude, lng: longitude },
+            address: `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`, // Placeholder for real address
+          }),
+        });
+
+        if (res.ok) {
+          fetchData();
+        }
+      }, (error) => {
+        alert(`Error getting location: ${error.message}`);
+      });
+
+    } catch (error) {
+      console.error("Attendance action failed:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this attendance record?")) return;
+    try {
+      const res = await fetch(`/api/attendance/${id}`, { method: "DELETE" });
+      if (res.ok) fetchData();
+    } catch (error) {
+      console.error("Failed to delete record:", error);
+    }
+  };
+
+  if (!mounted) return null;
+
+  // Real-time "Active" agents (checked in today and haven't checked out)
+  const activeAgents = records.filter(r => {
+    const isToday = new Date(r.timestamp).toDateString() === new Date().toDateString();
+    return isToday && r.type === "check_in";
+  }).filter((record, index, self) => 
+    index === self.findIndex((t) => t.user?._id === record.user?._id)
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--foreground)]">Attendance</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">GPS-based check-in/check-out tracking</p>
+          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Real-time GPS-verified staff tracking</p>
         </div>
         <button
-          onClick={() => setCheckedIn(!checkedIn)}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg ${
-            checkedIn
-              ? "bg-[var(--danger)] hover:bg-red-600 text-white shadow-red-500/20"
-              : "bg-[var(--success)] hover:bg-green-600 text-white shadow-green-500/20"
+          onClick={handleAttendance}
+          disabled={isProcessing}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
+            lastAction === "check_in"
+              ? "bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white shadow-[var(--danger)]/20"
+              : "bg-[var(--success)] hover:bg-[var(--success-hover)] text-white shadow-[var(--success)]/20"
           }`}
         >
-          {checkedIn ? <LogOut size={18} /> : <LogIn size={18} />}
-          <span>{checkedIn ? "Check Out" : "Check In"}</span>
+          {isProcessing ? <Loader2 size={18} className="animate-spin" /> : (lastAction === "check_in" ? <LogOut size={18} /> : <LogIn size={18} />)}
+          <span>{lastAction === "check_in" ? "Check Out Now" : "Check In Now"}</span>
         </button>
       </div>
 
-      {/* Active Field Agents */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1">Active Field Agents</h3>
-        <p className="text-xs text-[var(--foreground-muted)] mb-4">{activeAgents.length} agents currently checked in</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* Active Field Agents Dashboard */}
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="p-2 rounded-lg bg-[var(--success-muted)] text-[var(--success)]">
+            <ShieldAlert size={20} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-[var(--foreground)]">Active Field Staff</h3>
+            <p className="text-xs text-[var(--foreground-muted)]">{activeAgents.length} agents currently on field</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {activeAgents.map((agent) => (
-            <div key={agent.id} className="flex items-center gap-3 bg-[var(--background-secondary)] rounded-lg p-3 border border-[var(--border)]">
-              <div className="w-9 h-9 rounded-full bg-[var(--success-muted)] flex items-center justify-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-[var(--success)] animate-pulse" />
+            <div key={agent._id} className="flex items-center gap-3 bg-[var(--background-secondary)] rounded-xl p-4 border border-[var(--border)] hover:border-[var(--success)] transition-colors group">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)] font-bold">
+                  {agent.user?.firstName?.[0]}{agent.user?.lastName?.[0]}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[var(--success)] border-2 border-[var(--background-secondary)] animate-pulse" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-[var(--foreground)] truncate">{agent.user}</p>
-                <div className="flex items-center gap-1 text-[10px] text-[var(--foreground-muted)]">
-                  <MapPin size={10} />
-                  <span className="truncate">{agent.location}</span>
+                <p className="text-sm font-bold text-[var(--foreground)] truncate">{agent.user?.firstName} {agent.user?.lastName}</p>
+                <div className="flex items-center gap-1 text-[10px] text-[var(--foreground-muted)] font-medium">
+                  <MapPin size={10} className="text-[var(--danger)]" />
+                  <span className="truncate">{agent.address}</span>
                 </div>
               </div>
-              <span className="text-[10px] text-[var(--foreground-muted)] ml-auto shrink-0">{agent.time}</span>
             </div>
           ))}
+          {activeAgents.length === 0 && (
+            <div className="col-span-full py-4 text-center text-[var(--foreground-muted)] text-sm italic">No agents currently checked in.</div>
+          )}
         </div>
       </div>
 
-      {/* Attendance Log */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[var(--border)]">
-          <h3 className="text-sm font-semibold text-[var(--foreground)]">Attendance Log</h3>
+      {/* Attendance History */}
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+        <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--background-secondary)]/30">
+          <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">Attendance Log</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--border)]">
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">Employee</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">Type</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">Time</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] hidden md:table-cell">Location</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] hidden lg:table-cell">Date</th>
+              <tr className="bg-[var(--background-secondary)]/10">
+                <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Staff Member</th>
+                <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Action</th>
+                <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Timestamp</th>
+                <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] hidden md:table-cell">Location</th>
+                <th className="text-right px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {attendanceLog.map((entry) => (
-                <tr key={entry.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-hover)] transition-colors">
-                  <td className="px-4 py-3 font-medium text-[var(--foreground)]">{entry.user}</td>
-                  <td className="px-4 py-3"><StatusBadge status={entry.type} /></td>
-                  <td className="px-4 py-3 text-[var(--foreground-secondary)]">
-                    <div className="flex items-center gap-1.5"><Clock size={13} />{entry.time}</div>
+            <tbody className="divide-y divide-[var(--border)]">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center">
+                    <Loader2 className="w-6 h-6 text-[var(--accent)] animate-spin mx-auto mb-2" />
+                    <span className="text-xs text-[var(--foreground-muted)] font-medium uppercase tracking-widest">Loading history...</span>
                   </td>
-                  <td className="px-4 py-3 text-[var(--foreground-muted)] text-xs hidden md:table-cell">
-                    <div className="flex items-center gap-1.5"><MapPin size={13} />{entry.location}</div>
+                </tr>
+              ) : records.map((entry) => (
+                <tr key={entry._id} className="hover:bg-[var(--surface-hover)] transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[var(--surface-active)] flex items-center justify-center text-[var(--foreground-secondary)] text-[10px] font-bold">
+                        {entry.user?.firstName?.[0]}
+                      </div>
+                      <span className="font-bold text-[var(--foreground)]">{entry.user?.firstName} {entry.user?.lastName}</span>
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-[var(--foreground-muted)] text-xs hidden lg:table-cell">{entry.date}</td>
+                  <td className="px-6 py-4"><StatusBadge status={entry.type} /></td>
+                  <td className="px-6 py-4 text-[var(--foreground-secondary)] font-medium">
+                    <div className="flex items-center gap-2"><Clock size={14} className="text-[var(--accent)]" />{new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  </td>
+                  <td className="px-6 py-4 text-[var(--foreground-muted)] text-xs hidden md:table-cell">
+                    <div className="flex items-center gap-1.5"><MapPin size={14} className="text-[var(--danger)]" />{entry.address}</div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button onClick={() => handleDelete(entry._id)} className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-all opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                  </td>
                 </tr>
               ))}
             </tbody>
