@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const body = await req.json();
     
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${generateId().split("-")[2]}`;
+    const invoiceNumber = generateId("INV");
     
     const invoice = await Invoice.create({
       ...body,
