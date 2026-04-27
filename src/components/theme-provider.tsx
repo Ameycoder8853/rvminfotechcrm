@@ -48,8 +48,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <ClerkProvider
-        userProfileMode="navigation"
-        userProfileUrl="/settings"
         appearance={{
           baseTheme: theme === "dark" ? dark : undefined,
           variables: {
