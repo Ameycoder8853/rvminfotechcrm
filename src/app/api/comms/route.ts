@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
     const dbUser = await User.findOne({ clerkId: userId });
+    if (!dbUser) return NextResponse.json({ error: "User record not found" }, { status: 404 });
+
     const body = await req.json();
     const logType = body.logType; // "call" or "email"
 
