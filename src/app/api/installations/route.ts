@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Installation from "@/models/Installation";
 import User from "@/models/User";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
-    const dbUser = await User.findOne({ clerkId: userId });
+    const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();

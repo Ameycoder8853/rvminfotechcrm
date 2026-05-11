@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Lead from "@/models/Lead";
 import User from "@/models/User";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 // GET /api/leads/[id] — Get single lead
 export async function GET(
@@ -38,7 +39,7 @@ export async function PATCH(
     const { id } = await params;
     await connectToDatabase();
     
-    const dbUser = await User.findOne({ clerkId: userId });
+    const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
