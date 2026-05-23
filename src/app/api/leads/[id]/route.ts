@@ -16,7 +16,10 @@ export async function GET(
 
     const { id } = await params;
     await connectToDatabase();
-    const lead = await Lead.findById(id).populate("assignedTo", "firstName lastName").lean();
+    const lead = await Lead.findById(id)
+      .populate("assignedTo", "firstName lastName")
+      .populate("customer", "firstName lastName company")
+      .lean();
 
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
@@ -44,7 +47,9 @@ export async function PATCH(
 
     const body = await req.json();
     
-    const lead = await Lead.findByIdAndUpdate(id, body, { new: true }).populate("assignedTo", "firstName lastName");
+    const lead = await Lead.findByIdAndUpdate(id, body, { new: true })
+      .populate("assignedTo", "firstName lastName")
+      .populate("customer", "firstName lastName company");
 
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 

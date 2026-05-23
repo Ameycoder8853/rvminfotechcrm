@@ -460,4 +460,165 @@ body {
   scrollbar-color: var(--border-hover) transparent;
 }
 
+/* ==========================================
+   Sleek Enterprise $2000 UI Design System
+   Covers form fields, buttons, scrollbars,
+   cards, and glow transitions
+   ========================================== */
+
+/* Modernized Global Form Fields */
+input, select, textarea {
+  background-color: #0b0d19 !important;
+  border: 1px solid #1f243d !important;
+  border-radius: 12px !important;
+  color: #f1f5f9 !important;
+  padding: 11px 16px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.3) !important;
+  background-color: #0f1122 !important;
+  outline: none !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* Form Label Adjustments */
+label {
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-size: 10px !important;
+  margin-bottom: 6px !important;
+}
+
+/* Luminous $2000 Primary Buttons */
+button[type="submit"], .btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%) !important;
+  background-size: 200% auto !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 12px !important;
+  padding: 11px 26px !important;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+}
+
+button[type="submit"]:hover, .btn-primary:hover {
+  background-position: right center !important; /* smooth gradient shift */
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45) !important;
+}
+
+button[type="submit"]:active, .btn-primary:active {
+  transform: translateY(0) !important;
+  scale: 0.98 !important;
+}
+
+/* Premium Modal styling */
+.modal-glow {
+  background: rgba(13, 15, 29, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), 0 0 50px rgba(99, 102, 241, 0.07) !important;
+}
+
+/* Cancel / secondary modal button */
+button[type="button"] {
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  transition: all 0.2s ease !important;
+}
+
+/* ==========================================
+   Smooth $2000 Micro-animations & Transitions
+   ========================================== */
+
+/* Universal Card Hover Transitions */
+.grid > div, 
+.space-y-3 > div, 
+.space-y-4 > div {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.grid > div:hover,
+.space-y-3 > div:hover,
+.space-y-4 > div:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.04) !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Fluid responsive navigation hover effects */
+nav a {
+  transition: all 0.2s ease !important;
+}
+
+nav a:hover {
+  transform: translateX(3px) !important;
+}
+
+/* Sidebar toggle icon spin micro-animation */
+button svg {
+  transition: transform 0.2s ease-in-out !important;
+}
+button:hover svg {
+  transform: scale(1.08) !important;
+}
+
+/* Exclude inputs with transparent background class from global heavy styling */
+input.bg-transparent,
+textarea.bg-transparent,
+select.bg-transparent {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+input.bg-transparent:focus,
+textarea.bg-transparent:focus,
+select.bg-transparent:focus {
+  box-shadow: none !important;
+}
+
+/* Remove boxy card containers inside Clerk User Profile Modal to achieve a clean, sleek, unified design */
+.cl-profilePage .cl-card,
+.cl-profilePage .cl-userProfile-card {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.cl-profilePage {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Make sure modal content matches the sleek dark-theme surface variable */
+.cl-modalContent {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+}
+
+
+
+
+
 

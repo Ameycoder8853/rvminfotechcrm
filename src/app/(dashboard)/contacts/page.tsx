@@ -32,7 +32,13 @@ export default function ContactsPage() {
       const res = await fetch("/api/contacts");
       const data = await res.json();
       if (data.success) {
-        setContacts(data.data);
+        const mapped = data.data.map((c: any) => ({
+          ...c,
+          email: c.email || c.emails?.[0] || "",
+          phone: c.phone || c.phones?.[0] || "",
+          city: c.city || c.address?.city || "",
+        }));
+        setContacts(mapped);
       }
     } catch (error) {
       console.error("Failed to fetch contacts:", error);
@@ -168,8 +174,8 @@ export default function ContactsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleOpenModal(contact)} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-active)] transition-colors"><Edit size={14} /></button>
-                  <button onClick={() => handleDelete(contact._id)} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors"><Trash2 size={14} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); handleOpenModal(contact); }} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-active)] transition-colors"><Edit size={14} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); handleDelete(contact._id); }} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors"><Trash2 size={14} /></button>
                 </div>
               </div>
 

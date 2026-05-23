@@ -11,6 +11,7 @@ export interface ILead extends Document {
   source: string;
   assignedTo?: Types.ObjectId;
   customer?: Types.ObjectId;
+  company?: string;
   status: string;
   priority: string;
   value: number;
@@ -37,6 +38,7 @@ const LeadSchema = new Schema<ILead>(
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
     customer: { type: Schema.Types.ObjectId, ref: "Contact" },
+    company: { type: String, default: "" },
     status: {
       type: String,
       enum: ["new", "contacted", "qualified", "proposal", "negotiation", "won", "lost"],
@@ -58,7 +60,10 @@ const LeadSchema = new Schema<ILead>(
 LeadSchema.index({ status: 1, assignedTo: 1 });
 LeadSchema.index({ createdAt: -1 });
 
-const Lead: Model<ILead> =
-  mongoose.models.Lead || mongoose.model<ILead>("Lead", LeadSchema);
+if (mongoose.models.Lead) {
+  delete (mongoose.models as any).Lead;
+}
+
+const Lead: Model<ILead> = mongoose.model<ILead>("Lead", LeadSchema);
 
 export default Lead;

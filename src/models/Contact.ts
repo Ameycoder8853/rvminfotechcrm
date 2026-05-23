@@ -17,6 +17,9 @@ export interface IContact extends Document {
   firstName: string;
   lastName: string;
   company: string;
+  email?: string;
+  phone?: string;
+  city?: string;
   emails: string[];
   phones: string[];
   address: {
@@ -52,6 +55,9 @@ const ContactSchema = new Schema<IContact>(
     firstName: { type: String, required: true },
     lastName: { type: String, default: "" },
     company: { type: String, default: "" },
+    email: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    city: { type: String, default: "" },
     emails: [{ type: String }],
     phones: [{ type: String }],
     address: {
@@ -71,7 +77,10 @@ const ContactSchema = new Schema<IContact>(
 
 ContactSchema.index({ firstName: "text", lastName: "text", company: "text" });
 
-const Contact: Model<IContact> =
-  mongoose.models.Contact || mongoose.model<IContact>("Contact", ContactSchema);
+if (mongoose.models.Contact) {
+  delete (mongoose.models as any).Contact;
+}
+
+const Contact: Model<IContact> = mongoose.model<IContact>("Contact", ContactSchema);
 
 export default Contact;

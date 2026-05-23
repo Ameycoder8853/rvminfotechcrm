@@ -50,7 +50,11 @@ export default function LeadsPage() {
       const res = await fetch("/api/leads");
       const data = await res.json();
       if (data.success) {
-        setLeads(data.data);
+        const mapped = data.data.map((l: any) => ({
+          ...l,
+          company: l.company || l.customer?.company || "",
+        }));
+        setLeads(mapped);
       }
     } catch (error) {
       console.error("Failed to fetch leads:", error);
@@ -235,8 +239,8 @@ export default function LeadsPage() {
                         <td className="px-4 py-3"><StatusBadge status={lead.status} /></td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => handleOpenModal(lead)} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-active)] transition-colors"><Edit size={15} /></button>
-                            <button onClick={() => handleDelete(lead._id)} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors"><Trash2 size={15} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-active)] transition-colors"><Edit size={15} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1.5 rounded-md text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors"><Trash2 size={15} /></button>
                           </div>
                         </td>
                       </tr>
@@ -265,17 +269,19 @@ export default function LeadsPage() {
                             {colLeads.map((lead, index) => (
                               <Draggable key={lead._id} draggableId={lead._id} index={index}>
                                 {(provided, snapshot) => (
-                                  <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 shadow-sm hover:border-[var(--accent)]/50 transition-all group ${snapshot.isDragging ? "shadow-2xl border-[var(--accent)] ring-2 ring-[var(--accent)]/20 rotate-1 scale-[1.02] z-50" : ""}`}>
+                                  <div ref={provided.innerRef} {...provided.draggableProps} className={`bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 shadow-sm hover:border-[var(--accent)]/50 transition-all group ${snapshot.isDragging ? "shadow-2xl border-[var(--accent)] ring-2 ring-[var(--accent)]/20 rotate-1 scale-[1.02] z-50" : ""}`}>
                                     <div className="flex items-start justify-between mb-1">
                                       <h3 className="text-sm font-bold text-[var(--foreground)] leading-tight group-hover:text-[var(--accent)] transition-colors">{lead.title}</h3>
-                                      <GripVertical size={14} className="text-[var(--foreground-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      <div {...provided.dragHandleProps} className="p-1 -m-1 cursor-grab active:cursor-grabbing text-[var(--foreground-muted)] opacity-40 group-hover:opacity-100 transition-opacity">
+                                        <GripVertical size={14} />
+                                      </div>
                                     </div>
                                     <p className="text-xs text-[var(--foreground-secondary)] mb-3">{lead.company}</p>
                                     <div className="flex items-center justify-between">
                                       <span className="text-xs font-bold text-[var(--foreground)]">₹{lead.value.toLocaleString()}</span>
                                       <div className="flex items-center gap-1">
-                                        <button onClick={() => handleOpenModal(lead)} className="p-1 rounded-md text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors"><Edit size={13} /></button>
-                                        <button onClick={() => handleDelete(lead._id)} className="p-1 rounded-md text-[var(--foreground-muted)] hover:text-[var(--danger)] transition-colors"><Trash2 size={13} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1 rounded-md text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors"><Edit size={13} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1 rounded-md text-[var(--foreground-muted)] hover:text-[var(--danger)] transition-colors"><Trash2 size={13} /></button>
                                       </div>
                                     </div>
                                   </div>

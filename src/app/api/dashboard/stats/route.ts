@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("GET /api/dashboard/stats error:", error);
-    return NextResponse.json({ error: error?.message || "Internal server error" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

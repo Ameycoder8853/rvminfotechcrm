@@ -14,7 +14,18 @@ export const proxy = clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // All other routes require authentication
+  // Check authentication
+  const { userId } = await auth();
+
+  // If unauthorized and calling an API route, return 401 JSON instead of HTML redirect
+  if (!userId && req.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { error: "Unauthorized", message: "Your session has expired. Please sign in again." },
+      { status: 401 }
+    );
+  }
+
+  // All other pages require authentication
   await auth.protect();
 
   return NextResponse.next();

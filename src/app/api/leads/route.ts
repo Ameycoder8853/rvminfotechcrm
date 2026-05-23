@@ -25,7 +25,13 @@ export async function GET(req: NextRequest) {
     if (dbUser.role === "sales") filter.assignedTo = dbUser._id;
 
     const [leads, total] = await Promise.all([
-      Lead.find(filter).populate("assignedTo", "firstName lastName").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      Lead.find(filter)
+        .populate("assignedTo", "firstName lastName")
+        .populate("customer", "firstName lastName company")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
       Lead.countDocuments(filter),
     ]);
 

@@ -249,8 +249,8 @@ export default function DiaryPage() {
                       {entry.title}
                     </h4>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleOpenModal(entry)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-muted)]"><Edit size={14} /></button>
-                      <button onClick={() => handleDelete(entry._id)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)]"><Trash2 size={14} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleOpenModal(entry); }} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-muted)]"><Edit size={14} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(entry._id); }} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)]"><Trash2 size={14} /></button>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-bold uppercase tracking-wider text-[var(--foreground-secondary)]">

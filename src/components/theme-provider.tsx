@@ -51,14 +51,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       <ClerkProvider
         ui={ui}
         appearance={{
-          baseTheme: theme === "dark" ? dark : undefined,
+          theme: theme === "dark" ? dark : undefined,
           variables: {
             colorPrimary: "#6366f1",
             colorBackground: theme === "dark" ? "#1c1f32" : "#ffffff",
-            colorText: theme === "dark" ? "#f1f5f9" : "#0f172a",
-            colorTextSecondary: theme === "dark" ? "#94a3b8" : "#475569",
-            colorInputBackground: theme === "dark" ? "#111320" : "#f8f9fc",
-            colorInputText: theme === "dark" ? "#f1f5f9" : "#0f172a",
+            colorForeground: theme === "dark" ? "#f1f5f9" : "#0f172a",
+            colorMutedForeground: theme === "dark" ? "#94a3b8" : "#475569",
+            colorInput: theme === "dark" ? "#111320" : "#f8f9fc",
+            colorInputForeground: theme === "dark" ? "#f1f5f9" : "#0f172a",
             borderRadius: "8px",
           },
           elements: {

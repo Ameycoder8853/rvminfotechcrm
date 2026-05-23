@@ -41,6 +41,14 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    if (body.email) body.emails = [body.email];
+    if (body.phone) body.phones = [body.phone];
+    if (body.city) {
+      body.address = {
+        ...body.address,
+        city: body.city
+      };
+    }
     const contact = await Contact.create({ ...body, createdBy: dbUser._id });
 
     return NextResponse.json({ success: true, data: contact }, { status: 201 });

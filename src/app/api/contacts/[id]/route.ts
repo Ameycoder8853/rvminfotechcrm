@@ -35,7 +35,14 @@ export async function PATCH(
     const { id } = await params;
     await connectToDatabase();
     const body = await req.json();
-    
+    if (body.email) body.emails = [body.email];
+    if (body.phone) body.phones = [body.phone];
+    if (body.city) {
+      body.address = {
+        ...body.address,
+        city: body.city
+      };
+    }
     const contact = await Contact.findByIdAndUpdate(id, body, { new: true });
 
     if (!contact) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
