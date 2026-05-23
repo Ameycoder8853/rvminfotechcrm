@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { ui } from "@clerk/ui";
 
 type Theme = "dark" | "light";
 
@@ -48,6 +49,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <ClerkProvider
+        ui={ui}
         appearance={{
           baseTheme: theme === "dark" ? dark : undefined,
           variables: {
