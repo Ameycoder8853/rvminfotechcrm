@@ -22,7 +22,13 @@ export async function GET(req: NextRequest) {
 
     const filter: Record<string, unknown> = {};
     if (status) filter.status = status;
-    if (dbUser.role === "sales") filter.assignedTo = dbUser._id;
+    // Role-Based Access Control (RBAC) Hierarchy Filters
+    if (dbUser.roleTier === "junior") {
+      filter.assignedTo = dbUser._id;
+    } else if (dbUser.roleTier === "senior" && dbUser.teamId) {
+      const teamUserIds = await User.find({ teamId: dbUser.teamId }).select("_id");
+      filter.assignedTo = { $in: teamUserIds.map((u) => u._id) };
+    }
 
     const [leads, total] = await Promise.all([
       Lead.find(filter)
@@ -53,6 +59,22 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+
+    if (Array.isArray(body)) {
+      const formatted = body.map((item: any) => ({
+        title: item.title || "Imported Lead",
+        company: item.company || "",
+        value: Number(item.value || 0),
+        status: item.status || "new",
+        source: item.source || "website",
+        priority: item.priority || "medium",
+        createdBy: dbUser._id,
+        assignedTo: item.assignedTo || dbUser._id,
+      }));
+      const leads = await Lead.insertMany(formatted);
+      return NextResponse.json({ success: true, count: leads.length, data: leads }, { status: 201 });
+    }
+
     const lead = await Lead.create({ ...body, createdBy: dbUser._id });
 
     return NextResponse.json({ success: true, data: lead }, { status: 201 });

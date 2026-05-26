@@ -14,7 +14,7 @@ export interface ICallLog extends Document {
 const CallLogSchema = new Schema<ICallLog>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     type: {
       type: String,
       enum: ["inbound", "outbound", "missed"],

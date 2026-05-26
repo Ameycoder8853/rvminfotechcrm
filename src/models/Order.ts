@@ -33,7 +33,7 @@ const OrderItemSchema = new Schema<IOrderItem>({
 const OrderSchema = new Schema<IOrder>(
   {
     orderNumber: { type: String, required: true, unique: true },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     quote: { type: Schema.Types.ObjectId, ref: "Quote" },
     items: [OrderItemSchema],
     totalValue: { type: Number, default: 0 },
@@ -54,7 +54,10 @@ const OrderSchema = new Schema<IOrder>(
 OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
 
-const Order: Model<IOrder> =
-  mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema);
+if (mongoose.models.Order) {
+  delete (mongoose.models as any).Order;
+}
+
+const Order: Model<IOrder> = mongoose.model<IOrder>("Order", OrderSchema);
 
 export default Order;

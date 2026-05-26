@@ -6,7 +6,6 @@ import Ticket from "@/models/Ticket";
 import Order from "@/models/Order";
 import Expense from "@/models/Expense";
 import Attendance from "@/models/Attendance";
-import Contact from "@/models/Contact";
 
 export async function GET(req: NextRequest) {
   try {

@@ -33,7 +33,7 @@ const ServiceHistorySchema = new Schema<IServiceHistoryEntry>({
 const TicketSchema = new Schema<ITicket>(
   {
     ticketNumber: { type: String, required: true, unique: true },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     issueDescription: { type: String, required: true },
     category: {
       type: String,
@@ -63,7 +63,10 @@ TicketSchema.index({ ticketNumber: 1 });
 TicketSchema.index({ status: 1, priority: 1 });
 TicketSchema.index({ assignedTech: 1, status: 1 });
 
-const Ticket: Model<ITicket> =
-  mongoose.models.Ticket || mongoose.model<ITicket>("Ticket", TicketSchema);
+if (mongoose.models.Ticket) {
+  delete (mongoose.models as any).Ticket;
+}
+
+const Ticket: Model<ITicket> = mongoose.model<ITicket>("Ticket", TicketSchema);
 
 export default Ticket;

@@ -16,12 +16,20 @@ export async function GET(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
     const lead = await Lead.findById(id)
       .populate("assignedTo", "firstName lastName")
       .populate("customer", "firstName lastName company")
       .lean();
 
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+
+    // Access control check
+    if (dbUser.roleTier === "junior" && String(lead.assignedTo?._id || lead.assignedTo) !== String(dbUser._id)) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
 
     return NextResponse.json({ success: true, data: lead });
   } catch (error) {
@@ -44,6 +52,14 @@ export async function PATCH(
     
     const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    const existingLead = await Lead.findById(id);
+    if (!existingLead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+
+    // Access control check
+    if (dbUser.roleTier === "junior" && String(existingLead.assignedTo) !== String(dbUser._id)) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
 
     const body = await req.json();
     
@@ -70,11 +86,19 @@ export async function DELETE(
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
-    await connectToDatabase();
 
-    const lead = await Lead.findByIdAndDelete(id);
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    const existingLead = await Lead.findById(id);
+    if (!existingLead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+
+    // Access control check
+    if (dbUser.roleTier === "junior" && String(existingLead.assignedTo) !== String(dbUser._id)) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
+
+    await Lead.findByIdAndDelete(id);
 
     return NextResponse.json({ success: true, message: "Lead deleted successfully" });
   } catch (error) {

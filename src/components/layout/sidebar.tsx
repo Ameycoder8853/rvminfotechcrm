@@ -49,7 +49,7 @@ const navigation: NavGroup[] = [
     title: "Sales Core",
     items: [
       { title: "Lead Management", href: "/leads", icon: <Target size={20} /> },
-      { title: "Contact Database", href: "/contacts", icon: <Users size={20} /> },
+      { title: "Customers", href: "/customers", icon: <Users size={20} /> },
       { title: "Task Management", href: "/diary", icon: <Calendar size={20} /> },
     ],
   },
@@ -90,6 +90,11 @@ const navigation: NavGroup[] = [
         title: "Settings",
         href: "/settings",
         icon: <Settings size={20} />,
+      },
+      {
+        title: "Teams & Roles",
+        href: "/teams",
+        icon: <Users size={20} />,
       },
     ],
   },

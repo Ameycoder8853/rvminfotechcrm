@@ -28,6 +28,7 @@ export async function getOrCreateDbUser() {
       lastName: clerkUser.lastName || "",
       avatar: clerkUser.imageUrl || "",
       role: (clerkUser.publicMetadata?.role as string) || "admin",
+      roleTier: (clerkUser.publicMetadata?.role as string) || (clerkUser.publicMetadata?.roleTier as any) || "admin",
       isActive: true,
     });
 

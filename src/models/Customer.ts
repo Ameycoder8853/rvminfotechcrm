@@ -13,7 +13,7 @@ export interface IAttachment {
   uploadedAt: Date;
 }
 
-export interface IContact extends Document {
+export interface ICustomer extends Document {
   firstName: string;
   lastName: string;
   company: string;
@@ -33,6 +33,7 @@ export interface IContact extends Document {
   attachments: IAttachment[];
   interactions: IInteraction[];
   createdBy: Types.ObjectId;
+  assignedTo?: Types.ObjectId; // Reference to assigned Junior sales rep
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,7 +51,7 @@ const AttachmentSchema = new Schema<IAttachment>({
   uploadedAt: { type: Date, default: Date.now },
 });
 
-const ContactSchema = new Schema<IContact>(
+const CustomerSchema = new Schema<ICustomer>(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, default: "" },
@@ -71,16 +72,17 @@ const ContactSchema = new Schema<IContact>(
     attachments: [AttachmentSchema],
     interactions: [InteractionSchema],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
 
-ContactSchema.index({ firstName: "text", lastName: "text", company: "text" });
+CustomerSchema.index({ firstName: "text", lastName: "text", company: "text" });
 
-if (mongoose.models.Contact) {
-  delete (mongoose.models as any).Contact;
+if (mongoose.models.Customer) {
+  delete (mongoose.models as any).Customer;
 }
 
-const Contact: Model<IContact> = mongoose.model<IContact>("Contact", ContactSchema);
+const Customer: Model<ICustomer> = mongoose.model<ICustomer>("Customer", CustomerSchema);
 
-export default Contact;
+export default Customer;

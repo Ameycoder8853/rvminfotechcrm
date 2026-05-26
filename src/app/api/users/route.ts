@@ -9,7 +9,10 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
-    const users = await User.find({ isActive: true }).select("firstName lastName role avatar").lean();
+    const users = await User.find({ isActive: true })
+      .populate("teamId")
+      .populate("parentManager", "firstName lastName")
+      .lean();
 
     return NextResponse.json({ success: true, data: users });
   } catch (error) {

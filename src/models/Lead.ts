@@ -37,7 +37,7 @@ const LeadSchema = new Schema<ILead>(
       default: "other",
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact" },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer" },
     company: { type: String, default: "" },
     status: {
       type: String,

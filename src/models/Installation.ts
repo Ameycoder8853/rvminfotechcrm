@@ -29,7 +29,7 @@ const ProgressPhotoSchema = new Schema<IProgressPhoto>({
 
 const InstallationSchema = new Schema<IInstallation>(
   {
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     order: { type: Schema.Types.ObjectId, ref: "Order" },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", required: true },
     scheduledDate: { type: Date, required: true },
@@ -50,8 +50,10 @@ const InstallationSchema = new Schema<IInstallation>(
 InstallationSchema.index({ status: 1, scheduledDate: 1 });
 InstallationSchema.index({ assignedTo: 1, status: 1 });
 
-const Installation: Model<IInstallation> =
-  mongoose.models.Installation ||
-  mongoose.model<IInstallation>("Installation", InstallationSchema);
+if (mongoose.models.Installation) {
+  delete (mongoose.models as any).Installation;
+}
+
+const Installation: Model<IInstallation> = mongoose.model<IInstallation>("Installation", InstallationSchema);
 
 export default Installation;

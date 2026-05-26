@@ -28,7 +28,7 @@ const DiaryEntrySchema = new Schema<IDiaryEntry>(
     date: { type: Date, required: true },
     startTime: { type: String, default: "" },
     endTime: { type: String, default: "" },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact" },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer" },
     location: { type: String, default: "" },
     isCompleted: { type: Boolean, default: false },
   },

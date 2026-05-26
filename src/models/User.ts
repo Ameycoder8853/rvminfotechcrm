@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 export interface IUser extends Document {
   clerkId: string;
@@ -6,6 +6,9 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   role: "admin" | "sales" | "service_tech" | "field_agent";
+  roleTier: "admin" | "senior" | "junior";
+  teamId?: Types.ObjectId;
+  parentManager?: Types.ObjectId;
   phone?: string;
   avatar?: string;
   isActive: boolean;
@@ -24,6 +27,13 @@ const UserSchema = new Schema<IUser>(
       enum: ["admin", "sales", "service_tech", "field_agent"],
       default: "sales",
     },
+    roleTier: {
+      type: String,
+      enum: ["admin", "senior", "junior"],
+      default: "junior",
+    },
+    teamId: { type: Schema.Types.ObjectId, ref: "Team" },
+    parentManager: { type: Schema.Types.ObjectId, ref: "User" },
     phone: { type: String, default: "" },
     avatar: { type: String, default: "" },
     isActive: { type: Boolean, default: true },
@@ -31,7 +41,10 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-const User: Model<IUser> =
-  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+if (mongoose.models.User) {
+  delete (mongoose.models as any).User;
+}
+
+const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 
 export default User;

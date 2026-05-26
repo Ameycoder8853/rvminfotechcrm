@@ -13,7 +13,7 @@ export interface IEmailLog extends Document {
 const EmailLogSchema = new Schema<IEmailLog>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     subject: { type: String, required: true },
     body: { type: String, required: true },
     status: {
@@ -26,7 +26,10 @@ const EmailLogSchema = new Schema<IEmailLog>(
   { timestamps: true }
 );
 
-const EmailLog: Model<IEmailLog> =
-  mongoose.models.EmailLog || mongoose.model<IEmailLog>("EmailLog", EmailLogSchema);
+if (mongoose.models.EmailLog) {
+  delete (mongoose.models as any).EmailLog;
+}
+
+const EmailLog: Model<IEmailLog> = mongoose.model<IEmailLog>("EmailLog", EmailLogSchema);
 
 export default EmailLog;

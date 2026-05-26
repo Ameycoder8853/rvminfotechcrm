@@ -37,7 +37,7 @@ const QuoteItemSchema = new Schema<IQuoteItem>({
 const QuoteSchema = new Schema<IQuote>(
   {
     quoteNumber: { type: String, required: true, unique: true },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     lead: { type: Schema.Types.ObjectId, ref: "Lead" },
     items: [QuoteItemSchema],
     subtotal: { type: Number, default: 0 },
@@ -60,7 +60,10 @@ const QuoteSchema = new Schema<IQuote>(
 QuoteSchema.index({ quoteNumber: 1 });
 QuoteSchema.index({ customer: 1, status: 1 });
 
-const Quote: Model<IQuote> =
-  mongoose.models.Quote || mongoose.model<IQuote>("Quote", QuoteSchema);
+if (mongoose.models.Quote) {
+  delete (mongoose.models as any).Quote;
+}
+
+const Quote: Model<IQuote> = mongoose.model<IQuote>("Quote", QuoteSchema);
 
 export default Quote;

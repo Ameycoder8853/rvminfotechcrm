@@ -31,7 +31,7 @@ const ServiceScheduleSchema = new Schema<IServiceScheduleEntry>({
 
 const AMCSchema = new Schema<IAMC>(
   {
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     contractNumber: { type: String, required: true, unique: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },

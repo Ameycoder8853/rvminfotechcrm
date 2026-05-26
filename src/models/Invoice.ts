@@ -26,7 +26,7 @@ const InvoiceSchema = new Schema<IInvoice>(
   {
     invoiceNumber: { type: String, required: true, unique: true },
     order: { type: Schema.Types.ObjectId, ref: "Order" },
-    customer: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     items: [
       {
         description: { type: String, required: true },
@@ -55,7 +55,10 @@ InvoiceSchema.index({ invoiceNumber: 1 });
 InvoiceSchema.index({ customer: 1 });
 InvoiceSchema.index({ status: 1 });
 
-const Invoice: Model<IInvoice> =
-  mongoose.models.Invoice || mongoose.model<IInvoice>("Invoice", InvoiceSchema);
+if (mongoose.models.Invoice) {
+  delete (mongoose.models as any).Invoice;
+}
+
+const Invoice: Model<IInvoice> = mongoose.model<IInvoice>("Invoice", InvoiceSchema);
 
 export default Invoice;

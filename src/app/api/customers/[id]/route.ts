@@ -1,8 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import Contact from "@/models/Contact";
+import Customer from "@/models/Customer";
 
+// GET /api/customers/[id]
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -13,17 +14,18 @@ export async function GET(
 
     const { id } = await params;
     await connectToDatabase();
-    const contact = await Contact.findById(id).lean();
+    const customer = await Customer.findById(id).populate("assignedTo", "firstName lastName").lean();
 
-    if (!contact) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
-    return NextResponse.json({ success: true, data: contact });
+    return NextResponse.json({ success: true, data: customer });
   } catch (error) {
-    console.error("GET /api/contacts/[id] error:", error);
+    console.error("GET /api/customers/[id] error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
+// PATCH /api/customers/[id]
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -35,25 +37,27 @@ export async function PATCH(
     const { id } = await params;
     await connectToDatabase();
     const body = await req.json();
+
     if (body.email) body.emails = [body.email];
     if (body.phone) body.phones = [body.phone];
     if (body.city) {
       body.address = {
         ...body.address,
-        city: body.city
+        city: body.city,
       };
     }
-    const contact = await Contact.findByIdAndUpdate(id, body, { new: true });
+    const customer = await Customer.findByIdAndUpdate(id, body, { new: true }).populate("assignedTo", "firstName lastName");
 
-    if (!contact) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
-    return NextResponse.json({ success: true, data: contact });
+    return NextResponse.json({ success: true, data: customer });
   } catch (error) {
-    console.error("PATCH /api/contacts/[id] error:", error);
+    console.error("PATCH /api/customers/[id] error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
+// DELETE /api/customers/[id]
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -65,13 +69,13 @@ export async function DELETE(
     const { id } = await params;
     await connectToDatabase();
 
-    const contact = await Contact.findByIdAndDelete(id);
+    const customer = await Customer.findByIdAndDelete(id);
 
-    if (!contact) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
-    return NextResponse.json({ success: true, message: "Contact deleted successfully" });
+    return NextResponse.json({ success: true, message: "Customer deleted successfully" });
   } catch (error) {
-    console.error("DELETE /api/contacts/[id] error:", error);
+    console.error("DELETE /api/customers/[id] error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

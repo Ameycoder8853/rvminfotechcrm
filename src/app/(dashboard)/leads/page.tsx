@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import StatusBadge from "@/components/shared/status-badge";
-import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import Modal from "@/components/shared/modal";
 
@@ -43,6 +43,7 @@ export default function LeadsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLead, setCurrentLead] = useState<Partial<Lead> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -152,6 +153,104 @@ export default function LeadsPage() {
     }
   };
 
+  // Client-Side CSV Import Engine for Leads
+  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      try {
+        const lines = text.split(/\r?\n/);
+        if (lines.length === 0) return alert("Empty CSV file!");
+
+        // Parse CSV headers
+        const headers = lines[0].split(",").map((h) => h.trim().replace(/^["']|["']$/g, ""));
+        const parsedRows: any[] = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(",");
+          const row: any = {};
+          headers.forEach((header, index) => {
+            const val = matches[index] ? matches[index].trim().replace(/^["']|["']$/g, "") : "";
+            row[header] = val;
+          });
+          parsedRows.push(row);
+        }
+
+        // Map and normalize CSV columns to DB Lead fields
+        const normalized = parsedRows.map((row) => ({
+          title: row.title || row["Title"] || row["Lead Name"] || "Imported Lead",
+          company: row.company || row["Company"] || row["client name"] || "",
+          value: Number(row.value || row["Value"] || row["Amount"] || 0),
+          status: row.status || row["Status"] || "new",
+          source: row.source || row["Source"] || "website",
+          priority: row.priority || row["Priority"] || "medium",
+        }));
+
+        if (normalized.length === 0) return alert("No valid rows found in CSV!");
+
+        setLoading(true);
+        const res = await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(normalized),
+        });
+
+        if (res.ok) {
+          alert(`Successfully imported ${normalized.length} leads!`);
+          fetchLeads();
+        } else {
+          alert("Failed to import CSV data.");
+        }
+      } catch (err) {
+        console.error("CSV Import error:", err);
+        alert("Error parsing CSV. Please check formatting.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+  };
+
+  // Client-Side CSV Export Engine for Leads
+  const handleCSVExport = () => {
+    if (filteredLeads.length === 0) return alert("No lead records to export!");
+
+    const headers = ["Title", "Company", "Value", "Status", "Source", "Priority", "Assigned To"];
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [
+        headers.join(","),
+        ...filteredLeads.map((l) =>
+          [
+            `"${l.title || ""}"`,
+            `"${l.company || ""}"`,
+            l.value || 0,
+            `"${l.status || "new"}"`,
+            `"${l.source || "website"}"`,
+            `"${l.priority || "medium"}"`,
+            `"${l.assignedTo ? `${l.assignedTo.firstName} ${l.assignedTo.lastName}` : "Unassigned"}"`,
+          ].join(",")
+        ),
+      ].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `leads_export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this lead?")) return;
 
@@ -177,13 +276,38 @@ export default function LeadsPage() {
             Track and manage your sales pipeline with real data
           </p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
-        >
-          <Plus size={18} />
-          <span>Add Lead</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <input
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            onChange={handleCSVImport}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-3 py-2 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] rounded-lg text-sm font-medium transition-colors"
+            title="Import from CSV"
+          >
+            <Upload size={16} />
+            <span className="hidden md:inline">Import CSV</span>
+          </button>
+          <button
+            onClick={handleCSVExport}
+            className="flex items-center gap-2 px-3 py-2 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] rounded-lg text-sm font-medium transition-colors"
+            title="Export to CSV"
+          >
+            <Download size={16} />
+            <span className="hidden md:inline">Export CSV</span>
+          </button>
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          >
+            <Plus size={18} />
+            <span>Add Lead</span>
+          </button>
+        </div>
       </div>
 
       {/* Toolbar */}
