@@ -61,6 +61,18 @@ export default function DiaryPage() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    if (!mounted) return;
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get("action");
+    if (action === "add") {
+      handleOpenModal();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("action");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+  }, [mounted]);
+
   const handleToggleComplete = async (entry: DiaryEntry) => {
     try {
       const res = await fetch(`/api/diary/${entry._id}`, {

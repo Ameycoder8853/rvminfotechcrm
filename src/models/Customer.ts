@@ -20,6 +20,31 @@ export interface ICustomer extends Document {
   email?: string;
   phone?: string;
   city?: string;
+  status?: string;
+  source?: string;
+  gender?: string;
+  state?: string;
+  district?: string;
+  subLocation?: string;
+  department?: string;
+  designation?: string;
+  workAddress?: string;
+  workPhone?: string;
+  workPinCode?: string;
+  websiteUrl?: string;
+  product?: string;
+  category?: string;
+  subCategory?: string;
+  reference?: string;
+  classification?: string;
+  group?: string;
+  zone?: string;
+  contactType?: string;
+  dob?: string;
+  planDate?: string;
+  planActionType?: string;
+  planRemarks?: string;
+  additionalNotes?: string;
   emails: string[];
   phones: string[];
   address: {
@@ -68,6 +93,31 @@ const CustomerSchema = new Schema<ICustomer>(
       zip: { type: String, default: "" },
       country: { type: String, default: "India" },
     },
+    status: { type: String, default: "Lead" },
+    source: { type: String, default: "website" },
+    gender: { type: String, default: "" },
+    state: { type: String, default: "" },
+    district: { type: String, default: "" },
+    subLocation: { type: String, default: "" },
+    department: { type: String, default: "" },
+    designation: { type: String, default: "" },
+    workAddress: { type: String, default: "" },
+    workPhone: { type: String, default: "" },
+    workPinCode: { type: String, default: "" },
+    websiteUrl: { type: String, default: "" },
+    product: { type: String, default: "" },
+    category: { type: String, default: "" },
+    subCategory: { type: String, default: "" },
+    reference: { type: String, default: "" },
+    classification: { type: String, default: "" },
+    group: { type: String, default: "" },
+    zone: { type: String, default: "" },
+    contactType: { type: String, default: "" },
+    dob: { type: String, default: "" },
+    planDate: { type: String, default: "" },
+    planActionType: { type: String, default: "" },
+    planRemarks: { type: String, default: "" },
+    additionalNotes: { type: String, default: "" },
     tags: [{ type: String }],
     attachments: [AttachmentSchema],
     interactions: [InteractionSchema],

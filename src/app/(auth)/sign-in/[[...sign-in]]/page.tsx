@@ -1,6 +1,22 @@
 import { SignIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect_url?: string }>;
+}) {
+  const { userId } = await auth();
+  if (userId) {
+    const resolvedParams = await searchParams;
+    const redirectUrl = resolvedParams.redirect_url;
+    if (redirectUrl && redirectUrl.startsWith("/")) {
+      redirect(redirectUrl);
+    }
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex flex-col items-center gap-6">
       <p className="text-[var(--foreground-secondary)] text-sm -mt-6">

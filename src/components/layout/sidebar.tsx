@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -13,90 +14,126 @@ import {
   Shield,
   Wrench,
   Receipt,
-  MapPin,
   Calendar,
   Settings,
-  ChevronLeft,
   ChevronRight,
-  Activity,
   Phone,
+  Clock,
+  Package,
+  Megaphone,
+  X
 } from "lucide-react";
-import { useState } from "react";
 
 interface NavItem {
   title: string;
-  href: string;
+  href?: string;
   icon: React.ReactNode;
+  subItems?: { title: string; href: string }[];
 }
 
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
-
-const navigation: NavGroup[] = [
+const navigation: NavItem[] = [
   {
-    title: "Overview",
-    items: [
-      {
-        title: "Dashboard",
-        href: "/dashboard",
-        icon: <LayoutDashboard size={20} />,
-      },
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: <LayoutDashboard size={18} />,
+  },
+  {
+    title: "Contact Management",
+    icon: <Users size={18} />,
+    subItems: [
+      { title: "Contact List", href: "/contacts" },
+      { title: "Add Contact", href: "/contacts?action=add" },
+      { title: "Import/Export", href: "/contacts?action=import" },
     ],
   },
   {
-    title: "Sales Core",
-    items: [
-      { title: "Lead Management", href: "/leads", icon: <Target size={20} /> },
-      { title: "Customers", href: "/customers", icon: <Users size={20} /> },
-      { title: "Task Management", href: "/diary", icon: <Calendar size={20} /> },
+    title: "Lead Management",
+    icon: <Phone size={18} />,
+    subItems: [
+      { title: "Lead List", href: "/leads" },
+      { title: "Add Lead", href: "/leads?action=add" },
     ],
   },
   {
-    title: "Communications",
-    items: [
-      { title: "Call App & Email", href: "/comms", icon: <Phone size={20} /> },
+    title: "Tasks & Planner",
+    icon: <Calendar size={18} />,
+    subItems: [
+      { title: "Planner Board", href: "/diary" },
+      { title: "Add Task", href: "/diary?action=add" },
     ],
   },
   {
-    title: "Business Billing",
-    items: [
-      { title: "Quotations", href: "/quotes", icon: <FileText size={20} /> },
-      { title: "Orders", href: "/orders", icon: <ShoppingCart size={20} /> },
-      { title: "Invoice Generate", href: "/invoices", icon: <Receipt size={20} /> },
+    title: "Orders",
+    icon: <ShoppingCart size={18} />,
+    subItems: [
+      { title: "Order List", href: "/orders" },
+      { title: "Create Order", href: "/orders?action=add" },
     ],
   },
   {
-    title: "Field Operations",
-    items: [
-      { title: "Service Tickets", href: "/tickets", icon: <Ticket size={20} /> },
-      { title: "AMC Contracts", href: "/amc", icon: <Shield size={20} /> },
-      { title: "Installations", href: "/installations", icon: <Wrench size={20} />, },
+    title: "Quotations",
+    icon: <FileText size={18} />,
+    subItems: [
+      { title: "Quotation List", href: "/quotes" },
+      { title: "Create Quotation", href: "/quotes?action=add" },
     ],
   },
   {
-    title: "HR & Staffing",
-    items: [
-      { title: "Staff Activity", href: "/staff-activity", icon: <Activity size={18} /> },
-      { title: "Track Location", href: "/attendance", icon: <MapPin size={20} />, },
-      { title: "Expense Claims", href: "/expenses", icon: <Receipt size={20} /> },
+    title: "AMC",
+    icon: <Shield size={18} />,
+    subItems: [
+      { title: "AMC List", href: "/amc" },
+      { title: "Add AMC", href: "/amc?action=add" },
     ],
   },
   {
-    title: "System",
-    items: [
-      {
-        title: "Settings",
-        href: "/settings",
-        icon: <Settings size={20} />,
-      },
-      {
-        title: "Teams & Roles",
-        href: "/teams",
-        icon: <Users size={20} />,
-      },
+    title: "Complaints",
+    icon: <Ticket size={18} />,
+    subItems: [
+      { title: "Complaints List", href: "/tickets" },
+      { title: "Log Complaint", href: "/tickets?action=add" },
     ],
+  },
+  {
+    title: "Installation",
+    icon: <Wrench size={18} />,
+    subItems: [
+      { title: "Installation List", href: "/installations" },
+      { title: "Schedule Installation", href: "/installations?action=add" },
+    ],
+  },
+  {
+    title: "Expenses",
+    icon: <Receipt size={18} />,
+    subItems: [
+      { title: "Expense List", href: "/expenses" },
+      { title: "Claim Expense", href: "/expenses?action=add" },
+    ],
+  },
+  {
+    title: "Inventory",
+    href: "/inventory",
+    icon: <Package size={18} />,
+  },
+  {
+    title: "Marketing",
+    href: "/marketing",
+    icon: <Megaphone size={18} />,
+  },
+  {
+    title: "Team",
+    href: "/teams",
+    icon: <Users size={18} />,
+  },
+  {
+    title: "Attendance",
+    href: "/attendance",
+    icon: <Clock size={18} />,
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+    icon: <Settings size={18} />,
   },
 ];
 
@@ -106,20 +143,36 @@ interface SidebarProps {
 
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  // Auto-expand active page's parent menu on mount/route change
+  useEffect(() => {
+    const activeParent = navigation.find(
+      (item) => item.subItems?.some((sub) => pathname === sub.href || pathname.startsWith(sub.href + "?"))
+    );
+    if (activeParent) {
+      setExpanded((prev) => ({ ...prev, [activeParent.title]: true }));
+    }
+  }, [pathname]);
+
+  const toggleExpand = (title: string) => {
+    setExpanded((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
 
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out",
-        collapsed ? "w-[var(--sidebar-collapsed-width)]" : "w-[var(--sidebar-width)]",
-        "bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]",
+        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out w-[var(--sidebar-width,250px)]",
+        "bg-[var(--sidebar-bg,#ffffff)] border-r border-[var(--sidebar-border,#e2e4eb)]",
         className
       )}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-[var(--header-height)] border-b border-[var(--sidebar-border)] shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center shrink-0">
+      {/* Screenshot Logo Style: RVM CRM */}
+      <div className="flex items-center gap-3 px-5 h-[var(--header-height,64px)] border-b border-[var(--sidebar-border,#e2e4eb)] shrink-0 bg-transparent">
+        <div className="w-8 h-8 rounded-lg bg-[#6366f1] flex items-center justify-center shrink-0">
           <svg
             width="16"
             height="16"
@@ -135,62 +188,114 @@ export default function Sidebar({ className }: SidebarProps) {
             <path d="M2 12l10 5 10-5" />
           </svg>
         </div>
-        {!collapsed && (
-          <span className="text-lg font-bold text-[var(--foreground)] whitespace-nowrap animate-fade-in">
-            RVM <span className="gradient-text">CRM</span>
-          </span>
-        )}
+        <span className="text-lg font-black text-[var(--foreground)] whitespace-nowrap">
+          RVM <span className="gradient-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 bg-clip-text text-transparent">CRM</span>
+        </span>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {navigation.map((group) => (
-          <div key={group.title}>
-            {!collapsed && (
-              <p className="text-[10px] uppercase tracking-widest text-[var(--foreground-muted)] font-semibold px-3 mb-2">
-                {group.title}
-              </p>
-            )}
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    title={item.title}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                      collapsed && "justify-center px-0",
-                      isActive
-                        ? "bg-[var(--accent-muted)] text-[var(--accent-hover)] shadow-sm"
-                        : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--sidebar-hover)]"
-                    )}
-                  >
+      {/* Menu List */}
+      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 bg-transparent">
+        {navigation.map((item) => {
+          const hasSubItems = !!item.subItems;
+          const isExpanded = !!expanded[item.title];
+          
+          // Main item is active if path matches directly OR matches any of its sub-items
+          const isMainActive = hasSubItems
+            ? item.subItems?.some((sub) => pathname === sub.href || pathname.startsWith(sub.href + "?"))
+            : pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href || ""));
+
+          return (
+            <div key={item.title} className="space-y-0.5">
+              {hasSubItems ? (
+                // Accordion Trigger Link
+                <button
+                  onClick={() => toggleExpand(item.title)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-150 group cursor-pointer",
+                    isMainActive
+                      ? "text-[var(--accent,#6366f1)] bg-[var(--accent-muted,rgba(99,102,241,0.15))]"
+                      : "text-[var(--foreground-secondary,#475569)] hover:text-[var(--foreground,#0f172a)] hover:bg-[var(--sidebar-hover,#f1f3f8)]"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
                     <span
                       className={cn(
                         "shrink-0 transition-colors",
-                        isActive ? "text-[var(--accent)]" : ""
+                        isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
                       )}
                     >
                       {item.icon}
                     </span>
-                    {!collapsed && <span>{item.title}</span>}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
+                    <span>{item.title}</span>
+                  </div>
+                  <ChevronRight 
+                    size={14} 
+                    className={cn(
+                      "transition-all duration-250",
+                      isExpanded ? "rotate-90" : "",
+                      isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                    )}
+                  />
+                </button>
+              ) : (
+                // Simple Navigation Link
+                <Link
+                  href={item.href || "#"}
+                  title={item.title}
+                  className={cn(
+                    "flex items-center justify-between px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-150 group",
+                    isMainActive
+                      ? "text-[var(--accent,#6366f1)] bg-[var(--accent-muted,rgba(99,102,241,0.15))]"
+                      : "text-[var(--foreground-secondary,#475569)] hover:text-[var(--foreground,#0f172a)] hover:bg-[var(--sidebar-hover,#f1f3f8)]"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={cn(
+                        "shrink-0 transition-colors",
+                        isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                      )}
+                    >
+                      {item.icon}
+                    </span>
+                    <span>{item.title}</span>
+                  </div>
+                  <ChevronRight 
+                    size={14} 
+                    className={cn(
+                      "transition-colors",
+                      isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                    )}
+                  />
+                </Link>
+              )}
 
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="flex items-center justify-center h-12 border-t border-[var(--sidebar-border)] text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--sidebar-hover)] transition-colors"
-      >
-        {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-      </button>
+              {/* Accordion Sub-Menu Content */}
+              {hasSubItems && isExpanded && (
+                <div className="space-y-0.5 transition-all duration-300">
+                  {item.subItems?.map((sub) => {
+                    const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + "?");
+                    return (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className={cn(
+                          "flex items-center px-4 py-2 text-xs font-semibold rounded-lg transition-colors pl-[44px]",
+                          isSubActive
+                            ? "text-[var(--accent,#6366f1)] hover:text-[var(--accent-hover,#818cf8)]"
+                            : "text-[var(--foreground-secondary,#475569)] hover:text-[var(--foreground,#0f172a)] hover:bg-[var(--sidebar-hover,#f1f3f8)]/40"
+                        )}
+                      >
+                        {sub.title}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
     </aside>
   );
 }

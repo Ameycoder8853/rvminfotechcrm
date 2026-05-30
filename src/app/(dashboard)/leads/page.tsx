@@ -82,6 +82,18 @@ export default function LeadsPage() {
     fetchUsers();
   }, [fetchLeads, fetchUsers]);
 
+  useEffect(() => {
+    if (!mounted) return;
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get("action");
+    if (action === "add") {
+      handleOpenModal();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("action");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+  }, [mounted]);
+
   const filteredLeads = leads.filter(
     (l) =>
       l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
