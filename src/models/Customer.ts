@@ -43,7 +43,7 @@ export interface ICustomer extends Document {
   dob?: string;
   planDate?: string;
   planActionType?: string;
-  planRemarks?: string;
+  remarks?: string;
   additionalNotes?: string;
   emails: string[];
   phones: string[];
@@ -116,7 +116,7 @@ const CustomerSchema = new Schema<ICustomer>(
     dob: { type: String, default: "" },
     planDate: { type: String, default: "" },
     planActionType: { type: String, default: "" },
-    planRemarks: { type: String, default: "" },
+    remarks: { type: String, default: "" },
     additionalNotes: { type: String, default: "" },
     tags: [{ type: String }],
     attachments: [AttachmentSchema],

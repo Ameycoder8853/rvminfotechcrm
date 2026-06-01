@@ -2,18 +2,10 @@ import { SignIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-export default async function SignInPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ redirect_url?: string }>;
-}) {
+export default async function SignInPage() {
   const { userId } = await auth();
+
   if (userId) {
-    const resolvedParams = await searchParams;
-    const redirectUrl = resolvedParams.redirect_url;
-    if (redirectUrl && redirectUrl.startsWith("/")) {
-      redirect(redirectUrl);
-    }
     redirect("/dashboard");
   }
 

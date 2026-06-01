@@ -170,27 +170,18 @@ export default function Sidebar({ className }: SidebarProps) {
         className
       )}
     >
-      {/* Screenshot Logo Style: RVM CRM */}
-      <div className="flex items-center gap-3 px-5 h-[var(--header-height,64px)] border-b border-[var(--sidebar-border,#e2e4eb)] shrink-0 bg-transparent">
-        <div className="w-8 h-8 rounded-lg bg-[#6366f1] flex items-center justify-center shrink-0">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5z" />
-            <path d="M2 17l10 5 10-5" />
-            <path d="M2 12l10 5 10-5" />
-          </svg>
+      {/* Screenshot Logo Style with Theme Adaptability */}
+      <div className="flex items-center justify-between px-5 h-[var(--header-height,64px)] border-b border-[var(--sidebar-border,#e2e4eb)] shrink-0 bg-transparent">
+        <div className="flex items-center">
+          <div className="px-3.5 py-1.5 rounded bg-[var(--accent,#0ea5e9)] flex items-center justify-center shadow-sm">
+            <span className="text-[11px] font-black text-white uppercase tracking-wider">
+              CRM SYSTEM
+            </span>
+          </div>
         </div>
-        <span className="text-lg font-black text-[var(--foreground)] whitespace-nowrap">
-          RVM <span className="gradient-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 bg-clip-text text-transparent">CRM</span>
-        </span>
+        <button className="text-[var(--foreground-muted,#94a3b8)] hover:text-[var(--foreground,#0f172a)] transition-colors p-1 cursor-pointer">
+          <X size={16} />
+        </button>
       </div>
 
       {/* Menu List */}

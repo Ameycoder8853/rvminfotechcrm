@@ -9,33 +9,13 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export const proxy = clerkMiddleware(async (auth, req) => {
-  // Check authentication status first
-  const { userId } = await auth();
-
-  // If the user is already logged in, redirect them to the page they wanted to visit, or dashboard
-  if (userId && (req.nextUrl.pathname.startsWith("/sign-in") || req.nextUrl.pathname.startsWith("/sign-up") || req.nextUrl.pathname === "/")) {
-    const redirectUrl = req.nextUrl.searchParams.get("redirect_url");
-    if (redirectUrl) {
-      try {
-        const safeUrl = new URL(redirectUrl, req.url);
-        // Only allow internal redirects (same origin) to prevent open redirect vulnerabilities
-        if (safeUrl.origin === req.nextUrl.origin) {
-          return NextResponse.redirect(safeUrl);
-        }
-      } catch (e) {
-        // If it's a relative path (e.g. "/contacts?action=add"), prepend requesting host
-        if (redirectUrl.startsWith("/")) {
-          return NextResponse.redirect(new URL(redirectUrl, req.url));
-        }
-      }
-    }
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  // Allow other public routes for unauthenticated users
+  // Allow public routes
   if (isPublicRoute(req)) {
     return NextResponse.next();
   }
+
+  // Check authentication
+  const { userId } = await auth();
 
   // If unauthorized and calling an API route, return 401 JSON instead of HTML redirect
   if (!userId && req.nextUrl.pathname.startsWith("/api/")) {
@@ -45,13 +25,8 @@ export const proxy = clerkMiddleware(async (auth, req) => {
     );
   }
 
-  // All other pages require authentication (redirect to sign-in page with redirect_url parameter)
-  if (!userId) {
-    const signInUrl = new URL("/sign-in", req.url);
-    // Preserving the full original path and search query parameters (e.g. /contacts?action=add)
-    signInUrl.searchParams.set("redirect_url", req.nextUrl.pathname + req.nextUrl.search);
-    return NextResponse.redirect(signInUrl);
-  }
+  // All other pages require authentication
+  await auth.protect();
 
   return NextResponse.next();
 });

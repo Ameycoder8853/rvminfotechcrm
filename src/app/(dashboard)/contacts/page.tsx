@@ -21,9 +21,9 @@ import {
   Globe,
   MapPin,
   Tag,
+  Calendar,
   XCircle,
-  Save,
-  Calendar
+  Save
 } from "lucide-react";
 import Modal from "@/components/shared/modal";
 
@@ -58,7 +58,7 @@ interface Contact {
   dob?: string;
   planDate?: string;
   planActionType?: string;
-  planRemarks?: string;
+  remarks?: string;
   additionalNotes?: string;
   assignedTo?: { _id: string; firstName: string; lastName: string };
 }
@@ -175,7 +175,7 @@ export default function ContactsPage() {
       dob: "",
       planDate: "",
       planActionType: "",
-      planRemarks: "",
+      remarks: "",
       additionalNotes: "",
       assignedTo: undefined,
     });
@@ -775,7 +775,7 @@ export default function ContactsPage() {
               <h3 className="font-bold text-[var(--foreground)] text-base">Other Details</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Category / Sub Category</label>
                 <div className="grid grid-cols-2 gap-4">
@@ -817,9 +817,7 @@ export default function ContactsPage() {
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Classification</label>
                 <input
@@ -829,7 +827,9 @@ export default function ContactsPage() {
                   className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Group</label>
                 <input
@@ -849,9 +849,7 @@ export default function ContactsPage() {
                   className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Contact Type</label>
                 <select
@@ -860,25 +858,35 @@ export default function ContactsPage() {
                   className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
                 >
                   <option value="" className="bg-[var(--surface)]">Select Contact Type</option>
-                  <option value="Primary" className="bg-[var(--surface)]">Primary</option>
-                  <option value="Secondary" className="bg-[var(--surface)]">Secondary</option>
-                  <option value="Supplier" className="bg-[var(--surface)]">Supplier</option>
                   <option value="Client" className="bg-[var(--surface)]">Client</option>
                   <option value="Partner" className="bg-[var(--surface)]">Partner</option>
+                  <option value="Vendor" className="bg-[var(--surface)]">Vendor</option>
+                  <option value="Other" className="bg-[var(--surface)]">Other</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">DOB</label>
+                <input
+                  type="date"
+                  value={currentContact.dob || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, dob: e.target.value })}
+                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium text-left"
+                />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">DOB</label>
-                <div className="relative flex items-center">
-                  <input
-                    type="date"
-                    value={currentContact.dob || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, dob: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium pr-10"
-                  />
-                  <Calendar size={15} className="absolute right-3.5 text-[var(--foreground-muted)] pointer-events-none" />
-                </div>
+                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Status</label>
+                <select
+                  value={currentContact.status || "Lead"}
+                  onChange={(e) => setCurrentContact({ ...currentContact, status: e.target.value })}
+                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                >
+                  <option value="Lead" className="bg-[var(--surface)]">Lead</option>
+                  <option value="Customer" className="bg-[var(--surface)]">Customer</option>
+                </select>
               </div>
 
               <div>
@@ -890,20 +898,6 @@ export default function ContactsPage() {
                 >
                   <option value="" className="bg-[var(--surface)]">Unassigned</option>
                   {users.map(u => <option key={u._id} value={u._id} className="bg-[var(--surface)]">{u.firstName} {u.lastName}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Status</label>
-                <select
-                  value={currentContact.status || "Lead"}
-                  onChange={(e) => setCurrentContact({ ...currentContact, status: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
-                >
-                  <option value="Lead" className="bg-[var(--surface)]">Lead</option>
-                  <option value="Customer" className="bg-[var(--surface)]">Customer</option>
                 </select>
               </div>
             </div>
@@ -921,15 +915,12 @@ export default function ContactsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Plan Date (dd-mm-yyyy)</label>
-                <div className="relative flex items-center">
-                  <input
-                    type="date"
-                    value={currentContact.planDate || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, planDate: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium pr-10"
-                  />
-                  <Calendar size={15} className="absolute right-3.5 text-[var(--foreground-muted)] pointer-events-none" />
-                </div>
+                <input
+                  type="date"
+                  value={currentContact.planDate || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, planDate: e.target.value })}
+                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium text-left"
+                />
               </div>
 
               <div>
@@ -943,6 +934,7 @@ export default function ContactsPage() {
                   <option value="Call" className="bg-[var(--surface)]">Call</option>
                   <option value="Meeting" className="bg-[var(--surface)]">Meeting</option>
                   <option value="Email" className="bg-[var(--surface)]">Email</option>
+                  <option value="Follow Up" className="bg-[var(--surface)]">Follow Up</option>
                   <option value="Task" className="bg-[var(--surface)]">Task</option>
                 </select>
               </div>
@@ -951,23 +943,24 @@ export default function ContactsPage() {
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Remarks</label>
                 <input
                   placeholder="Add remarks for this plan"
-                  value={currentContact.planRemarks || ""}
-                  onChange={(e) => setCurrentContact({ ...currentContact, planRemarks: e.target.value })}
+                  value={currentContact.remarks || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, remarks: e.target.value })}
                   className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
                 />
               </div>
             </div>
+          </div>
 
-            <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Additional Notes</label>
-              <textarea
-                placeholder="Add any additional information about this contact"
-                rows={4}
-                value={currentContact.additionalNotes || ""}
-                onChange={(e) => setCurrentContact({ ...currentContact, additionalNotes: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
-              />
-            </div>
+          {/* Section 5: Additional Notes */}
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="font-bold text-[var(--foreground)] text-base">Additional Notes</h3>
+            <textarea
+              placeholder="Add any additional information about this contact"
+              rows={3}
+              value={currentContact.additionalNotes || ""}
+              onChange={(e) => setCurrentContact({ ...currentContact, additionalNotes: e.target.value })}
+              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+            />
           </div>
 
           {/* Form Action Controls */}
@@ -975,7 +968,7 @@ export default function ContactsPage() {
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all cursor-pointer border border-[var(--border)] bg-transparent"
+              className="flex items-center gap-2 px-6 py-2.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] rounded-xl text-sm font-semibold transition-all cursor-pointer"
             >
               <XCircle size={15} />
               <span>Cancel</span>
@@ -990,7 +983,7 @@ export default function ContactsPage() {
               ) : (
                 <Save size={15} />
               )}
-              <span>{currentContact._id ? "Update Contact" : "Save Contact"}</span>
+              <span>{currentContact._id ? "Update Details" : "Save Contact"}</span>
             </button>
           </div>
         </form>
