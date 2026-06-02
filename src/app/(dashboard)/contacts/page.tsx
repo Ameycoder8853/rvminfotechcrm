@@ -243,17 +243,41 @@ export default function ContactsPage() {
         const lines = text.split(/\r?\n/);
         if (lines.length === 0) return alert("Empty CSV file!");
 
-        const headers = lines[0].split(",").map((h) => h.trim().replace(/^["']|["']$/g, ""));
+        const parseCSVLine = (lineText: string): string[] => {
+          const result: string[] = [];
+          let inQuotes = false;
+          let currentVal = "";
+          for (let i = 0; i < lineText.length; i++) {
+            const char = lineText[i];
+            if (char === '"') {
+              if (inQuotes && lineText[i + 1] === '"') {
+                currentVal += '"';
+                i++; // Skip next quote
+              } else {
+                inQuotes = !inQuotes;
+              }
+            } else if (char === ',' && !inQuotes) {
+              result.push(currentVal.trim());
+              currentVal = "";
+            } else {
+              currentVal += char;
+            }
+          }
+          result.push(currentVal.trim());
+          return result;
+        };
+
+        const headers = parseCSVLine(lines[0]);
         const parsedRows: any[] = [];
 
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(",");
+          const matches = parseCSVLine(line);
           const row: any = {};
           headers.forEach((header, index) => {
-            const val = matches[index] ? matches[index].trim().replace(/^["']|["']$/g, "") : "";
+            const val = matches[index] !== undefined ? matches[index] : "";
             row[header] = val;
           });
           parsedRows.push(row);

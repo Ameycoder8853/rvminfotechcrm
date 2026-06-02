@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
@@ -17,6 +16,8 @@ import {
   MapPin,
   Calendar,
   Settings,
+  X,
+  Layers
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 
@@ -66,23 +67,10 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-5 h-[var(--header-height)] border-b border-[var(--sidebar-border)] shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                    <path d="M2 17l10 5 10-5" />
-                    <path d="M2 12l10 5 10-5" />
-                  </svg>
+                <div className="w-[32px] h-[32px] rounded-[9px] bg-[var(--accent,#6366f1)] flex items-center justify-center shadow-sm shrink-0">
+                  <Layers size={16} className="text-white stroke-[2.2]" />
                 </div>
-                <span className="text-lg font-bold">
+                <span className="text-lg font-bold tracking-tight text-[var(--foreground)]">
                   RVM <span className="gradient-text">CRM</span>
                 </span>
               </div>
