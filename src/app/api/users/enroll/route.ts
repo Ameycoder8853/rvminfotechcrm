@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Requester profile not found in DB" }, { status: 404 });
     }
 
-    const { firstName, lastName, email, password, roleTier: requestedRoleTier, teamId } = await req.json();
+    const { firstName, lastName, email, password, roleTier: requestedRoleTier, teamId, phone } = await req.json();
 
     if (!email || !password || !firstName || !lastName || !requestedRoleTier) {
       return NextResponse.json({ error: "Missing required fields (email, password, firstName, lastName, roleTier)" }, { status: 400 });
@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
         orgId: finalOrgId,
         teamId: finalTeamId,
         parentManager: finalParentManagerId,
+        phone: phone || "",
         isActive: true,
       });
 

@@ -1,7 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Team from "@/models/Team";
+import User from "@/models/User";
 import Organization from "@/models/Organization";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
@@ -52,23 +53,78 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const { seniorManager, ...teamData } = body;
     
     // Inject orgId into the body
-    if (!body.orgId) {
+    if (!teamData.orgId) {
       if (dbUser.orgId) {
-        body.orgId = dbUser.orgId;
+        teamData.orgId = dbUser.orgId;
       } else {
         let org = await Organization.findOne({ status: "active" });
         if (!org) {
           org = await Organization.create({ name: "Default Org", slug: "default", status: "active" });
         }
-        body.orgId = org._id;
+        teamData.orgId = org._id;
         dbUser.orgId = org._id as any;
         await dbUser.save();
       }
     }
 
-    const team = await Team.create(body);
+    const team = await Team.create(teamData);
+
+    // If seniorManager is requested, enroll them
+    if (seniorManager) {
+      const { firstName, lastName, email, password, phone } = seniorManager;
+      
+      if (!email || !password || !firstName || !lastName) {
+        await Team.findByIdAndDelete(team._id);
+        return NextResponse.json({ error: "Missing required Senior Manager fields" }, { status: 400 });
+      }
+
+      const clerk = await clerkClient();
+      let clerkUser;
+      try {
+        clerkUser = await clerk.users.createUser({
+          emailAddress: [email],
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          publicMetadata: {
+            roleTier: "senior",
+            orgId: team.orgId ? team.orgId.toString() : "",
+          },
+        });
+      } catch (clerkError: any) {
+        console.error("Clerk creation error for senior in team POST:", clerkError);
+        await Team.findByIdAndDelete(team._id);
+        return NextResponse.json({ error: clerkError.errors?.[0]?.message || "Clerk account creation failed for Senior Manager." }, { status: 400 });
+      }
+
+      try {
+        await User.create({
+          clerkId: clerkUser.id,
+          email: email.toLowerCase(),
+          firstName,
+          lastName,
+          role: "sales",
+          roleTier: "senior",
+          orgId: team.orgId,
+          teamId: team._id,
+          parentManager: dbUser._id,
+          phone: phone || "",
+          isActive: true,
+        });
+      } catch (mongoError: any) {
+        console.error("MongoDB creation error for senior in team POST. Rolling back...", mongoError);
+        try {
+          await clerk.users.deleteUser(clerkUser.id);
+        } catch (rollbackError) {
+          console.error("CRITICAL: Failed to rollback Clerk account deletion:", rollbackError);
+        }
+        await Team.findByIdAndDelete(team._id);
+        return NextResponse.json({ error: mongoError.message || "Database mapping failed for Senior Manager. Registration rolled back." }, { status: 500 });
+      }
+    }
 
     return NextResponse.json({ success: true, data: team }, { status: 201 });
   } catch (error) {

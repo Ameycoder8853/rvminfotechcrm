@@ -45,6 +45,17 @@ export default function TeamsPage() {
   // Enrollment states
   const [isEnrollMode, setIsEnrollMode] = useState(false);
   const [enrollPassword, setEnrollPassword] = useState("");
+  const [enrollPhone, setEnrollPhone] = useState("");
+
+  // Senior manager inside team modal state
+  const [enrollSenior, setEnrollSenior] = useState(false);
+  const [seniorForm, setSeniorForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: ""
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -89,12 +100,21 @@ export default function TeamsPage() {
         },
       }
     );
+    setEnrollSenior(false);
+    setSeniorForm({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      password: ""
+    });
     setIsTeamModalOpen(true);
   };
 
   const handleOpenUserModal = (user: Partial<UserProfile> | null = null, forceEnroll: boolean = false) => {
     setIsEnrollMode(forceEnroll || !user);
     setEnrollPassword("");
+    setEnrollPhone((user as any)?.phone || "");
     setCurrentUserEdit(
       user || {
         firstName: "",
@@ -117,15 +137,23 @@ export default function TeamsPage() {
       const url = currentTeam._id ? `/api/teams/${currentTeam._id}` : "/api/teams";
       const method = currentTeam._id ? "PATCH" : "POST";
 
+      const payload = {
+        ...currentTeam,
+        seniorManager: (!currentTeam._id && enrollSenior) ? seniorForm : undefined
+      };
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(currentTeam),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setIsTeamModalOpen(false);
         fetchData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to save team.");
       }
     } catch (error) {
       console.error("Failed to save team:", error);
@@ -148,6 +176,7 @@ export default function TeamsPage() {
         roleTier: currentUserEdit.roleTier || "junior",
         teamId: (currentUserEdit.teamId as any)?._id || currentUserEdit.teamId || undefined,
         parentManager: (currentUserEdit.parentManager as any)?._id || currentUserEdit.parentManager || undefined,
+        phone: enrollPhone,
       };
 
       if (isEnrollMode) {
@@ -498,6 +527,85 @@ export default function TeamsPage() {
                 </select>
               </div>
             </div>
+            
+            {!currentTeam?._id && (
+              <div className="space-y-4 border-t border-[var(--border)] pt-4">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={enrollSenior}
+                    onChange={(e) => setEnrollSenior(e.target.checked)}
+                    className="rounded border-[var(--border)] text-[var(--accent)] focus:ring-[var(--accent)]"
+                  />
+                  <span className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">
+                    Enroll a Team Senior Manager
+                  </span>
+                </label>
+
+                {enrollSenior && (
+                  <div className="p-4 bg-[var(--background-secondary)]/50 border border-[var(--border)] rounded-2xl space-y-4 animate-fade-in text-left">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">First Name</label>
+                        <input
+                          required
+                          value={seniorForm.firstName}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, firstName: e.target.value })}
+                          className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                          placeholder="e.g. Robert"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Last Name</label>
+                        <input
+                          required
+                          value={seniorForm.lastName}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, lastName: e.target.value })}
+                          className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                          placeholder="e.g. Downey"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Email Address</label>
+                        <input
+                          required
+                          type="email"
+                          value={seniorForm.email}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, email: e.target.value })}
+                          className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                          placeholder="robert.d@company.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Contact Number (Phone)</label>
+                        <input
+                          required
+                          value={seniorForm.phone}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, phone: e.target.value })}
+                          className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                          placeholder="e.g. +1 555-0199"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Account Password (set by admin)</label>
+                      <input
+                        required
+                        type="password"
+                        value={seniorForm.password}
+                        onChange={(e) => setSeniorForm({ ...seniorForm, password: e.target.value })}
+                        className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                        placeholder="Minimum 8 characters"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
@@ -552,16 +660,28 @@ export default function TeamsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Email Address</label>
-                <input
-                  required
-                  type="email"
-                  value={currentUserEdit?.email || ""}
-                  onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, email: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
-                  placeholder="john.doe@company.com"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Email Address</label>
+                  <input
+                    required
+                    type="email"
+                    value={currentUserEdit?.email || ""}
+                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, email: e.target.value })}
+                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                    placeholder="john.doe@company.com"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Contact Number (Phone)</label>
+                  <input
+                    required
+                    value={enrollPhone}
+                    onChange={(e) => setEnrollPhone(e.target.value)}
+                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                    placeholder="e.g. +1 555-0199"
+                  />
+                </div>
               </div>
 
               <div>
@@ -577,14 +697,25 @@ export default function TeamsPage() {
               </div>
             </>
           ) : (
-            <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Staff Member</label>
-              <input
-                disabled
-                value={`${currentUserEdit?.firstName || ""} ${currentUserEdit?.lastName || ""}`}
-                className="w-full bg-[var(--background-secondary)]/50 border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground-muted)] outline-none"
-              />
-            </div>
+            <>
+              <div>
+                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Staff Member</label>
+                <input
+                  disabled
+                  value={`${currentUserEdit?.firstName || ""} ${currentUserEdit?.lastName || ""}`}
+                  className="w-full bg-[var(--background-secondary)]/50 border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground-muted)] outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Contact Number (Phone)</label>
+                <input
+                  value={enrollPhone}
+                  onChange={(e) => setEnrollPhone(e.target.value)}
+                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                  placeholder="e.g. +1 555-0199"
+                />
+              </div>
+            </>
           )}
 
           {isAdmin ? (

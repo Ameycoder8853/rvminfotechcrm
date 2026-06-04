@@ -23,11 +23,12 @@ export async function PATCH(
 
     const body = await req.json();
     
-    // We only permit updating roleTier, teamId, and parentManager fields
+    // We only permit updating roleTier, teamId, parentManager, and phone fields
     const updates: Record<string, any> = {};
     if (body.roleTier) updates.roleTier = body.roleTier;
     if (body.teamId !== undefined) updates.teamId = body.teamId;
     if (body.parentManager !== undefined) updates.parentManager = body.parentManager;
+    if (body.phone !== undefined) updates.phone = body.phone;
 
     const user = await User.findByIdAndUpdate(id, updates, { new: true })
       .populate("teamId")
