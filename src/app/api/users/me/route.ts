@@ -51,7 +51,8 @@ export async function GET(req: NextRequest) {
       console.log(`[DB] Auto-promoted single database user ${dbUser.email} to admin`);
     }
 
-    return NextResponse.json({ success: true, data: dbUser });
+    const populatedUser = await User.findById(dbUser._id).populate("teamId").lean();
+    return NextResponse.json({ success: true, data: populatedUser });
   } catch (error: any) {
     console.error("GET /api/users/me error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

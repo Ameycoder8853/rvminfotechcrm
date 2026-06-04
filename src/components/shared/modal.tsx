@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,11 @@ interface ModalProps {
 
 export default function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -31,10 +37,10 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--backdrop)] backdrop-blur-md animate-fade-in overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[var(--backdrop)] backdrop-blur-md animate-fade-in overflow-y-auto">
       <div 
         ref={modalRef}
         className={cn(
@@ -64,6 +70,7 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

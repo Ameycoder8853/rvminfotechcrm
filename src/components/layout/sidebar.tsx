@@ -212,8 +212,55 @@ export default function Sidebar({ className }: SidebarProps) {
     }));
   };
 
-  // Dynamically configure navigation list, adding super admin items if authorized
-  const visibleSections = [...navigationSections];
+  // Dynamically configure navigation list, filtering based on team permissions and roleTier
+  const getFilteredSections = () => {
+    if (!currentUser) return [];
+
+    const isSuperAdmin = currentUser.roleTier === "super_admin";
+    const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
+    const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
+
+    // Retrieve permissions if teamId is populated
+    const perms = currentUser.teamId?.permissions || {
+      leads: "all",
+      customers: "all",
+      invoices: "all",
+      tickets: "all",
+    };
+
+    return navigationSections
+      .map((section) => {
+        const filteredItems = section.items.filter((item) => {
+          // 1. Super admin / Admin has full access to everything
+          if (isAdmin) return true;
+
+          // 2. Hide "Team" for Junior representatives
+          if (item.title === "Team" && !isSenior) return false;
+
+          // 3. Filter other items based on team module permissions
+          if (item.title === "Lead Management" && perms.leads === "none") return false;
+          if (item.title === "Contact Management" && perms.customers === "none") return false;
+          if (item.title === "Complaints" && perms.tickets === "none") return false;
+          if (item.title === "AMC" && perms.tickets === "none") return false;
+          if (item.title === "Installation" && perms.tickets === "none") return false;
+          if (item.title === "Quotations" && perms.invoices === "none") return false;
+          if (item.title === "Orders" && perms.invoices === "none") return false;
+          if (item.title === "Expenses" && perms.invoices === "none") return false;
+          if (item.title === "Inventory" && perms.invoices === "none") return false;
+          if (item.title === "Marketing" && perms.leads === "none") return false;
+
+          return true;
+        });
+
+        return {
+          ...section,
+          items: filteredItems,
+        };
+      })
+      .filter((section) => section.items.length > 0);
+  };
+
+  const visibleSections = getFilteredSections();
   if (currentUser?.roleTier === "super_admin") {
     visibleSections.push({
       category: "Super Admin Control",

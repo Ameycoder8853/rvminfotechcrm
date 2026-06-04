@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,55 @@ interface MobileNavProps {
 
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname();
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    async function fetchMe() {
+      try {
+        const res = await fetch("/api/users/me");
+        const data = await res.json();
+        if (data.success) {
+          setCurrentUser(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load user details in mobile-nav:", err);
+      }
+    }
+    if (isOpen) {
+      fetchMe();
+    }
+  }, [isOpen]);
+
+  const getFilteredNavItems = () => {
+    if (!currentUser) return [];
+
+    const isSuperAdmin = currentUser.roleTier === "super_admin";
+    const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
+
+    const perms = currentUser.teamId?.permissions || {
+      leads: "all",
+      customers: "all",
+      invoices: "all",
+      tickets: "all",
+    };
+
+    return navItems.filter((item) => {
+      if (isAdmin) return true;
+
+      if (item.title === "Leads" && perms.leads === "none") return false;
+      if (item.title === "Contacts" && perms.customers === "none") return false;
+      if (item.title === "Tickets" && perms.tickets === "none") return false;
+      if (item.title === "AMC" && perms.tickets === "none") return false;
+      if (item.title === "Installations" && perms.tickets === "none") return false;
+      if (item.title === "Quotations" && perms.invoices === "none") return false;
+      if (item.title === "Orders" && perms.invoices === "none") return false;
+      if (item.title === "Expenses" && perms.invoices === "none") return false;
+
+      return true;
+    });
+  };
+
+  const visibleNavItems = currentUser ? getFilteredNavItems() : navItems;
 
   return (
     <>
@@ -62,7 +112,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
         )}
       >
         <div className="flex flex-col h-full justify-between">
-          {/* Top segment */}
+          {/* Bottom segment / Top segment */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-5 h-[var(--header-height)] border-b border-[var(--sidebar-border)] shrink-0">
@@ -84,7 +134,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
 
             {/* Nav Items */}
             <nav className="p-3 space-y-1 overflow-y-auto flex-1 pb-16">
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 return (
                   <Link
