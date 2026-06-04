@@ -579,7 +579,7 @@ export default function ContactsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Name *</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     required
                     placeholder="First Name"
@@ -683,7 +683,7 @@ export default function ContactsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Department/Designation</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <select
                     value={currentContact.department || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, department: e.target.value })}
@@ -802,7 +802,7 @@ export default function ContactsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Category / Sub Category</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     placeholder="Category"
                     value={currentContact.category || ""}
@@ -820,7 +820,7 @@ export default function ContactsPage() {
 
               <div>
                 <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Source/Reference</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <select
                     value={currentContact.source || "website"}
                     onChange={(e) => setCurrentContact({ ...currentContact, source: e.target.value })}

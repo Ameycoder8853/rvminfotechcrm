@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import User from "@/models/User";
+import Customer from "@/models/Customer"; // Ensure Customer model is registered for populate queries
 import { generateId } from "@/lib/utils";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 

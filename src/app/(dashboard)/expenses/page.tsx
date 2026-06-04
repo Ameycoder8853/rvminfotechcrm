@@ -201,7 +201,7 @@ export default function ExpensesPage() {
       {/* Submit Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Submit New Expense">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Category</label>
               <select 

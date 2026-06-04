@@ -6,6 +6,8 @@
    ========================================== */
 
 :root {
+  color-scheme: dark;
+  --backdrop: rgba(0, 0, 0, 0.75);
   /* Core Palette */
   --background: #0a0b10;
   --background-secondary: #111320;
@@ -70,6 +72,8 @@
    ========================================== */
 
 [data-theme="light"] {
+  color-scheme: light;
+  --backdrop: rgba(15, 23, 42, 0.35);
   /* Core Palette */
   --background: #f8f9fc;
   --background-secondary: #ffffff;
@@ -359,19 +363,29 @@ body {
 /* Input fields */
 .cl-formFieldInput,
 .cl-formFieldInput input,
-.cl-formFieldInput textarea {
+.cl-formFieldInput textarea,
+.cl-otpCodeFieldInput,
+.cl-otpCodeFieldInput input,
+.cl-rootBox input,
+.cl-rootBox textarea {
   background: var(--background-secondary) !important;
   border: 1px solid var(--border) !important;
   color: var(--foreground) !important;
 }
 
 .cl-formFieldInput::placeholder,
-.cl-formFieldInput input::placeholder {
+.cl-formFieldInput input::placeholder,
+.cl-otpCodeFieldInput::placeholder,
+.cl-otpCodeFieldInput input::placeholder,
+.cl-rootBox input::placeholder {
   color: var(--foreground-muted) !important;
 }
 
 .cl-formFieldInput:focus,
-.cl-formFieldInput input:focus {
+.cl-formFieldInput input:focus,
+.cl-otpCodeFieldInput:focus,
+.cl-otpCodeFieldInput input:focus,
+.cl-rootBox input:focus {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 2px var(--accent-muted) !important;
 }
@@ -468,10 +482,10 @@ body {
 
 /* Modernized Global Form Fields */
 input, select, textarea {
-  background-color: #0b0d19 !important;
-  border: 1px solid #1f243d !important;
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 12px !important;
-  color: #f1f5f9 !important;
+  color: var(--foreground) !important;
   padding: 11px 16px !important;
   font-size: 0.85rem !important;
   font-weight: 500 !important;
@@ -479,19 +493,20 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #6366f1 !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.3) !important;
-  background-color: #0f1122 !important;
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 3px var(--accent-muted), 0 8px 16px -4px rgba(0, 0, 0, 0.1) !important;
+  background-color: var(--background-secondary) !important;
   outline: none !important;
 }
 
 input::placeholder, textarea::placeholder {
-  color: #475569 !important;
+  color: var(--foreground-muted) !important;
 }
 
 /* Form Label Adjustments */
 label {
-  color: #94a3b8 !important;
+  display: block !important;
+  color: var(--foreground-secondary) !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
@@ -529,11 +544,11 @@ button[type="submit"]:active, .btn-primary:active {
 
 /* Premium Modal styling */
 .modal-glow {
-  background: rgba(13, 15, 29, 0.85) !important;
+  background: var(--surface) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), 0 0 50px rgba(99, 102, 241, 0.07) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-lg), var(--shadow-glow) !important;
 }
 
 /* Cancel / secondary modal button */
@@ -550,15 +565,11 @@ button[type="button"] {
    ========================================== */
 
 /* Universal Card Hover Transitions */
-.grid > div, 
-.space-y-3 > div, 
-.space-y-4 > div {
+.card-hover {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.grid > div:hover,
-.space-y-3 > div:hover,
-.space-y-4 > div:hover {
+.card-hover:hover {
   transform: translateY(-4px) !important;
   box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.04) !important;
   border-color: rgba(99, 102, 241, 0.4) !important;

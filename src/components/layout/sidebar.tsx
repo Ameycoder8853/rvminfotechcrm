@@ -170,6 +170,23 @@ interface SidebarProps {
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
+
+  // Fetch current user details
+  useEffect(() => {
+    async function fetchMe() {
+      try {
+        const res = await fetch("/api/users/me");
+        const data = await res.json();
+        if (data.success) {
+          setCurrentUser(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load user details in sidebar:", err);
+      }
+    }
+    fetchMe();
+  }, []);
 
   // Auto-expand active page's parent menu on mount/route change
   useEffect(() => {
@@ -194,6 +211,21 @@ export default function Sidebar({ className }: SidebarProps) {
       [title]: !prev[title],
     }));
   };
+
+  // Dynamically configure navigation list, adding super admin items if authorized
+  const visibleSections = [...navigationSections];
+  if (currentUser?.roleTier === "super_admin") {
+    visibleSections.push({
+      category: "Super Admin Control",
+      items: [
+        {
+          title: "Super Admin Operations",
+          href: "/super-admin",
+          icon: <Shield size={18} />,
+        }
+      ]
+    });
+  }
 
   return (
     <aside
@@ -220,7 +252,7 @@ export default function Sidebar({ className }: SidebarProps) {
 
       {/* Menu List structured in Premium Sections */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 bg-transparent scrollbar-thin">
-        {navigationSections.map((section) => (
+        {visibleSections.map((section) => (
           <div key={section.category} className="space-y-1.5">
             <div className="px-4 text-[10px] font-bold tracking-wider text-[var(--foreground-muted,#94a3b8)] uppercase">
               {section.category}

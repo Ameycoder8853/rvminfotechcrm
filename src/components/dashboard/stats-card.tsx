@@ -23,7 +23,7 @@ export default function StatsCard({
   description,
 }: StatsCardProps) {
   return (
-    <div className="group relative bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--border-hover)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+    <div className="group relative bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--border-hover)] transition-all duration-300 hover:shadow-[var(--shadow-md)] card-hover">
       {/* Hover glow effect */}
       <div
         className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"

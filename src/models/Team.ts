@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ITeam extends Document {
+  orgId: mongoose.Types.ObjectId;
   name: string;
   description: string;
   permissions: {
@@ -15,7 +16,8 @@ export interface ITeam extends Document {
 
 const TeamSchema = new Schema<ITeam>(
   {
-    name: { type: String, required: true, unique: true },
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", required: true, index: true },
+    name: { type: String, required: true },
     description: { type: String, default: "" },
     permissions: {
       leads: { type: String, enum: ["none", "read", "write", "all"], default: "all" },

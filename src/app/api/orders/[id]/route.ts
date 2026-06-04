@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Order from "@/models/Order";
+import Customer from "@/models/Customer"; // Ensure Customer model is registered for populate queries
 
 export async function PATCH(
   req: NextRequest,

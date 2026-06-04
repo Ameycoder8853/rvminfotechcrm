@@ -156,7 +156,7 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Trend */}
-        <div className="lg:col-span-2 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+        <div className="lg:col-span-2 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">
@@ -202,7 +202,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Priority Distribution */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
           <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider mb-1">
             Ticket Priority
           </h3>
@@ -255,7 +255,7 @@ export default function DashboardPage() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Leads */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">
               High-Value Leads
@@ -286,7 +286,7 @@ export default function DashboardPage() {
         </div>
 
         {/* System Operations */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
            <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider mb-6">
             Module Health
           </h3>

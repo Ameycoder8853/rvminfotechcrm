@@ -6,7 +6,8 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   role: "admin" | "sales" | "service_tech" | "field_agent";
-  roleTier: "admin" | "senior" | "junior";
+  roleTier: "super_admin" | "admin" | "senior" | "junior";
+  orgId?: Types.ObjectId;
   teamId?: Types.ObjectId;
   parentManager?: Types.ObjectId;
   phone?: string;
@@ -29,9 +30,10 @@ const UserSchema = new Schema<IUser>(
     },
     roleTier: {
       type: String,
-      enum: ["admin", "senior", "junior"],
+      enum: ["super_admin", "admin", "senior", "junior"],
       default: "junior",
     },
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization" },
     teamId: { type: Schema.Types.ObjectId, ref: "Team" },
     parentManager: { type: Schema.Types.ObjectId, ref: "User" },
     phone: { type: String, default: "" },
