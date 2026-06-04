@@ -97,11 +97,15 @@ export default function DashboardPage() {
 
   const isSuperAdmin = currentUser?.roleTier === "super_admin";
   const isAdmin = currentUser?.roleTier === "admin" || isSuperAdmin;
-  const perms = currentUser?.teamId?.permissions || {
-    leads: "all",
-    customers: "all",
-    invoices: "all",
-    tickets: "all",
+  const rawPerms = currentUser?.teamId && typeof currentUser.teamId === "object"
+    ? (currentUser.teamId as any).permissions
+    : null;
+
+  const perms = {
+    leads: rawPerms?.leads || "all",
+    customers: rawPerms?.customers || "all",
+    invoices: rawPerms?.invoices || "all",
+    tickets: rawPerms?.tickets || "all",
   };
 
   const hasLeads = isAdmin || perms.leads !== "none";
