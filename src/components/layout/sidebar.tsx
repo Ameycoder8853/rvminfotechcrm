@@ -220,16 +220,12 @@ export default function Sidebar({ className }: SidebarProps) {
     const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
     const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
 
-    // Retrieve permissions safely (handling unpopulated, string, null, or missing fields)
-    const rawPerms = currentUser.teamId && typeof currentUser.teamId === "object"
-      ? (currentUser.teamId as any).permissions
-      : null;
-
-    const perms = {
-      leads: rawPerms?.leads || "all",
-      customers: rawPerms?.customers || "all",
-      invoices: rawPerms?.invoices || "all",
-      tickets: rawPerms?.tickets || "all",
+    // Retrieve permissions if teamId is populated
+    const perms = currentUser.teamId?.permissions || {
+      leads: "all",
+      customers: "all",
+      invoices: "all",
+      tickets: "all",
     };
 
     return navigationSections

@@ -373,14 +373,6 @@ body {
   color: var(--foreground) !important;
 }
 
-/* Fix Clerk OTP text visibility by removing heavy padding and centering digit */
-.cl-otpCodeFieldInput,
-.cl-otpCodeFieldInput input {
-  padding: 0 !important;
-  text-align: center !important;
-  font-size: 1.25rem !important;
-}
-
 .cl-formFieldInput::placeholder,
 .cl-formFieldInput input::placeholder,
 .cl-otpCodeFieldInput::placeholder,
@@ -482,13 +474,36 @@ body {
   scrollbar-color: var(--border-hover) transparent;
 }
 
+/* Explicit overrides for Clerk OTP Code verification inputs */
+.cl-otpCodeFieldInputs {
+  gap: 8px !important;
+  justify-content: center !important;
+}
+
+.cl-otpCodeFieldInput,
+.cl-otpCodeFieldInput input,
+input.cl-otpCodeFieldInput {
+  background-color: var(--background-secondary) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  width: 44px !important;
+  height: 48px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
 /* ==========================================
    Sleek Enterprise $2000 UI Design System
    Covers form fields, buttons, scrollbars,
    cards, and glow transitions
    ========================================== */
 
-/* Modernized Global Form Fields (excluding Clerk inputs to prevent layout/padding clipping on OTP fields) */
+/* Modernized Global Form Fields (excluding Clerk components) */
 input:not([class^="cl-"]):not([class*=" cl-"]), 
 select:not([class^="cl-"]):not([class*=" cl-"]), 
 textarea:not([class^="cl-"]):not([class*=" cl-"]) {
@@ -511,12 +526,13 @@ textarea:not([class^="cl-"]):not([class*=" cl-"]):focus {
   outline: none !important;
 }
 
-input::placeholder, textarea::placeholder {
+input:not([class^="cl-"]):not([class*=" cl-"])::placeholder, 
+textarea:not([class^="cl-"]):not([class*=" cl-"])::placeholder {
   color: var(--foreground-muted) !important;
 }
 
-/* Form Label Adjustments */
-label {
+/* Form Label Adjustments (excluding Clerk components) */
+label:not([class^="cl-"]):not([class*=" cl-"]) {
   display: block !important;
   color: var(--foreground-secondary) !important;
   font-weight: 700 !important;
@@ -563,8 +579,8 @@ button[type="submit"]:active, .btn-primary:active {
   box-shadow: var(--shadow-lg), var(--shadow-glow) !important;
 }
 
-/* Cancel / secondary modal button */
-button[type="button"] {
+/* Cancel / secondary modal button (excluding Clerk components) */
+button[type="button"]:not([class^="cl-"]):not([class*=" cl-"]) {
   font-weight: 700 !important;
   font-size: 0.8rem !important;
   text-transform: uppercase !important;
