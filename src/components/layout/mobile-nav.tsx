@@ -68,25 +68,33 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
 
     const isSuperAdmin = currentUser.roleTier === "super_admin";
     const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
+    const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
 
-    const perms = currentUser.teamId?.permissions || {
-      leads: "all",
-      customers: "all",
-      invoices: "all",
-      tickets: "all",
-    };
+    const rawTeam = currentUser.teamId;
+    const perms = (rawTeam && typeof rawTeam === "object" && "permissions" in rawTeam)
+      ? (rawTeam.permissions as any)
+      : null;
+
+    const defaultFallback = (isAdmin || isSenior) ? "all" : "none";
+    const leadsPerm = perms?.leads || defaultFallback;
+    const customersPerm = perms?.customers || defaultFallback;
+    const invoicesPerm = perms?.invoices || defaultFallback;
+    const ticketsPerm = perms?.tickets || defaultFallback;
 
     return navItems.filter((item) => {
       if (isAdmin) return true;
 
-      if (item.title === "Leads" && perms.leads === "none") return false;
-      if (item.title === "Contacts" && perms.customers === "none") return false;
-      if (item.title === "Tickets" && perms.tickets === "none") return false;
-      if (item.title === "AMC" && perms.tickets === "none") return false;
-      if (item.title === "Installations" && perms.tickets === "none") return false;
-      if (item.title === "Quotations" && perms.invoices === "none") return false;
-      if (item.title === "Orders" && perms.invoices === "none") return false;
-      if (item.title === "Expenses" && perms.invoices === "none") return false;
+      // Seniors see all team-related modules
+      if (isSenior) return true;
+
+      if (item.title === "Leads" && leadsPerm === "none") return false;
+      if (item.title === "Contacts" && customersPerm === "none") return false;
+      if (item.title === "Tickets" && ticketsPerm === "none") return false;
+      if (item.title === "AMC" && ticketsPerm === "none") return false;
+      if (item.title === "Installations" && ticketsPerm === "none") return false;
+      if (item.title === "Quotations" && invoicesPerm === "none") return false;
+      if (item.title === "Orders" && invoicesPerm === "none") return false;
+      if (item.title === "Expenses" && invoicesPerm === "none") return false;
 
       return true;
     });

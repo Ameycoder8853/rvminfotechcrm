@@ -221,12 +221,16 @@ export default function Sidebar({ className }: SidebarProps) {
     const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
 
     // Retrieve permissions if teamId is populated
-    const perms = currentUser.teamId?.permissions || {
-      leads: "all",
-      customers: "all",
-      invoices: "all",
-      tickets: "all",
-    };
+    const rawTeam = currentUser.teamId;
+    const perms = (rawTeam && typeof rawTeam === "object" && "permissions" in rawTeam)
+      ? (rawTeam.permissions as any)
+      : null;
+
+    const defaultFallback = (isAdmin || isSenior) ? "all" : "none";
+    const leadsPerm = perms?.leads || defaultFallback;
+    const customersPerm = perms?.customers || defaultFallback;
+    const invoicesPerm = perms?.invoices || defaultFallback;
+    const ticketsPerm = perms?.tickets || defaultFallback;
 
     return navigationSections
       .map((section) => {
@@ -237,17 +241,20 @@ export default function Sidebar({ className }: SidebarProps) {
           // 2. Hide "Team" for Junior representatives
           if (item.title === "Team" && !isSenior) return false;
 
+          // 3. Seniors see all team-related modules
+          if (isSenior && item.title !== "Super Admin Operations") return true;
+
           // 3. Filter other items based on team module permissions
-          if (item.title === "Lead Management" && perms.leads === "none") return false;
-          if (item.title === "Contact Management" && perms.customers === "none") return false;
-          if (item.title === "Complaints" && perms.tickets === "none") return false;
-          if (item.title === "AMC" && perms.tickets === "none") return false;
-          if (item.title === "Installation" && perms.tickets === "none") return false;
-          if (item.title === "Quotations" && perms.invoices === "none") return false;
-          if (item.title === "Orders" && perms.invoices === "none") return false;
-          if (item.title === "Expenses" && perms.invoices === "none") return false;
-          if (item.title === "Inventory" && perms.invoices === "none") return false;
-          if (item.title === "Marketing" && perms.leads === "none") return false;
+          if (item.title === "Lead Management" && leadsPerm === "none") return false;
+          if (item.title === "Contact Management" && customersPerm === "none") return false;
+          if (item.title === "Complaints" && ticketsPerm === "none") return false;
+          if (item.title === "AMC" && ticketsPerm === "none") return false;
+          if (item.title === "Installation" && ticketsPerm === "none") return false;
+          if (item.title === "Quotations" && invoicesPerm === "none") return false;
+          if (item.title === "Orders" && invoicesPerm === "none") return false;
+          if (item.title === "Expenses" && invoicesPerm === "none") return false;
+          if (item.title === "Inventory" && invoicesPerm === "none") return false;
+          if (item.title === "Marketing" && leadsPerm === "none") return false;
 
           return true;
         });

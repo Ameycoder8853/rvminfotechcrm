@@ -7,6 +7,8 @@ import Order from "@/models/Order";
 import Expense from "@/models/Expense";
 import Attendance from "@/models/Attendance";
 import User from "@/models/User";
+import Organization from "@/models/Organization";
+import DiaryEntry from "@/models/DiaryEntry";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 import mongoose from "mongoose";
 
@@ -152,6 +154,70 @@ export async function GET(req: NextRequest) {
       count: p.count
     }));
 
+    // ==========================================
+    // Role-specific Extra Stats Data
+    // ==========================================
+    let extraStats: any = {};
+
+    if (isSuperAdmin) {
+      const orgs = await Organization.find().lean();
+      const orgList = await Promise.all(orgs.map(async (org) => {
+        const userCount = await User.countDocuments({ orgId: org._id, isActive: true });
+        return {
+          _id: org._id,
+          name: org.name,
+          slug: org.slug,
+          status: org.status,
+          userCount
+        };
+      }));
+      extraStats = {
+        totalOrganizations: orgs.length,
+        totalUsers: await User.countDocuments({ isActive: true }),
+        organizations: orgList
+      };
+    } else if (populatedUser.roleTier === "senior" && populatedUser.teamId) {
+      const teamMembers = await User.find({ teamId: populatedUser.teamId }).lean();
+      const teamRoster = await Promise.all(teamMembers.map(async (member) => {
+        const attendance = await Attendance.findOne({ 
+          user: member._id,
+          type: "check_in",
+          timestamp: { $gte: todayStart, $lte: todayEnd }
+        }).lean();
+        return {
+          _id: member._id,
+          firstName: member.firstName,
+          lastName: member.lastName,
+          role: member.role,
+          roleTier: member.roleTier,
+          phone: member.phone,
+          avatar: member.avatar,
+          checkedIn: !!attendance,
+          checkInTime: attendance ? attendance.timestamp : null
+        };
+      }));
+      extraStats = {
+        teamRoster
+      };
+    } else if (populatedUser.roleTier === "junior") {
+      const myTasks = await DiaryEntry.find({ user: populatedUser._id })
+        .sort({ date: 1 })
+        .limit(5)
+        .lean();
+      extraStats = {
+        myTasks: myTasks.map(t => ({
+          _id: t._id,
+          title: t.title,
+          description: t.description,
+          type: t.type,
+          date: t.date,
+          startTime: t.startTime,
+          endTime: t.endTime,
+          isCompleted: t.isCompleted
+        }))
+      };
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -162,7 +228,8 @@ export async function GET(req: NextRequest) {
         activeAgents,
         monthlyRevenue,
         recentLeads,
-        ticketsByPriority
+        ticketsByPriority,
+        ...extraStats
       }
     });
   } catch (error) {

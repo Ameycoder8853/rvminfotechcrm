@@ -503,10 +503,10 @@ input.cl-otpCodeFieldInput {
    cards, and glow transitions
    ========================================== */
 
-/* Modernized Global Form Fields (excluding Clerk components) */
-input:not([class^="cl-"]):not([class*=" cl-"]), 
-select:not([class^="cl-"]):not([class*=" cl-"]), 
-textarea:not([class^="cl-"]):not([class*=" cl-"]) {
+/* Modernized Global Form Fields (excluding Clerk components and transparent background inputs) */
+input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent), 
+select:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent), 
+textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent) {
   background-color: var(--background) !important;
   border: 1px solid var(--border) !important;
   border-radius: 12px !important;
@@ -517,17 +517,17 @@ textarea:not([class^="cl-"]):not([class*=" cl-"]) {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-input:not([class^="cl-"]):not([class*=" cl-"]):focus, 
-select:not([class^="cl-"]):not([class*=" cl-"]):focus, 
-textarea:not([class^="cl-"]):not([class*=" cl-"]):focus {
+input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus, 
+select:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus, 
+textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus {
   border-color: var(--border-focus) !important;
   box-shadow: 0 0 0 3px var(--accent-muted), 0 8px 16px -4px rgba(0, 0, 0, 0.1) !important;
   background-color: var(--background-secondary) !important;
   outline: none !important;
 }
 
-input:not([class^="cl-"]):not([class*=" cl-"])::placeholder, 
-textarea:not([class^="cl-"]):not([class*=" cl-"])::placeholder {
+input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent)::placeholder, 
+textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent)::placeholder {
   color: var(--foreground-muted) !important;
 }
 
