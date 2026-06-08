@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Building2, Shield, Loader2, Save, Trash2, ArrowRight, CheckCircle, ExternalLink, Globe } from "lucide-react";
+import { Plus, Building2, Shield, Loader2, ArrowRight, Globe, Users, ShieldAlert, Lock, Unlock, Search, Check } from "lucide-react";
 import Modal from "@/components/shared/modal";
 
 interface Organization {
@@ -12,12 +12,37 @@ interface Organization {
   createdAt: string;
 }
 
+interface UserProfile {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  roleTier: "super_admin" | "admin" | "senior" | "junior";
+  isActive: boolean;
+  clerkId: string;
+  orgId?: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
+  phone?: string;
+  avatar?: string;
+}
+
 export default function SuperAdminPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<"companies" | "users">("companies");
   const [isOrgModalOpen, setIsOrgModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Search queries
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [orgSearchQuery, setOrgSearchQuery] = useState("");
 
   // Form states
   const [newOrgName, setNewOrgName] = useState("");
@@ -41,9 +66,25 @@ export default function SuperAdminPage() {
     }
   }, []);
 
+  const fetchUsers = useCallback(async () => {
+    try {
+      setUsersLoading(true);
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      if (data.success) {
+        setUsers(data.data);
+      }
+    } catch (error) {
+      console.error("Failed to load users:", error);
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     setMounted(true);
     fetchOrgs();
+    fetchUsers();
 
     // Check if there is an active impersonated organization in sessionStorage/localStorage
     if (typeof window !== "undefined") {
@@ -52,7 +93,7 @@ export default function SuperAdminPage() {
         setActiveImpersonatedOrg(saved);
       }
     }
-  }, [fetchOrgs]);
+  }, [fetchOrgs, fetchUsers]);
 
   const handleOpenOrgModal = () => {
     setNewOrgName("");
@@ -105,10 +146,60 @@ export default function SuperAdminPage() {
     }
   };
 
+  const handleUpdateUserRoleTier = async (userId: string, newRoleTier: string) => {
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roleTier: newRoleTier }),
+      });
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update role tier.");
+      }
+    } catch (error) {
+      console.error("Failed to update user role:", error);
+    }
+  };
+
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !currentStatus }),
+      });
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update user status.");
+      }
+    } catch (error) {
+      console.error("Failed to toggle user status:", error);
+    }
+  };
+
   const autoGenerateSlug = (val: string) => {
     setNewOrgName(val);
     setNewOrgSlug(val.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""));
   };
+
+  // Filters
+  const filteredOrgs = organizations.filter((org) => {
+    const query = orgSearchQuery.toLowerCase();
+    return org.name.toLowerCase().includes(query) || org.slug.toLowerCase().includes(query);
+  });
+
+  const filteredUsers = users.filter((u) => {
+    const query = userSearchQuery.toLowerCase();
+    const fullName = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
+    const email = (u.email || "").toLowerCase();
+    const company = (u.orgId?.name || "Global / Sovereign").toLowerCase();
+    return fullName.includes(query) || email.includes(query) || company.includes(query);
+  });
 
   if (!mounted) return null;
 
@@ -122,19 +213,21 @@ export default function SuperAdminPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Super Admin Operations</h1>
-            <p className="text-sm text-[var(--foreground-secondary)]">Manage tenant organizations and inspect CRM instances.</p>
+            <p className="text-sm text-[var(--foreground-secondary)]">Manage tenant organizations, inspect CRM databases, and manage global user accounts.</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleOpenOrgModal}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-md shadow-[var(--accent)]/10"
-          >
-            <Plus size={16} />
-            <span>Register Company</span>
-          </button>
-        </div>
+        {activeTab === "companies" && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleOpenOrgModal}
+              className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-md shadow-[var(--accent)]/10"
+            >
+              <Plus size={16} />
+              <span>Register Company</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Impersonation Warning Banner */}
@@ -155,91 +248,288 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">Syncing company registry...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Tenant Registry Listing */}
-          <div className="lg:col-span-2 bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
-              <h3 className="font-bold text-base">Registered CRM Tenants ({organizations.length})</h3>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/35 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">
-                    <th className="px-5 py-3.5">Company Name</th>
-                    <th className="px-5 py-3.5">Subdomain Slug</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right pr-6">Impersonation</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]/45 text-sm">
-                  {organizations.map((org) => {
-                    const isImpersonating = activeImpersonatedOrg === org._id;
-                    return (
-                      <tr key={org._id} className="hover:bg-[var(--surface-hover)]/40 transition-colors">
-                        <td className="px-5 py-4 font-semibold text-[var(--foreground)]">{org.name}</td>
-                        <td className="px-5 py-4 font-medium text-[var(--foreground-secondary)]">{org.slug}.rvmcrm.com</td>
-                        <td className="px-5 py-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20">
-                            {org.status}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-right pr-6">
-                          <button
-                            onClick={() => handleImpersonate(org._id, org.name)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                              isImpersonating
-                                ? "bg-[var(--warning)] hover:bg-[var(--warning-hover)] text-black"
-                                : "bg-[var(--accent-muted)] hover:bg-[var(--accent)] text-[var(--accent)] hover:text-white"
-                            }`}
-                          >
-                            <span>{isImpersonating ? "Stop Inspecting" : "Inspect Database"}</span>
-                            <ArrowRight size={12} />
-                          </button>
+      {/* Navigation Tabs */}
+      <div className="flex border-b border-[var(--border)] gap-6">
+        <button
+          onClick={() => setActiveTab("companies")}
+          className={`pb-4 text-sm font-bold relative transition-colors cursor-pointer ${
+            activeTab === "companies" ? "text-[var(--accent)]" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Building2 size={16} />
+            <span>Company Registries</span>
+          </div>
+          {activeTab === "companies" && (
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--accent)] rounded-full animate-fade-in" />
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("users")}
+          className={`pb-4 text-sm font-bold relative transition-colors cursor-pointer ${
+            activeTab === "users" ? "text-[var(--accent)]" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Users size={16} />
+            <span>Global User Profiles</span>
+          </div>
+          {activeTab === "users" && (
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--accent)] rounded-full animate-fade-in" />
+          )}
+        </button>
+      </div>
+
+      {activeTab === "companies" ? (
+        loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
+            <p className="text-sm text-[var(--foreground-secondary)]">Syncing company registry...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Tenant Registry Listing */}
+            <div className="lg:col-span-2 bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+              <div className="p-5 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="font-bold text-base">Registered CRM Tenants ({filteredOrgs.length})</h3>
+                <div className="relative flex items-center max-w-xs w-full">
+                  <Search className="absolute left-3 text-[var(--foreground-muted)] w-4 h-4" />
+                  <input
+                    type="text"
+                    value={orgSearchQuery}
+                    onChange={(e) => setOrgSearchQuery(e.target.value)}
+                    placeholder="Search companies..."
+                    className="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2 text-xs font-semibold outline-none focus:border-[var(--accent)] text-[var(--foreground)]"
+                  />
+                </div>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/35 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">
+                      <th className="px-5 py-3.5">Company Name</th>
+                      <th className="px-5 py-3.5">Subdomain Slug</th>
+                      <th className="px-5 py-3.5">Status</th>
+                      <th className="px-5 py-3.5 text-right pr-6">Impersonation</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]/45 text-sm">
+                    {filteredOrgs.map((org) => {
+                      const isImpersonating = activeImpersonatedOrg === org._id;
+                      return (
+                        <tr key={org._id} className="hover:bg-[var(--surface-hover)]/40 transition-colors">
+                          <td className="px-5 py-4 font-semibold text-[var(--foreground)]">{org.name}</td>
+                          <td className="px-5 py-4 font-medium text-[var(--foreground-secondary)]">{org.slug}.rvmcrm.com</td>
+                          <td className="px-5 py-4">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20">
+                              {org.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-right pr-6">
+                            <button
+                              onClick={() => handleImpersonate(org._id, org.name)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                isImpersonating
+                                  ? "bg-[var(--warning)] hover:bg-[var(--warning-hover)] text-black"
+                                  : "bg-[var(--accent-muted)] hover:bg-[var(--accent)] text-[var(--accent)] hover:text-white"
+                              }`}
+                            >
+                              <span>{isImpersonating ? "Stop Inspecting" : "Inspect Database"}</span>
+                              <ArrowRight size={12} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                    {filteredOrgs.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="text-center py-16 text-[var(--foreground-muted)] font-medium">
+                          No organizations found matching search query.
                         </td>
                       </tr>
-                    );
-                  })}
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-                  {organizations.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="text-center py-16 text-[var(--foreground-muted)] font-medium">
-                        No organizations found. Register your first customer company!
-                      </td>
+            {/* Quick Info & Onboarding panel */}
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 space-y-5 h-fit shadow-sm">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <Globe className="text-[var(--accent)] w-5 h-5" />
+                <span>CRM Distribution Hub</span>
+              </h3>
+              <p className="text-xs text-[var(--foreground-secondary)] leading-relaxed">
+                Registering an organization sets up a completely clean database slice/scope. Once created, you can invite the customer's initial <strong>Company Administrator</strong> via the registration flow or seeding tools.
+              </p>
+              <div className="p-3 bg-[var(--background-secondary)]/50 rounded-xl space-y-2.5 border border-[var(--border)]">
+                <h4 className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider">Quick Commands</h4>
+                <ul className="text-[11px] font-medium space-y-1.5 list-disc list-inside text-[var(--foreground-secondary)]">
+                  <li>Create Client Instance</li>
+                  <li>Setup SLA boundaries</li>
+                  <li>Suspensions block login instantly</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )
+      ) : (
+        usersLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
+            <p className="text-sm text-[var(--foreground-secondary)]">Fetching registered system users...</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* User Directory Registry */}
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+              <div className="p-5 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-bold text-base">Global User Account Directory ({filteredUsers.length})</h3>
+                  <p className="text-xs text-[var(--foreground-secondary)] mt-0.5">View profiles, change role tiers, and toggle active status across all companies.</p>
+                </div>
+                <div className="relative flex items-center max-w-xs w-full">
+                  <Search className="absolute left-3 text-[var(--foreground-muted)] w-4 h-4" />
+                  <input
+                    type="text"
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    placeholder="Search users or companies..."
+                    className="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2 text-xs font-semibold outline-none focus:border-[var(--accent)] text-[var(--foreground)]"
+                  />
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/35 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">
+                      <th className="px-5 py-3.5">User Profile Info</th>
+                      <th className="px-5 py-3.5">Assigned CRM Tenant</th>
+                      <th className="px-5 py-3.5">Role Tier</th>
+                      <th className="px-5 py-3.5">Account Status</th>
+                      <th className="px-5 py-3.5 text-right pr-6">Administrative Actions</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]/45 text-sm">
+                    {filteredUsers.map((user) => {
+                      const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "U";
+                      return (
+                        <tr key={user._id} className="hover:bg-[var(--surface-hover)]/40 transition-colors">
+                          <td className="px-5 py-4 flex items-center gap-3">
+                            {user.avatar ? (
+                              <img src={user.avatar} alt={user.firstName} className="w-9 h-9 rounded-xl object-cover border border-[var(--border)]" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-xl bg-[var(--accent-muted)] text-[var(--accent)] font-bold text-xs flex items-center justify-center">
+                                {initials}
+                              </div>
+                            )}
+                            <div>
+                              <div className="font-semibold text-[var(--foreground)]">{user.firstName} {user.lastName}</div>
+                              <div className="text-xs text-[var(--foreground-secondary)]">{user.email}</div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4 font-semibold text-[var(--foreground)]">
+                            {user.orgId ? (
+                              <div className="flex items-center gap-2">
+                                <Building2 size={14} className="text-[var(--foreground-secondary)]" />
+                                <span>{user.orgId.name}</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 text-purple-400">
+                                <Shield size={14} />
+                                <span>Global (Sovereign Context)</span>
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-5 py-4">
+                            {user.roleTier === "super_admin" ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]">
+                                Super Admin
+                              </span>
+                            ) : user.roleTier === "admin" ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                Company Admin
+                              </span>
+                            ) : user.roleTier === "senior" ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                Senior Manager
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                                Junior Rep
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-5 py-4">
+                            {user.isActive ? (
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-green-500">
+                                <Check size={14} />
+                                <span>Active</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-red-500">
+                                <ShieldAlert size={14} />
+                                <span>Suspended</span>
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-5 py-4 text-right pr-6">
+                            <div className="inline-flex items-center gap-3">
+                              {/* Change Tier Selector */}
+                              <select
+                                value={user.roleTier}
+                                onChange={(e) => handleUpdateUserRoleTier(user._id, e.target.value)}
+                                className="bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl text-xs font-semibold px-2.5 py-1.5 focus:border-[var(--accent)] outline-none text-[var(--foreground)] cursor-pointer"
+                              >
+                                <option value="super_admin">Super Admin</option>
+                                <option value="admin">Company Admin</option>
+                                <option value="senior">Senior Manager</option>
+                                <option value="junior">Junior Rep</option>
+                              </select>
+
+                              {/* Toggle active button */}
+                              <button
+                                onClick={() => handleToggleUserStatus(user._id, user.isActive)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                  user.isActive
+                                    ? "bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white"
+                                    : "bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white"
+                                }`}
+                              >
+                                {user.isActive ? (
+                                  <>
+                                    <Lock size={12} />
+                                    <span>Suspend</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Unlock size={12} />
+                                    <span>Activate</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                    {filteredUsers.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="text-center py-16 text-[var(--foreground-muted)] font-medium">
+                          No users found matching search query.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-
-          {/* Quick Info & Onboarding panel */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 space-y-5 h-fit shadow-sm">
-            <h3 className="font-bold text-base flex items-center gap-2">
-              <Globe className="text-[var(--accent)] w-5 h-5" />
-              <span>CRM Distribution Hub</span>
-            </h3>
-            <p className="text-xs text-[var(--foreground-secondary)] leading-relaxed">
-              Registering an organization sets up a completely clean database slice/scope. Once created, you can invite the customer's initial <strong>Company Administrator</strong> via the registration flow or seeding tools.
-            </p>
-            <div className="p-3 bg-[var(--background-secondary)]/50 rounded-xl space-y-2.5 border border-[var(--border)]">
-              <h4 className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider">Quick Commands</h4>
-              <ul className="text-[11px] font-medium space-y-1.5 list-disc list-inside text-[var(--foreground-secondary)]">
-                <li>Create Client Instance</li>
-                <li>Setup SLA boundaries</li>
-                <li>Suspensions block login instantly</li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
+        )
       )}
 
       {/* Register Organization Modal */}

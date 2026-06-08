@@ -44,11 +44,44 @@ export async function GET(req: NextRequest) {
 
     // 2. Single User Auto-Promotion Self-Healing
     const activeCount = await User.countDocuments({ isActive: true });
-    if (activeCount <= 1 && dbUser.roleTier !== "admin" && dbUser.roleTier !== "super_admin") {
-      dbUser.roleTier = "admin";
+    if (activeCount <= 1 && dbUser.roleTier !== "super_admin") {
+      dbUser.roleTier = "super_admin";
       dbUser.role = "admin";
       await dbUser.save();
-      console.log(`[DB] Auto-promoted single database user ${dbUser.email} to admin`);
+      console.log(`[DB] Auto-promoted single database user ${dbUser.email} to super_admin`);
+      
+      try {
+        const clerk = await clerkClient();
+        await clerk.users.updateUserMetadata(userId, {
+          publicMetadata: {
+            roleTier: "super_admin",
+            role: "super_admin"
+          }
+        });
+      } catch (clerkErr) {
+        console.warn("Failed to sync Clerk metadata during auto-promotion:", clerkErr);
+      }
+    }
+
+    // 3. Manual Promotion Parameter Support
+    const promoteParam = req.nextUrl.searchParams.get("promote");
+    if (promoteParam === "super_admin" && dbUser.roleTier !== "super_admin") {
+      dbUser.roleTier = "super_admin";
+      dbUser.role = "admin";
+      await dbUser.save();
+      
+      try {
+        const clerk = await clerkClient();
+        await clerk.users.updateUserMetadata(userId, {
+          publicMetadata: {
+            roleTier: "super_admin",
+            role: "super_admin"
+          }
+        });
+        console.log(`[Clerk] Manually promoted user ${userId} to super_admin`);
+      } catch (clerkErr) {
+        console.error("Failed to manually promote Clerk metadata:", clerkErr);
+      }
     }
 
     const populatedUser = await User.findById(dbUser._id).populate("teamId").lean();

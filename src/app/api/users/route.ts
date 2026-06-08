@@ -13,8 +13,9 @@ export async function GET(req: NextRequest) {
     await connectToDatabase();
     const dbUser = await getOrCreateDbUser();
     
-    const filter: Record<string, any> = { isActive: true };
+    const filter: Record<string, any> = {};
     if (dbUser && dbUser.roleTier !== "super_admin") {
+      filter.isActive = true;
       if (dbUser.orgId) {
         filter.orgId = dbUser.orgId;
       } else {
@@ -30,6 +31,7 @@ export async function GET(req: NextRequest) {
     }
 
     const users = await User.find(filter)
+      .populate("orgId", "name slug")
       .populate("teamId")
       .populate("parentManager", "firstName lastName")
       .lean();

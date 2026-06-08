@@ -480,22 +480,7 @@ body {
   justify-content: center !important;
 }
 
-.cl-otpCodeFieldInput,
-.cl-otpCodeFieldInput input,
-input.cl-otpCodeFieldInput {
-  background-color: var(--background-secondary) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--foreground) !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  text-align: center !important;
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
-  width: 44px !important;
-  height: 48px !important;
-  border-radius: 8px !important;
-  box-shadow: none !important;
-}
+/* Moved to the end of the file for cascade priority */
 
 /* ==========================================
    Sleek Enterprise $2000 UI Design System
@@ -504,7 +489,7 @@ input.cl-otpCodeFieldInput {
    ========================================== */
 
 /* Modernized Global Form Fields (excluding Clerk components and transparent background inputs) */
-input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent), 
+input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):not([name^="code-"]):not([id^="code-"]):not([maxlength="1"]):not([maxlength="6"]):not([name="code"]):not([class*="otp"]):not([class*="cl-otpCodeFieldInput"]):not([class*="cl-otpCodeFieldInputs"]), 
 select:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent), 
 textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent) {
   background-color: var(--background) !important;
@@ -517,7 +502,7 @@ textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent) {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus, 
+input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):not([name^="code-"]):not([id^="code-"]):not([maxlength="1"]):not([maxlength="6"]):not([name="code"]):not([class*="otp"]):not([class*="cl-otpCodeFieldInput"]):not([class*="cl-otpCodeFieldInputs"]):focus, 
 select:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus, 
 textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus {
   border-color: var(--border-focus) !important;
@@ -526,7 +511,7 @@ textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):focus {
   outline: none !important;
 }
 
-input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent)::placeholder, 
+input:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent):not([name^="code-"]):not([id^="code-"]):not([maxlength="1"]):not([maxlength="6"]):not([name="code"]):not([class*="otp"]):not([class*="cl-otpCodeFieldInput"]):not([class*="cl-otpCodeFieldInputs"])::placeholder, 
 textarea:not([class^="cl-"]):not([class*=" cl-"]):not(.bg-transparent)::placeholder {
   color: var(--foreground-muted) !important;
 }
@@ -654,6 +639,37 @@ select.bg-transparent:focus {
 .cl-modalContent {
   background-color: var(--surface) !important;
   border: 1px solid var(--border) !important;
+}
+
+/* Guarantee Clerk OTP inputs are styled properly and not overwritten by global input styles */
+.cl-otpCodeFieldInput,
+.cl-otpCodeFieldInput input,
+input.cl-otpCodeFieldInput,
+.cl-rootBox.cl-rootBox .cl-otpCodeFieldInputs.cl-otpCodeFieldInputs input,
+.cl-rootBox.cl-rootBox input[name^="code-"],
+.cl-rootBox.cl-rootBox input[id^="code-"],
+.cl-otpCodeFieldInputs input,
+input[name^="code-"],
+input[id^="code-"],
+input[name="code"],
+input[class*="otp"],
+input[class*="cl-otpCodeFieldInput"],
+input[class*="cl-otpCodeFieldInputs"],
+input[maxlength="1"],
+input[maxlength="6"] {
+  background-color: var(--background-secondary) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  width: 44px !important;
+  height: 48px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  line-height: 48px !important;
 }
 
 
