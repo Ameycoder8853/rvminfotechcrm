@@ -138,12 +138,12 @@ export default function TicketsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Service Tickets</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Manage real complaints and service requests</p>
+          <h1 className="text-2xl font-bold text-foreground">Service Tickets</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Manage real complaints and service requests</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
         >
           <Plus size={18} />
           <span>New Ticket</span>
@@ -155,52 +155,52 @@ export default function TicketsPage() {
         {["critical", "high", "medium", "low"].map((p) => {
           const count = tickets.filter(t => t.priority === p).length;
           return (
-            <div key={p} className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 flex items-center gap-3">
+            <div key={p} className="bg-surface border border-border rounded-lg p-3 flex items-center gap-3">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: priorityColors[p] }} />
               <div>
-                <p className="text-lg font-bold text-[var(--foreground)]">{count}</p>
-                <p className="text-[10px] uppercase tracking-wider text-[var(--foreground-muted)]">{p}</p>
+                <p className="text-lg font-bold text-foreground">{count}</p>
+                <p className="text-[10px] uppercase tracking-wider text-foreground-muted">{p}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 max-w-sm">
-        <Search size={16} className="text-[var(--foreground-muted)]" />
-        <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full" />
+      <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 max-w-sm">
+        <Search size={16} className="text-foreground-muted" />
+        <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full" />
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">Loading tickets...</p>
+          <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+          <p className="text-sm text-foreground-secondary">Loading tickets...</p>
         </div>
       ) : (
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/50">
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Ticket</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] hidden md:table-cell">Customer</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Issue</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Priority</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Actions</th>
+                <tr className="border-b border-border bg-background-secondary/50">
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Ticket</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted hidden md:table-cell">Customer</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Issue</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Priority</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((ticket) => (
-                  <tr key={ticket._id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-hover)] transition-colors">
+                  <tr key={ticket._id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <AlertCircle size={14} style={{ color: priorityColors[ticket.priority] }} />
-                        <span className="font-bold text-[var(--foreground)] text-xs">{ticket.ticketNumber}</span>
+                        <span className="font-bold text-foreground text-xs">{ticket.ticketNumber}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[var(--foreground-secondary)] hidden md:table-cell">{ticket.customer?.company || "No Company"}</td>
-                    <td className="px-4 py-3 text-[var(--foreground-secondary)] max-w-[200px] truncate font-medium">{ticket.title}</td>
+                    <td className="px-4 py-3 text-foreground-secondary hidden md:table-cell">{ticket.customer?.company || "No Company"}</td>
+                    <td className="px-4 py-3 text-foreground-secondary max-w-[200px] truncate font-medium">{ticket.title}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-bold capitalize" style={{ color: priorityColors[ticket.priority] }}>
                         {ticket.priority}
@@ -209,18 +209,18 @@ export default function TicketsPage() {
                     <td className="px-4 py-3"><StatusBadge status={ticket.status} /></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleOpenModal(ticket)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-active)] transition-colors"><Edit size={16} /></button>
+                        <button onClick={() => handleOpenModal(ticket)} className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors"><Edit size={16} /></button>
                         {ticket.status !== "resolved" && (
-                          <button onClick={() => handleUpdateStatus(ticket._id, "resolved")} className="p-1.5 rounded-lg text-[var(--success)] hover:bg-[var(--success-muted)] transition-colors" title="Resolve"><CheckCircle size={16} /></button>
+                          <button onClick={() => handleUpdateStatus(ticket._id, "resolved")} className="p-1.5 rounded-lg text-success hover:bg-success-muted transition-colors" title="Resolve"><CheckCircle size={16} /></button>
                         )}
-                        <button onClick={() => handleDelete(ticket._id)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors"><Trash2 size={16} /></button>
+                        <button onClick={() => handleDelete(ticket._id)} className="p-1.5 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--foreground-muted)] italic">No tickets found.</td>
+                    <td colSpan={6} className="px-4 py-10 text-center text-foreground-muted italic">No tickets found.</td>
                   </tr>
                 )}
               </tbody>
@@ -237,21 +237,21 @@ export default function TicketsPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Issue Title</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Issue Title</label>
             <input 
               required
               value={currentTicket?.title || ""}
               onChange={(e) => setCurrentTicket({ ...currentTicket, title: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               placeholder="e.g. Printer not working"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Customer</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Customer</label>
             <select 
               value={(currentTicket?.customer as any)?._id || (currentTicket?.customer as any) || ""}
               onChange={(e) => setCurrentTicket({ ...currentTicket, customer: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Select Customer</option>
               {customers.map(c => <option key={c._id} value={c._id}>{c.firstName} {c.lastName} ({c.company})</option>)}
@@ -259,11 +259,11 @@ export default function TicketsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Category</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Category</label>
               <select 
                 value={currentTicket?.category || "service_request"}
                 onChange={(e) => setCurrentTicket({ ...currentTicket, category: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 <option value="complaint">Complaint</option>
                 <option value="service_request">Service Request</option>
@@ -272,11 +272,11 @@ export default function TicketsPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Priority</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Priority</label>
               <select 
                 value={currentTicket?.priority || "medium"}
                 onChange={(e) => setCurrentTicket({ ...currentTicket, priority: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -286,19 +286,19 @@ export default function TicketsPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Assign Technician</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Assign Technician</label>
             <select 
               value={(currentTicket?.assignedTech as any)?._id || (currentTicket?.assignedTech as any) || ""}
               onChange={(e) => setCurrentTicket({ ...currentTicket, assignedTech: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Unassigned</option>
               {techs.map(t => <option key={t._id} value={t._id}>{t.firstName} {t.lastName}</option>)}
             </select>
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>{currentTicket?._id ? "Update Ticket" : "Open Ticket"}</span>
             </button>

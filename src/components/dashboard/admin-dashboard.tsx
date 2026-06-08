@@ -34,11 +34,11 @@ interface AdminDashboardProps {
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-lg text-xs">
-      <p className="text-[var(--foreground)] font-semibold mb-1">{label}</p>
+    <div className="bg-surface border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
+      <p className="text-foreground font-semibold mb-1">{label}</p>
       {payload.map((entry, i) => (
-        <p key={i} className="text-[var(--foreground-secondary)]">
-          {entry.name}: <span className="text-[var(--foreground)] font-medium">
+        <p key={i} className="text-foreground-secondary">
+          {entry.name}: <span className="text-foreground font-medium">
             {entry.name === "revenue" ? `₹${(entry.value / 1000).toFixed(0)}K` : entry.value}
           </span>
         </p>
@@ -75,16 +75,16 @@ export default function AdminDashboard({ stats, currentUser }: AdminDashboardPro
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-4xl font-black text-[var(--foreground)] tracking-tight">
+          <h1 className="text-2xl lg:text-4xl font-black text-foreground tracking-tight">
             Command Center
           </h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1 font-medium">
+          <p className="text-sm text-foreground-secondary mt-1 font-medium">
             Real-time business intelligence for RVM Infotech.
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
-          <span className="text-xs font-bold text-[var(--foreground-secondary)] uppercase tracking-wider">Live System Status</span>
+        <div className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-xl shadow-sm">
+          <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+          <span className="text-xs font-bold text-foreground-secondary uppercase tracking-wider">Live System Status</span>
         </div>
       </div>
 
@@ -143,15 +143,15 @@ export default function AdminDashboard({ stats, currentUser }: AdminDashboardPro
           {/* Revenue Trend */}
           {hasInvoices && (
             <div className={cn(
-              "bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover",
+              "bg-surface border border-border rounded-2xl p-6 shadow-sm card-hover",
               hasTickets ? "lg:col-span-2" : ""
             )}>
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                     Revenue Trajectory
                   </h3>
-                  <p className="text-xs text-[var(--foreground-muted)] mt-1 font-medium">
+                  <p className="text-xs text-foreground-muted mt-1 font-medium">
                     Sales performance over current quarter
                   </p>
                 </div>
@@ -193,11 +193,11 @@ export default function AdminDashboard({ stats, currentUser }: AdminDashboardPro
 
           {/* Priority Distribution */}
           {hasTickets && (
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
-              <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider mb-1">
+            <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm card-hover">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-1">
                 Ticket Priority
               </h3>
-              <p className="text-xs text-[var(--foreground-muted)] mb-8 font-medium">
+              <p className="text-xs text-foreground-muted mb-8 font-medium">
                 Resolution focus distribution
               </p>
               <ResponsiveContainer width="100%" height={220}>
@@ -231,13 +231,13 @@ export default function AdminDashboard({ stats, currentUser }: AdminDashboardPro
                   />
                 </BarChart>
               </ResponsiveContainer>
-              <div className="mt-6 pt-6 border-t border-[var(--border)]">
+              <div className="mt-6 pt-6 border-t border-border">
                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Efficiency</span>
-                    <span className="text-xs font-bold text-[var(--success)]">84%</span>
+                    <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Efficiency</span>
+                    <span className="text-xs font-bold text-success">84%</span>
                  </div>
-                 <div className="w-full bg-[var(--background-secondary)] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[var(--success)] h-full w-[84%] rounded-full shadow-[0_0_8px_var(--success)]" />
+                 <div className="w-full bg-background-secondary h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-success h-full w-[84%] rounded-full shadow-[0_0_8px_var(--success)]" />
                  </div>
               </div>
             </div>
@@ -253,32 +253,32 @@ export default function AdminDashboard({ stats, currentUser }: AdminDashboardPro
         )}>
           {/* Top Leads */}
           {hasLeads && (
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
+            <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm card-hover">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                   High-Value Leads
                 </h3>
-                <span className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-widest cursor-pointer hover:underline">View Pipeline</span>
+                <span className="text-[10px] font-bold text-accent uppercase tracking-widest cursor-pointer hover:underline">View Pipeline</span>
               </div>
               <div className="space-y-4">
                 {(stats?.recentLeads || []).map((lead: any, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between p-4 bg-[var(--background-secondary)]/30 rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all cursor-pointer group"
+                    className="flex items-center justify-between p-4 bg-background-secondary/30 rounded-xl border border-border hover:border-accent transition-all cursor-pointer group"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-[var(--foreground)] truncate group-hover:text-[var(--accent)] transition-colors">
+                      <p className="text-sm font-bold text-foreground truncate group-hover:text-accent transition-colors">
                         {lead.name}
                       </p>
-                      <p className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest mt-0.5">
-                        Est. Value: <span className="text-[var(--foreground-secondary)]">{lead.value}</span>
+                      <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mt-0.5">
+                        Est. Value: <span className="text-foreground-secondary">{lead.value}</span>
                       </p>
                     </div>
                     <StatusBadge status={lead.status} />
                   </div>
                 ))}
                 {(!stats?.recentLeads || stats?.recentLeads.length === 0) && (
-                  <p className="text-center py-10 text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-widest">No active leads in pipeline</p>
+                  <p className="text-center py-10 text-xs font-bold text-foreground-muted uppercase tracking-widest">No active leads in pipeline</p>
                 )}
               </div>
             </div>
@@ -286,37 +286,37 @@ export default function AdminDashboard({ stats, currentUser }: AdminDashboardPro
 
           {/* Module Health */}
           {hasModuleHealth && (
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover">
-               <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider mb-6">
+            <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm card-hover">
+               <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-6">
                 Module Health
               </h3>
               <div className="grid grid-cols-2 gap-4">
                  {hasInvoices && (
-                   <div className="p-4 rounded-2xl bg-[var(--background-secondary)] border border-[var(--border)]">
-                      <Receipt className="w-5 h-5 text-[var(--danger)] mb-2" />
-                      <p className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Pending Claims</p>
-                      <p className="text-xl font-black text-[var(--foreground)] mt-1">₹{((stats?.pendingExpenses || 0) / 1000).toFixed(1)}K</p>
+                   <div className="p-4 rounded-2xl bg-background-secondary border border-border">
+                      <Receipt className="w-5 h-5 text-danger mb-2" />
+                      <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Pending Claims</p>
+                      <p className="text-xl font-black text-foreground mt-1">₹{((stats?.pendingExpenses || 0) / 1000).toFixed(1)}K</p>
                    </div>
                  )}
                  {hasInvoices && (
-                   <div className="p-4 rounded-2xl bg-[var(--background-secondary)] border border-[var(--border)]">
-                      <ShoppingCart className="w-5 h-5 text-[var(--accent)] mb-2" />
-                      <p className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Active Orders</p>
-                      <p className="text-xl font-black text-[var(--foreground)] mt-1">{stats?.pendingOrders || 0}</p>
+                   <div className="p-4 rounded-2xl bg-background-secondary border border-border">
+                      <ShoppingCart className="w-5 h-5 text-accent mb-2" />
+                      <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Active Orders</p>
+                      <p className="text-xl font-black text-foreground mt-1">{stats?.pendingOrders || 0}</p>
                    </div>
                  )}
                  {hasLeads && (
-                   <div className="p-4 rounded-2xl bg-[var(--background-secondary)] border border-[var(--border)]">
-                      <TrendingUp className="w-5 h-5 text-[var(--success)] mb-2" />
-                      <p className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Conversion</p>
-                      <p className="text-xl font-black text-[var(--foreground)] mt-1">24%</p>
+                   <div className="p-4 rounded-2xl bg-background-secondary border border-border">
+                      <TrendingUp className="w-5 h-5 text-success mb-2" />
+                      <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Conversion</p>
+                      <p className="text-xl font-black text-foreground mt-1">24%</p>
                    </div>
                  )}
                  {hasTickets && (
-                   <div className="p-4 rounded-2xl bg-[var(--background-secondary)] border border-[var(--border)]">
-                      <Clock className="w-5 h-5 text-[var(--warning)] mb-2" />
-                      <p className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Avg. Res Time</p>
-                      <p className="text-xl font-black text-[var(--foreground)] mt-1">4.2h</p>
+                   <div className="p-4 rounded-2xl bg-background-secondary border border-border">
+                      <Clock className="w-5 h-5 text-warning mb-2" />
+                      <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Avg. Res Time</p>
+                      <p className="text-xl font-black text-foreground mt-1">4.2h</p>
                    </div>
                  )}
               </div>

@@ -13,7 +13,7 @@ export default function DashboardLayout({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <Sidebar />
 
@@ -24,7 +24,7 @@ export default function DashboardLayout({
       />
 
       {/* Main Content Area */}
-      <div className="lg:pl-[var(--sidebar-width)] min-h-screen flex flex-col transition-all duration-300">
+      <div className="lg:pl-sidebar-width min-h-screen flex flex-col transition-all duration-300">
         <Header onMenuClick={() => setMobileNavOpen(true)} />
 
         <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">

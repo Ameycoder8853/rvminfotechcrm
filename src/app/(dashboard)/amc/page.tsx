@@ -121,72 +121,72 @@ export default function AMCPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">AMC Management</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Real Annual Maintenance Contract tracking</p>
+          <h1 className="text-2xl font-bold text-foreground">AMC Management</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Real Annual Maintenance Contract tracking</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
         >
           <Plus size={18} /><span>New AMC</span>
         </button>
       </div>
 
       {expiringSoonCount > 0 && (
-        <div className="flex items-center gap-3 bg-[var(--danger-muted)] border border-[var(--danger)]/20 rounded-xl px-4 py-3 shadow-sm animate-pulse-slow">
-          <AlertTriangle size={18} className="text-[var(--danger)] shrink-0" />
-          <p className="text-sm text-[var(--danger)] font-medium">
+        <div className="flex items-center gap-3 bg-danger-muted border border-danger/20 rounded-xl px-4 py-3 shadow-sm animate-pulse-slow">
+          <AlertTriangle size={18} className="text-danger shrink-0" />
+          <p className="text-sm text-danger font-medium">
             <span className="font-bold">{expiringSoonCount} contract(s)</span> expiring within 30 days. Action recommended.
           </p>
         </div>
       )}
 
-      <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 max-w-sm">
-        <Search size={16} className="text-[var(--foreground-muted)]" />
+      <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 max-w-sm">
+        <Search size={16} className="text-foreground-muted" />
         <input 
           type="text" 
           placeholder="Search AMC..." 
           value={search} 
           onChange={(e) => setSearch(e.target.value)} 
-          className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full" 
+          className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full" 
         />
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">Syncing contracts...</p>
+          <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+          <p className="text-sm text-foreground-secondary">Syncing contracts...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((amc) => (
-            <div key={amc._id} className="group bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--accent)] transition-all shadow-sm hover:shadow-lg relative overflow-hidden">
+            <div key={amc._id} className="group bg-surface border border-border rounded-xl p-5 hover:border-accent transition-all shadow-sm hover:shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <button onClick={() => handleOpenModal(amc)} className="p-1.5 rounded-lg bg-[var(--background)] text-[var(--foreground-muted)] hover:text-[var(--accent)] border border-[var(--border)] shadow-sm"><Edit size={14} /></button>
-                <button onClick={() => handleDelete(amc._id)} className="p-1.5 rounded-lg bg-[var(--background)] text-[var(--foreground-muted)] hover:text-[var(--danger)] border border-[var(--border)] shadow-sm"><Trash2 size={14} /></button>
+                <button onClick={() => handleOpenModal(amc)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-accent border border-border shadow-sm"><Edit size={14} /></button>
+                <button onClick={() => handleDelete(amc._id)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-danger border border-border shadow-sm"><Trash2 size={14} /></button>
               </div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Shield size={18} className="text-[var(--accent)]" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--foreground-muted)]">{amc.contractNumber}</span>
+                  <Shield size={18} className="text-accent" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-foreground-muted">{amc.contractNumber}</span>
                 </div>
                 <StatusBadge status={amc.status} />
               </div>
-              <h3 className="font-bold text-[var(--foreground)] text-lg mb-1 leading-tight">{amc.customer?.company || "No Company"}</h3>
-              <p className="text-xs text-[var(--foreground-secondary)] mb-4 font-medium italic">
+              <h3 className="font-bold text-foreground text-lg mb-1 leading-tight">{amc.customer?.company || "No Company"}</h3>
+              <p className="text-xs text-foreground-secondary mb-4 font-medium italic">
                 {amc.services?.map(s => s.description).join(", ") || "No services specified"}
               </p>
-              <div className="space-y-2 border-t border-[var(--border)] pt-4 mt-auto">
+              <div className="space-y-2 border-t border-border pt-4 mt-auto">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] uppercase font-bold text-[var(--foreground-muted)] tracking-wider">Annual Value</span>
-                  <span className="font-bold text-[var(--foreground)] text-sm">₹{amc.value?.toLocaleString()}</span>
+                  <span className="text-[10px] uppercase font-bold text-foreground-muted tracking-wider">Annual Value</span>
+                  <span className="font-bold text-foreground text-sm">₹{amc.value?.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] uppercase font-bold text-[var(--foreground-muted)] tracking-wider">Valid Until</span>
+                  <span className="text-[10px] uppercase font-bold text-foreground-muted tracking-wider">Valid Until</span>
                   <span className={`text-xs font-bold ${
                     new Date(amc.endDate).getTime() - new Date().getTime() < 30 * 24 * 60 * 60 * 1000 
-                      ? "text-[var(--danger)]" 
-                      : "text-[var(--foreground-secondary)]"
+                      ? "text-danger" 
+                      : "text-foreground-secondary"
                   }`}>
                     {new Date(amc.endDate).toLocaleDateString()}
                   </span>
@@ -195,8 +195,8 @@ export default function AMCPage() {
             </div>
           ))}
           {filtered.length === 0 && (
-            <div className="col-span-full py-20 text-center bg-[var(--surface)] border border-dashed border-[var(--border)] rounded-xl">
-              <p className="text-[var(--foreground-muted)] italic">No AMC records found matching your search.</p>
+            <div className="col-span-full py-20 text-center bg-surface border border-dashed border-border rounded-xl">
+              <p className="text-foreground-muted italic">No AMC records found matching your search.</p>
             </div>
           )}
         </div>
@@ -210,12 +210,12 @@ export default function AMCPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Customer</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Customer</label>
             <select 
               required
               value={(currentAmc?.customer as any)?._id || (currentAmc?.customer as any) || ""}
               onChange={(e) => setCurrentAmc({ ...currentAmc, customer: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Select Customer</option>
               {customers.map(c => <option key={c._id} value={c._id}>{c.firstName} {c.lastName} ({c.company})</option>)}
@@ -223,38 +223,38 @@ export default function AMCPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Start Date</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Start Date</label>
               <input 
                 type="date"
                 required
                 value={currentAmc?.startDate ? new Date(currentAmc.startDate).toISOString().split("T")[0] : ""}
                 onChange={(e) => setCurrentAmc({ ...currentAmc, startDate: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">End Date</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">End Date</label>
               <input 
                 type="date"
                 required
                 value={currentAmc?.endDate ? new Date(currentAmc.endDate).toISOString().split("T")[0] : ""}
                 onChange={(e) => setCurrentAmc({ ...currentAmc, endDate: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Annual Value (₹)</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Annual Value (₹)</label>
             <input 
               type="number"
               required
               value={currentAmc?.value || 0}
               onChange={(e) => setCurrentAmc({ ...currentAmc, value: Number(e.target.value) })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Primary Service Description</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Primary Service Description</label>
             <input 
               required
               value={currentAmc?.services?.[0]?.description || ""}
@@ -262,13 +262,13 @@ export default function AMCPage() {
                 ...currentAmc, 
                 services: [{ ...currentAmc?.services?.[0], description: e.target.value, frequency: "quarterly" }] as any 
               })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               placeholder="e.g. Server + Network Support"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>{currentAmc?._id ? "Update AMC" : "Register AMC"}</span>
             </button>

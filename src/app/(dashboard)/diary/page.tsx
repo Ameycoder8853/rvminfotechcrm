@@ -158,19 +158,19 @@ export default function DiaryPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Diary & Planner</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Real-time schedule and task management</p>
+          <h1 className="text-2xl font-bold text-foreground">Diary & Planner</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Real-time schedule and task management</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
         >
           <Plus size={18} /><span>New Entry</span>
         </button>
       </div>
 
       {/* Week Navigation */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
+      <div className="bg-surface border border-border rounded-2xl p-4 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <button 
             onClick={() => {
@@ -178,11 +178,11 @@ export default function DiaryPage() {
               d.setDate(d.getDate() - 7);
               setSelectedDate(d);
             }}
-            className="p-2 rounded-xl text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all border border-[var(--border)]"
+            className="p-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-all border border-border"
           >
             <ChevronLeft size={20} />
           </button>
-          <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-widest">
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">
             {selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
           </h3>
           <button 
@@ -191,7 +191,7 @@ export default function DiaryPage() {
               d.setDate(d.getDate() + 7);
               setSelectedDate(d);
             }}
-            className="p-2 rounded-xl text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all border border-[var(--border)]"
+            className="p-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-all border border-border"
           >
             <ChevronRight size={20} />
           </button>
@@ -206,8 +206,8 @@ export default function DiaryPage() {
                 onClick={() => setSelectedDate(day)}
                 className={`flex flex-col items-center gap-1.5 py-4 rounded-2xl transition-all relative ${
                   isSelected
-                    ? "bg-[var(--accent)] text-white shadow-xl shadow-[var(--accent)]/30 scale-105 z-10"
-                    : "text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] border border-transparent hover:border-[var(--border)]"
+                    ? "bg-accent text-white shadow-xl shadow-accent/30 scale-105 z-10"
+                    : "text-foreground-secondary hover:bg-surface-hover border border-transparent hover:border-border"
                 }`}
               >
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">
@@ -217,7 +217,7 @@ export default function DiaryPage() {
                   {day.getDate()}
                 </span>
                 {isToday && !isSelected && (
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-accent" />
                 )}
               </button>
             );
@@ -228,46 +228,46 @@ export default function DiaryPage() {
       {/* Day Schedule */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
             {selectedDate.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' })}
           </h3>
-          <span className="text-xs font-bold text-[var(--foreground-muted)] bg-[var(--surface)] border border-[var(--border)] px-3 py-1 rounded-full">
+          <span className="text-xs font-bold text-foreground-muted bg-surface border border-border px-3 py-1 rounded-full">
             {entries.length} Entries
           </span>
         </div>
 
         {loading ? (
           <div className="py-20 flex flex-col items-center">
-            <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin mb-4" />
-            <p className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Syncing Schedule...</p>
+            <Loader2 className="w-8 h-8 text-accent animate-spin mb-4" />
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-widest">Syncing Schedule...</p>
           </div>
         ) : (
           <div className="space-y-3">
             {entries.map((entry) => (
               <div
                 key={entry._id}
-                className={`group bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--accent)] transition-all flex gap-4 shadow-sm relative overflow-hidden ${entry.isCompleted ? "opacity-60" : ""}`}
+                className={`group bg-surface border border-border rounded-2xl p-5 hover:border-accent transition-all flex gap-4 shadow-sm relative overflow-hidden ${entry.isCompleted ? "opacity-60" : ""}`}
               >
                 <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: typeColors[entry.type] }} />
                 <button 
                   onClick={() => handleToggleComplete(entry)}
-                  className={`mt-1 shrink-0 transition-colors ${entry.isCompleted ? "text-[var(--success)]" : "text-[var(--foreground-muted)] group-hover:text-[var(--accent)]"}`}
+                  className={`mt-1 shrink-0 transition-colors ${entry.isCompleted ? "text-success" : "text-foreground-muted group-hover:text-accent"}`}
                 >
                   {entry.isCompleted ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                 </button>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h4 className={`font-bold text-base text-[var(--foreground)] ${entry.isCompleted ? "line-through decoration-2" : ""}`}>
+                    <h4 className={`font-bold text-base text-foreground ${entry.isCompleted ? "line-through decoration-2" : ""}`}>
                       {entry.title}
                     </h4>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={(e) => { e.stopPropagation(); handleOpenModal(entry); }} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-muted)]"><Edit size={14} /></button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(entry._id); }} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)]"><Trash2 size={14} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleOpenModal(entry); }} className="p-1.5 rounded-lg text-foreground-muted hover:text-accent hover:bg-accent-muted"><Edit size={14} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(entry._id); }} className="p-1.5 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted"><Trash2 size={14} /></button>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-bold uppercase tracking-wider text-[var(--foreground-secondary)]">
-                    <div className="flex items-center gap-2"><Clock size={14} className="text-[var(--accent)]" />{entry.startTime} - {entry.endTime}</div>
-                    {entry.location && <div className="flex items-center gap-2 max-w-[200px] truncate"><MapPin size={14} className="text-[var(--danger)]" />{entry.location}</div>}
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-bold uppercase tracking-wider text-foreground-secondary">
+                    <div className="flex items-center gap-2"><Clock size={14} className="text-accent" />{entry.startTime} - {entry.endTime}</div>
+                    {entry.location && <div className="flex items-center gap-2 max-w-[200px] truncate"><MapPin size={14} className="text-danger" />{entry.location}</div>}
                     <div className="px-3 py-1 rounded-full text-[9px]" style={{ backgroundColor: `${typeColors[entry.type]}20`, color: typeColors[entry.type] }}>
                       {entry.type}
                     </div>
@@ -276,9 +276,9 @@ export default function DiaryPage() {
               </div>
             ))}
             {entries.length === 0 && (
-              <div className="py-20 text-center bg-[var(--surface)] border border-dashed border-[var(--border)] rounded-2xl flex flex-col items-center">
-                <p className="text-[var(--foreground-muted)] font-medium italic mb-4">Your schedule is clear for today.</p>
-                <button onClick={() => handleOpenModal()} className="text-[var(--accent)] text-xs font-bold uppercase tracking-widest hover:underline">+ Add Entry</button>
+              <div className="py-20 text-center bg-surface border border-dashed border-border rounded-2xl flex flex-col items-center">
+                <p className="text-foreground-muted font-medium italic mb-4">Your schedule is clear for today.</p>
+                <button onClick={() => handleOpenModal()} className="text-accent text-xs font-bold uppercase tracking-widest hover:underline">+ Add Entry</button>
               </div>
             )}
           </div>
@@ -293,22 +293,22 @@ export default function DiaryPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Title</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Title</label>
             <input 
               required
               value={currentEntry?.title || ""}
               onChange={(e) => setCurrentEntry({ ...currentEntry, title: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               placeholder="Meeting with..."
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Type</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Type</label>
               <select 
                 value={currentEntry?.type || "task"}
                 onChange={(e) => setCurrentEntry({ ...currentEntry, type: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 <option value="task">Task</option>
                 <option value="meeting">Meeting</option>
@@ -317,48 +317,48 @@ export default function DiaryPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Date</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Date</label>
               <input 
                 type="date"
                 required
                 value={currentEntry?.date ? new Date(currentEntry.date).toISOString().split("T")[0] : ""}
                 onChange={(e) => setCurrentEntry({ ...currentEntry, date: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Start Time</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Start Time</label>
               <input 
                 type="time"
                 value={currentEntry?.startTime || ""}
                 onChange={(e) => setCurrentEntry({ ...currentEntry, startTime: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">End Time</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">End Time</label>
               <input 
                 type="time"
                 value={currentEntry?.endTime || ""}
                 onChange={(e) => setCurrentEntry({ ...currentEntry, endTime: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Location (Optional)</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Location (Optional)</label>
             <input 
               value={currentEntry?.location || ""}
               onChange={(e) => setCurrentEntry({ ...currentEntry, location: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               placeholder="e.g. Ahmedabad Office"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>{currentEntry?._id ? "Update Event" : "Create Event"}</span>
             </button>

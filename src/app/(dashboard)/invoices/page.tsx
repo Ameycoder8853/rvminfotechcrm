@@ -120,12 +120,12 @@ export default function InvoicesPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Invoice Generate</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Professional billing and financial tracking</p>
+          <h1 className="text-2xl font-bold text-foreground">Invoice Generate</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Professional billing and financial tracking</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20"
         >
           <Plus size={18} /><span>Generate Invoice</span>
         </button>
@@ -133,17 +133,17 @@ export default function InvoicesPage() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 flex-1 sm:max-w-sm">
-          <Search size={16} className="text-[var(--foreground-muted)]" />
+        <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 flex-1 sm:max-w-sm">
+          <Search size={16} className="text-foreground-muted" />
           <input
             type="text"
             placeholder="Search invoices..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full"
+            className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full"
           />
         </div>
-        <button className="p-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-[var(--foreground-secondary)] hover:text-[var(--foreground)] transition-colors">
+        <button className="p-2.5 bg-surface border border-border rounded-lg text-foreground-secondary hover:text-foreground transition-colors">
           <Filter size={16} />
         </button>
       </div>
@@ -152,19 +152,19 @@ export default function InvoicesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           <div className="col-span-full py-20 flex flex-col items-center">
-            <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-            <p className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Loading Invoices...</p>
+            <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-widest">Loading Invoices...</p>
           </div>
         ) : invoices.map((invoice) => (
-          <div key={invoice._id} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--accent)] transition-all group shadow-sm">
+          <div key={invoice._id} className="bg-surface border border-border rounded-2xl p-5 hover:border-accent transition-all group shadow-sm">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+                <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
                   <Receipt size={20} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-[var(--foreground)]">{invoice.invoiceNumber}</h4>
-                  <p className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">{new Date(invoice.issueDate).toLocaleDateString()}</p>
+                  <h4 className="font-bold text-foreground">{invoice.invoiceNumber}</h4>
+                  <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-widest">{new Date(invoice.issueDate).toLocaleDateString()}</p>
                 </div>
               </div>
               <StatusBadge status={invoice.status} />
@@ -172,27 +172,27 @@ export default function InvoicesPage() {
             
             <div className="space-y-3 mb-6">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[var(--foreground-muted)] font-medium">Customer</span>
-                <span className="text-[var(--foreground)] font-bold">{invoice.customer?.company || `${invoice.customer?.firstName} ${invoice.customer?.lastName}`}</span>
+                <span className="text-foreground-muted font-medium">Customer</span>
+                <span className="text-foreground font-bold">{invoice.customer?.company || `${invoice.customer?.firstName} ${invoice.customer?.lastName}`}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[var(--foreground-muted)] font-medium">Due Date</span>
-                <span className="text-[var(--foreground-secondary)] font-semibold">{new Date(invoice.dueDate).toLocaleDateString()}</span>
+                <span className="text-foreground-muted font-medium">Due Date</span>
+                <span className="text-foreground-secondary font-semibold">{new Date(invoice.dueDate).toLocaleDateString()}</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-[var(--border)]">
-                <span className="text-xs font-bold text-[var(--foreground-muted)] uppercase">Amount</span>
-                <span className="text-lg font-black text-[var(--accent)]">₹{invoice.totalAmount.toLocaleString()}</span>
+              <div className="flex justify-between items-center pt-2 border-t border-border">
+                <span className="text-xs font-bold text-foreground-muted uppercase">Amount</span>
+                <span className="text-lg font-black text-accent">₹{invoice.totalAmount.toLocaleString()}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)] opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => handleOpenModal(invoice)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[var(--background-secondary)] text-[var(--foreground-secondary)] text-xs font-bold hover:bg-[var(--surface-hover)] transition-colors">
+            <div className="flex items-center gap-2 pt-4 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => handleOpenModal(invoice)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-background-secondary text-foreground-secondary text-xs font-bold hover:bg-surface-hover transition-colors">
                 <Edit size={14} /> Edit
               </button>
-              <button className="p-2 rounded-lg bg-[var(--accent-muted)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all">
+              <button className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-white transition-all">
                 <Download size={14} />
               </button>
-              <button onClick={() => handleDelete(invoice._id)} className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-all">
+              <button onClick={() => handleDelete(invoice._id)} className="p-2 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-all">
                 <Trash2 size={14} />
               </button>
             </div>
@@ -204,12 +204,12 @@ export default function InvoicesPage() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentInvoice?._id ? "Edit Invoice" : "Generate New Invoice"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Customer</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Customer</label>
             <select 
               required
               value={currentInvoice?.customer || ""}
               onChange={(e) => setCurrentInvoice({ ...currentInvoice, customer: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Select Customer</option>
               {customers.map(c => (
@@ -219,21 +219,21 @@ export default function InvoicesPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Due Date</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Due Date</label>
               <input 
                 type="date"
                 required
                 value={currentInvoice?.dueDate ? new Date(currentInvoice.dueDate).toISOString().split("T")[0] : ""}
                 onChange={(e) => setCurrentInvoice({ ...currentInvoice, dueDate: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Status</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Status</label>
               <select 
                 value={currentInvoice?.status || "unpaid"}
                 onChange={(e) => setCurrentInvoice({ ...currentInvoice, status: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 <option value="unpaid">Unpaid</option>
                 <option value="paid">Paid</option>
@@ -244,44 +244,44 @@ export default function InvoicesPage() {
           </div>
           
           <div className="space-y-3 pt-2">
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider block">Items</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider block">Items</label>
             {currentInvoice?.items.map((item: any, idx: number) => (
               <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                 <input 
                   placeholder="Item description"
-                  className="col-span-6 bg-[var(--background-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs outline-none"
+                  className="col-span-6 bg-background-secondary border border-border rounded-lg px-3 py-2 text-xs outline-none"
                   value={item.description}
                   onChange={(e) => handleItemChange(idx, "description", e.target.value)}
                 />
                 <input 
                   type="number"
                   placeholder="Qty"
-                  className="col-span-2 bg-[var(--background-secondary)] border border-[var(--border)] rounded-lg px-2 py-2 text-xs outline-none"
+                  className="col-span-2 bg-background-secondary border border-border rounded-lg px-2 py-2 text-xs outline-none"
                   value={item.quantity}
                   onChange={(e) => handleItemChange(idx, "quantity", parseInt(e.target.value))}
                 />
                 <input 
                   type="number"
                   placeholder="Price"
-                  className="col-span-3 bg-[var(--background-secondary)] border border-[var(--border)] rounded-lg px-2 py-2 text-xs outline-none"
+                  className="col-span-3 bg-background-secondary border border-border rounded-lg px-2 py-2 text-xs outline-none"
                   value={item.unitPrice}
                   onChange={(e) => handleItemChange(idx, "unitPrice", parseInt(e.target.value))}
                 />
-                <button type="button" className="col-span-1 text-[var(--danger)] hover:bg-[var(--danger-muted)] p-1 rounded">
+                <button type="button" className="col-span-1 text-danger hover:bg-danger-muted p-1 rounded">
                   <Trash2 size={14} />
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="pt-6 border-t border-[var(--border)] flex justify-between items-center">
-            <span className="text-sm font-bold text-[var(--foreground-secondary)]">Total Amount:</span>
-            <span className="text-2xl font-black text-[var(--accent)]">₹{currentInvoice?.totalAmount.toLocaleString()}</span>
+          <div className="pt-6 border-t border-border flex justify-between items-center">
+            <span className="text-sm font-bold text-foreground-secondary">Total Amount:</span>
+            <span className="text-2xl font-black text-accent">₹{currentInvoice?.totalAmount.toLocaleString()}</span>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:bg-surface-hover">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>{currentInvoice?._id ? "Update Invoice" : "Generate Invoice"}</span>
             </button>

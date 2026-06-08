@@ -23,7 +23,7 @@ export default function StatsCard({
   description,
 }: StatsCardProps) {
   return (
-    <div className="group relative bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--border-hover)] transition-all duration-300 hover:shadow-[var(--shadow-md)] card-hover">
+    <div className="group relative bg-surface border border-border rounded-xl p-5 hover:border-border-hover transition-all duration-300 hover:shadow-shadow-md card-hover">
       {/* Hover glow effect */}
       <div
         className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -34,10 +34,10 @@ export default function StatsCard({
 
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-[var(--foreground-muted)]">
+          <p className="text-xs font-medium uppercase tracking-wider text-foreground-muted">
             {title}
           </p>
-          <p className="text-2xl lg:text-3xl font-bold text-[var(--foreground)]">
+          <p className="text-2xl lg:text-3xl font-bold text-foreground">
             {value}
           </p>
           {change && (
@@ -45,15 +45,15 @@ export default function StatsCard({
               <span
                 className={cn(
                   "text-xs font-semibold px-1.5 py-0.5 rounded",
-                  changeType === "positive" && "text-[var(--success)] bg-[var(--success-muted)]",
-                  changeType === "negative" && "text-[var(--danger)] bg-[var(--danger-muted)]",
-                  changeType === "neutral" && "text-[var(--foreground-muted)] bg-[var(--surface-hover)]"
+                  changeType === "positive" && "text-success bg-success-muted",
+                  changeType === "negative" && "text-danger bg-danger-muted",
+                  changeType === "neutral" && "text-foreground-muted bg-surface-hover"
                 )}
               >
                 {change}
               </span>
               {description && (
-                <span className="text-xs text-[var(--foreground-muted)]">
+                <span className="text-xs text-foreground-muted">
                   {description}
                 </span>
               )}

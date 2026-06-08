@@ -124,72 +124,72 @@ export default function ExpensesPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Expenses</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Track and manage real expense claims</p>
+          <h1 className="text-2xl font-bold text-foreground">Expenses</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Track and manage real expense claims</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
         >
           <Plus size={18} /><span>Submit Expense</span>
         </button>
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 max-w-sm">
-        <Search size={16} className="text-[var(--foreground-muted)]" />
+      <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 max-w-sm">
+        <Search size={16} className="text-foreground-muted" />
         <input 
           type="text" 
           placeholder="Search expenses..." 
           value={search} 
           onChange={(e) => setSearch(e.target.value)} 
-          className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full" 
+          className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full" 
         />
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">Loading records...</p>
+          <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+          <p className="text-sm text-foreground-secondary">Loading records...</p>
         </div>
       ) : (
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/50">
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Employee</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Category</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Description</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Amount</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Actions</th>
+                <tr className="border-b border-border bg-background-secondary/50">
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Employee</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Category</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Description</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Amount</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((exp) => (
-                  <tr key={exp._id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-hover)] transition-colors">
-                    <td className="px-4 py-3 font-medium text-[var(--foreground)]">{exp.user?.firstName} {exp.user?.lastName}</td>
+                  <tr key={exp._id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors">
+                    <td className="px-4 py-3 font-medium text-foreground">{exp.user?.firstName} {exp.user?.lastName}</td>
                     <td className="px-4 py-3"><span className="text-xs capitalize flex items-center gap-1.5">{categoryIcons[exp.category]} {exp.category}</span></td>
-                    <td className="px-4 py-3 text-[var(--foreground-secondary)] max-w-[200px] truncate">{exp.description}</td>
-                    <td className="px-4 py-3 font-bold text-[var(--foreground)]">₹{exp.amount.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-foreground-secondary max-w-[200px] truncate">{exp.description}</td>
+                    <td className="px-4 py-3 font-bold text-foreground">₹{exp.amount.toLocaleString()}</td>
                     <td className="px-4 py-3"><StatusBadge status={exp.status} /></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         {exp.status === "pending" && (
                           <>
-                            <button onClick={() => handleUpdateStatus(exp._id, "approved")} className="p-1.5 rounded-lg text-[var(--success)] hover:bg-[var(--success-muted)] transition-colors" title="Approve"><Check size={16} /></button>
-                            <button onClick={() => handleUpdateStatus(exp._id, "rejected")} className="p-1.5 rounded-lg text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors" title="Reject"><X size={16} /></button>
+                            <button onClick={() => handleUpdateStatus(exp._id, "approved")} className="p-1.5 rounded-lg text-success hover:bg-success-muted transition-colors" title="Approve"><Check size={16} /></button>
+                            <button onClick={() => handleUpdateStatus(exp._id, "rejected")} className="p-1.5 rounded-lg text-danger hover:bg-danger-muted transition-colors" title="Reject"><X size={16} /></button>
                           </>
                         )}
-                        <button onClick={() => handleDelete(exp._id)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors" title="Delete"><Trash2 size={16} /></button>
+                        <button onClick={() => handleDelete(exp._id)} className="p-1.5 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors" title="Delete"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--foreground-muted)] italic">No expense records found.</td>
+                    <td colSpan={6} className="px-4 py-10 text-center text-foreground-muted italic">No expense records found.</td>
                   </tr>
                 )}
               </tbody>
@@ -203,49 +203,49 @@ export default function ExpensesPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Category</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Category</label>
               <select 
                 value={currentExpense.category}
                 onChange={(e) => setCurrentExpense({ ...currentExpense, category: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 {Object.keys(categoryIcons).map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Amount (₹)</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Amount (₹)</label>
               <input 
                 type="number"
                 required
                 value={currentExpense.amount}
                 onChange={(e) => setCurrentExpense({ ...currentExpense, amount: Number(e.target.value) })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Description</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Description</label>
             <textarea 
               required
               value={currentExpense.description}
               onChange={(e) => setCurrentExpense({ ...currentExpense, description: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none h-24 resize-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none h-24 resize-none"
               placeholder="e.g. Travel to client site"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Date</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Date</label>
             <input 
               type="date"
               required
               value={currentExpense.date}
               onChange={(e) => setCurrentExpense({ ...currentExpense, date: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>Submit Claim</span>
             </button>

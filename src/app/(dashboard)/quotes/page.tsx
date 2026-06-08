@@ -139,73 +139,73 @@ export default function QuotesPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Quotations</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Create and manage real sales quotations</p>
+          <h1 className="text-2xl font-bold text-foreground">Quotations</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Create and manage real sales quotations</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
         >
           <Plus size={18} />
           <span>New Quote</span>
         </button>
       </div>
 
-      <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 max-w-sm">
-        <Search size={16} className="text-[var(--foreground-muted)]" />
-        <input type="text" placeholder="Search quotes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full" />
+      <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 max-w-sm">
+        <Search size={16} className="text-foreground-muted" />
+        <input type="text" placeholder="Search quotes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full" />
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">Loading quotations...</p>
+          <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+          <p className="text-sm text-foreground-secondary">Loading quotations...</p>
         </div>
       ) : (
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/50">
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Quote #</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Customer</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Total</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Status</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] hidden lg:table-cell">Valid Until</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Actions</th>
+                <tr className="border-b border-border bg-background-secondary/50">
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Quote #</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Customer</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Total</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Status</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted hidden lg:table-cell">Valid Until</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((quote) => (
-                  <tr key={quote._id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-hover)] transition-colors">
+                  <tr key={quote._id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <FileText size={14} className="text-[var(--accent)]" />
-                        <span className="font-bold text-[var(--foreground)]">{quote.quoteNumber}</span>
+                        <FileText size={14} className="text-accent" />
+                        <span className="font-bold text-foreground">{quote.quoteNumber}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[var(--foreground-secondary)] font-medium">{quote.customer?.company || "No Company"}</td>
-                    <td className="px-4 py-3 font-bold text-[var(--foreground)]">₹{quote.totalAmount?.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-foreground-secondary font-medium">{quote.customer?.company || "No Company"}</td>
+                    <td className="px-4 py-3 font-bold text-foreground">₹{quote.totalAmount?.toLocaleString()}</td>
                     <td className="px-4 py-3"><StatusBadge status={quote.status} /></td>
-                    <td className="px-4 py-3 text-[var(--foreground-muted)] text-xs hidden lg:table-cell">
+                    <td className="px-4 py-3 text-foreground-muted text-xs hidden lg:table-cell">
                       {new Date(quote.validUntil).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleOpenModal(quote)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-active)] transition-colors" title="Edit"><Edit size={16} /></button>
+                        <button onClick={() => handleOpenModal(quote)} className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors" title="Edit"><Edit size={16} /></button>
                         {quote.status === "accepted" && (
-                          <button onClick={() => handleConvertToOrder(quote)} className="p-1.5 rounded-lg text-[var(--success)] hover:bg-[var(--success-muted)] transition-colors" title="Convert to Order">
+                          <button onClick={() => handleConvertToOrder(quote)} className="p-1.5 rounded-lg text-success hover:bg-success-muted transition-colors" title="Convert to Order">
                             <ArrowRightLeft size={16} />
                           </button>
                         )}
-                        <button onClick={() => handleDelete(quote._id)} className="p-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors" title="Delete"><Trash2 size={16} /></button>
+                        <button onClick={() => handleDelete(quote._id)} className="p-1.5 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors" title="Delete"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--foreground-muted)] italic">No quotations found.</td>
+                    <td colSpan={6} className="px-4 py-10 text-center text-foreground-muted italic">No quotations found.</td>
                   </tr>
                 )}
               </tbody>
@@ -222,12 +222,12 @@ export default function QuotesPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Customer</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Customer</label>
             <select 
               required
               value={(currentQuote?.customer as any)?._id || (currentQuote?.customer as any) || ""}
               onChange={(e) => setCurrentQuote({ ...currentQuote, customer: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Select Customer</option>
               {customers.map(c => <option key={c._id} value={c._id}>{c.firstName} {c.lastName} ({c.company})</option>)}
@@ -235,21 +235,21 @@ export default function QuotesPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Total Amount (₹)</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Total Amount (₹)</label>
               <input 
                 type="number"
                 required
                 value={currentQuote?.totalAmount || 0}
                 onChange={(e) => setCurrentQuote({ ...currentQuote, totalAmount: Number(e.target.value) })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Status</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Status</label>
               <select 
                 value={currentQuote?.status || "draft"}
                 onChange={(e) => setCurrentQuote({ ...currentQuote, status: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
@@ -260,18 +260,18 @@ export default function QuotesPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Valid Until</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Valid Until</label>
             <input 
               type="date"
               required
               value={currentQuote?.validUntil ? new Date(currentQuote.validUntil).toISOString().split("T")[0] : ""}
               onChange={(e) => setCurrentQuote({ ...currentQuote, validUntil: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>{currentQuote?._id ? "Update Quotation" : "Create Quotation"}</span>
             </button>

@@ -15,16 +15,16 @@ export default function SuperAdminDashboard({ stats, currentUser }: SuperAdminDa
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-4xl font-black text-[var(--foreground)] tracking-tight">
+          <h1 className="text-2xl lg:text-4xl font-black text-foreground tracking-tight">
             Sovereign Command Center
           </h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1 font-medium">
+          <p className="text-sm text-foreground-secondary mt-1 font-medium">
             Super Admin Overview of all CRM tenants and system resources.
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-          <span className="text-xs font-bold text-[var(--foreground-secondary)] uppercase tracking-wider">Super Admin Mode</span>
+        <div className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-xl shadow-sm">
+          <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+          <span className="text-xs font-bold text-foreground-secondary uppercase tracking-wider">Super Admin Mode</span>
         </div>
       </div>
 
@@ -69,38 +69,38 @@ export default function SuperAdminDashboard({ stats, currentUser }: SuperAdminDa
       </div>
 
       {/* Tenant Organization Directory */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm card-hover animate-scale-in">
+      <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm card-hover animate-scale-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
               Tenant Workspaces
             </h3>
-            <p className="text-xs text-[var(--foreground-muted)] mt-1 font-medium">
+            <p className="text-xs text-foreground-muted mt-1 font-medium">
               Registered tenants and their workspace metadata.
             </p>
           </div>
-          <span className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-widest cursor-pointer hover:underline">Manage All</span>
+          <span className="text-[10px] font-bold text-accent uppercase tracking-widest cursor-pointer hover:underline">Manage All</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[var(--border)]">
-                <th className="pb-3 text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Workspace Name</th>
-                <th className="pb-3 text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Slug (Subdomain)</th>
-                <th className="pb-3 text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Active Staff</th>
-                <th className="pb-3 text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-widest">Workspace Status</th>
+              <tr className="border-b border-border">
+                <th className="pb-3 text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Workspace Name</th>
+                <th className="pb-3 text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Slug (Subdomain)</th>
+                <th className="pb-3 text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Active Staff</th>
+                <th className="pb-3 text-[10px] font-bold text-foreground-muted uppercase tracking-widest">Workspace Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]/50">
+            <tbody className="divide-y divide-border/50">
               {(stats?.organizations || []).map((org: any) => (
-                <tr key={org._id} className="hover:bg-[var(--background-secondary)]/30 transition-colors group">
-                  <td className="py-4 text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">{org.name}</td>
-                  <td className="py-4 text-xs font-semibold text-[var(--foreground-secondary)]">{org.slug}.rvminfotech.com</td>
-                  <td className="py-4 text-sm font-semibold text-[var(--foreground)]">{org.userCount} users</td>
+                <tr key={org._id} className="hover:bg-background-secondary/30 transition-colors group">
+                  <td className="py-4 text-sm font-bold text-foreground group-hover:text-accent transition-colors">{org.name}</td>
+                  <td className="py-4 text-xs font-semibold text-foreground-secondary">{org.slug}.rvminfotech.com</td>
+                  <td className="py-4 text-sm font-semibold text-foreground">{org.userCount} users</td>
                   <td className="py-4">
                     <span className={cn(
                       "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                      org.status === "active" ? "bg-[var(--success-muted)] text-[var(--success)]" : "bg-[var(--danger-muted)] text-[var(--danger)]"
+                      org.status === "active" ? "bg-success-muted text-success" : "bg-danger-muted text-danger"
                     )}>
                       {org.status}
                     </span>
@@ -109,7 +109,7 @@ export default function SuperAdminDashboard({ stats, currentUser }: SuperAdminDa
               ))}
               {(!stats?.organizations || stats?.organizations.length === 0) && (
                 <tr>
-                  <td colSpan={4} className="py-10 text-center text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-widest">No organizations registered yet.</td>
+                  <td colSpan={4} className="py-10 text-center text-xs font-bold text-foreground-muted uppercase tracking-widest">No organizations registered yet.</td>
                 </tr>
               )}
             </tbody>

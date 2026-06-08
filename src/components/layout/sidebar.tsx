@@ -284,22 +284,22 @@ export default function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out w-[var(--sidebar-width,250px)]",
-        "bg-[var(--sidebar-bg,#ffffff)] border-r border-[var(--sidebar-border,#e2e4eb)]",
+        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out w-sidebar-width",
+        "bg-sidebar-bg border-r border-sidebar-border",
         className
       )}
     >
       {/* Brand Header: Beautiful logo squircle and gradient-text exact matching screenshot */}
-      <div className="flex items-center justify-between px-5 h-[var(--header-height,64px)] border-b border-[var(--sidebar-border,#e2e4eb)] shrink-0 bg-transparent">
+      <div className="flex items-center justify-between px-5 h-header-height border-b border-sidebar-border shrink-0 bg-transparent">
         <div className="flex items-center gap-3">
-          <div className="w-[38px] h-[38px] rounded-[11px] bg-[var(--accent,#6366f1)] flex items-center justify-center shadow-sm shrink-0">
+          <div className="w-9.5 h-9.5 rounded-[11px] bg-accent flex items-center justify-center shadow-sm shrink-0">
             <Layers size={19} className="text-white stroke-[2.2]" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+          <span className="text-xl font-bold tracking-tight text-foreground">
             RVM <span className="gradient-text">CRM</span>
           </span>
         </div>
-        <button className="lg:hidden text-[var(--foreground-muted,#94a3b8)] hover:text-[var(--foreground,#0f172a)] transition-colors p-1 cursor-pointer">
+        <button className="lg:hidden text-foreground-muted hover:text-foreground transition-colors p-1 cursor-pointer">
           <X size={16} />
         </button>
       </div>
@@ -308,7 +308,7 @@ export default function Sidebar({ className }: SidebarProps) {
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 bg-transparent scrollbar-thin">
         {visibleSections.map((section) => (
           <div key={section.category} className="space-y-1.5">
-            <div className="px-4 text-[10px] font-bold tracking-wider text-[var(--foreground-muted,#94a3b8)] uppercase">
+            <div className="px-4 text-[10px] font-bold tracking-wider text-foreground-muted uppercase">
               {section.category}
             </div>
             <div className="space-y-0.5">
@@ -328,15 +328,15 @@ export default function Sidebar({ className }: SidebarProps) {
                         className={cn(
                           "flex items-center justify-between w-full px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 group cursor-pointer",
                           isMainActive
-                            ? "text-[var(--accent,#6366f1)] bg-[var(--accent-muted,rgba(99,102,241,0.15))]"
-                            : "text-[var(--foreground-secondary,#475569)] hover:text-[var(--foreground,#0f172a)] hover:bg-[var(--sidebar-hover,#f1f3f8)]"
+                            ? "text-accent bg-accent-muted"
+                            : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
                         )}
                       >
                         <div className="flex items-center gap-3">
                           <span
                             className={cn(
                               "shrink-0 transition-colors",
-                              isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                              isMainActive ? "text-accent" : "text-foreground-muted group-hover:text-foreground-secondary"
                             )}
                           >
                             {item.icon}
@@ -348,7 +348,7 @@ export default function Sidebar({ className }: SidebarProps) {
                           className={cn(
                             "transition-all duration-250",
                             isExpanded ? "rotate-90" : "",
-                            isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                            isMainActive ? "text-accent" : "text-foreground-muted group-hover:text-foreground-secondary"
                           )}
                         />
                       </button>
@@ -359,15 +359,15 @@ export default function Sidebar({ className }: SidebarProps) {
                         className={cn(
                           "flex items-center justify-between px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 group",
                           isMainActive
-                            ? "text-[var(--accent,#6366f1)] bg-[var(--accent-muted,rgba(99,102,241,0.15))]"
-                            : "text-[var(--foreground-secondary,#475569)] hover:text-[var(--foreground,#0f172a)] hover:bg-[var(--sidebar-hover,#f1f3f8)]"
+                            ? "text-accent bg-accent-muted"
+                            : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
                         )}
                       >
                         <div className="flex items-center gap-3">
                           <span
                             className={cn(
                               "shrink-0 transition-colors",
-                              isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                              isMainActive ? "text-accent" : "text-foreground-muted group-hover:text-foreground-secondary"
                             )}
                           >
                             {item.icon}
@@ -378,7 +378,7 @@ export default function Sidebar({ className }: SidebarProps) {
                           size={14} 
                           className={cn(
                             "transition-colors",
-                            isMainActive ? "text-[var(--accent,#6366f1)]" : "text-[var(--foreground-muted,#94a3b8)] group-hover:text-[var(--foreground-secondary,#475569)]"
+                            isMainActive ? "text-accent" : "text-foreground-muted group-hover:text-foreground-secondary"
                           )}
                         />
                       </Link>
@@ -393,10 +393,10 @@ export default function Sidebar({ className }: SidebarProps) {
                               key={sub.href}
                               href={sub.href}
                               className={cn(
-                                "flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors pl-[44px]",
+                                "flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors pl-11",
                                 isSubActive
-                                  ? "text-[var(--accent,#6366f1)] hover:text-[var(--accent-hover,#818cf8)]"
-                                  : "text-[var(--foreground-secondary,#475569)] hover:text-[var(--foreground,#0f172a)] hover:bg-[var(--sidebar-hover,#f1f3f8)]/40"
+                                  ? "text-accent hover:text-accent-hover"
+                                  : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover/40"
                               )}
                             >
                               {sub.title}

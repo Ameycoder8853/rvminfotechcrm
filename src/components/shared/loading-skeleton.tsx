@@ -15,7 +15,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 space-y-4",
+        "bg-surface border border-border rounded-xl p-5 space-y-4",
         className
       )}
     >
@@ -45,7 +45,7 @@ export function SkeletonTable({ className, count = 5 }: LoadingSkeletonProps) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="flex gap-4 px-4 py-3 border border-[var(--border)] rounded-lg"
+          className="flex gap-4 px-4 py-3 border border-border rounded-lg"
         >
           <div className="skeleton h-4 w-32 rounded" />
           <div className="skeleton h-4 w-24 rounded" />

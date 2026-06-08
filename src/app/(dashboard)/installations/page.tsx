@@ -116,61 +116,61 @@ export default function InstallationsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Installations</h1>
-          <p className="text-sm text-[var(--foreground-secondary)] mt-1">Track real installation jobs and progress</p>
+          <h1 className="text-2xl font-bold text-foreground">Installations</h1>
+          <p className="text-sm text-foreground-secondary mt-1">Track real installation jobs and progress</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-[var(--accent)]/20 active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
         >
           <Plus size={18} /><span>Schedule Installation</span>
         </button>
       </div>
 
-      <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 max-w-sm">
-        <Search size={16} className="text-[var(--foreground-muted)]" />
+      <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 max-w-sm">
+        <Search size={16} className="text-foreground-muted" />
         <input 
           type="text" 
           placeholder="Search installations..." 
           value={search} 
           onChange={(e) => setSearch(e.target.value)} 
-          className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full" 
+          className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full" 
         />
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">Syncing installation jobs...</p>
+          <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+          <p className="text-sm text-foreground-secondary">Syncing installation jobs...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((inst) => (
-            <div key={inst._id} className="group bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--accent)] transition-all shadow-sm hover:shadow-lg relative overflow-hidden flex flex-col">
+            <div key={inst._id} className="group bg-surface border border-border rounded-xl p-5 hover:border-accent transition-all shadow-sm hover:shadow-lg relative overflow-hidden flex flex-col">
               <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <button onClick={() => handleOpenModal(inst)} className="p-1.5 rounded-lg bg-[var(--background)] text-[var(--foreground-muted)] hover:text-[var(--accent)] border border-[var(--border)] shadow-sm"><Edit size={14} /></button>
-                <button onClick={() => handleDelete(inst._id)} className="p-1.5 rounded-lg bg-[var(--background)] text-[var(--foreground-muted)] hover:text-[var(--danger)] border border-[var(--border)] shadow-sm"><Trash2 size={14} /></button>
+                <button onClick={() => handleOpenModal(inst)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-accent border border-border shadow-sm"><Edit size={14} /></button>
+                <button onClick={() => handleDelete(inst._id)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-danger border border-border shadow-sm"><Trash2 size={14} /></button>
               </div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Wrench size={18} className="text-[var(--accent)]" />
-                  <span className="font-bold text-[var(--foreground)] text-lg leading-tight">{inst.customer?.company || "No Company"}</span>
+                  <Wrench size={18} className="text-accent" />
+                  <span className="font-bold text-foreground text-lg leading-tight">{inst.customer?.company || "No Company"}</span>
                 </div>
                 <StatusBadge status={inst.status} />
               </div>
-              <div className="space-y-2 text-xs mb-6 border-l-2 border-[var(--border)] pl-4 py-1">
-                <div className="flex justify-between"><span className="text-[var(--foreground-muted)] font-medium">Order Reference</span><span className="text-[var(--accent)] font-bold">{inst.order?.orderNumber || "Direct Job"}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--foreground-muted)] font-medium">Technician</span><span className="text-[var(--foreground)] font-bold">{inst.assignedTo?.firstName} {inst.assignedTo?.lastName}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--foreground-muted)] font-medium">Job Date</span><span className="text-[var(--foreground)] font-bold">{new Date(inst.scheduledDate).toLocaleDateString()}</span></div>
+              <div className="space-y-2 text-xs mb-6 border-l-2 border-border pl-4 py-1">
+                <div className="flex justify-between"><span className="text-foreground-muted font-medium">Order Reference</span><span className="text-accent font-bold">{inst.order?.orderNumber || "Direct Job"}</span></div>
+                <div className="flex justify-between"><span className="text-foreground-muted font-medium">Technician</span><span className="text-foreground font-bold">{inst.assignedTo?.firstName} {inst.assignedTo?.lastName}</span></div>
+                <div className="flex justify-between"><span className="text-foreground-muted font-medium">Job Date</span><span className="text-foreground font-bold">{new Date(inst.scheduledDate).toLocaleDateString()}</span></div>
               </div>
-              <div className="flex items-center gap-6 pt-4 border-t border-[var(--border)] mt-auto">
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">
-                  <Camera size={14} className="text-[var(--foreground-muted)]" />
+              <div className="flex items-center gap-6 pt-4 border-t border-border mt-auto">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-foreground-muted">
+                  <Camera size={14} className="text-foreground-muted" />
                   <span>{inst.progressPhotos?.length || 0} Photos</span>
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-                  <CheckSquare size={14} className={inst.customerSignature ? "text-[var(--success)]" : "text-[var(--foreground-muted)]"} />
-                  <span className={inst.customerSignature ? "text-[var(--success)]" : "text-[var(--foreground-muted)]"}>
+                  <CheckSquare size={14} className={inst.customerSignature ? "text-success" : "text-foreground-muted"} />
+                  <span className={inst.customerSignature ? "text-success" : "text-foreground-muted"}>
                     {inst.customerSignature ? "Signed" : "Unsigned"}
                   </span>
                 </div>
@@ -178,8 +178,8 @@ export default function InstallationsPage() {
             </div>
           ))}
           {filtered.length === 0 && (
-            <div className="col-span-full py-20 text-center bg-[var(--surface)] border border-dashed border-[var(--border)] rounded-xl">
-              <p className="text-[var(--foreground-muted)] italic">No installation records found matching your search.</p>
+            <div className="col-span-full py-20 text-center bg-surface border border-dashed border-border rounded-xl">
+              <p className="text-foreground-muted italic">No installation records found matching your search.</p>
             </div>
           )}
         </div>
@@ -193,23 +193,23 @@ export default function InstallationsPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Customer</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Customer</label>
             <select 
               required
               value={(currentInst?.customer as any)?._id || (currentInst?.customer as any) || ""}
               onChange={(e) => setCurrentInst({ ...currentInst, customer: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Select Customer</option>
               {customers.map(c => <option key={c._id} value={c._id}>{c.firstName} {c.lastName} ({c.company})</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Linked Order (Optional)</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Linked Order (Optional)</label>
             <select 
               value={(currentInst?.order as any)?._id || (currentInst?.order as any) || ""}
               onChange={(e) => setCurrentInst({ ...currentInst, order: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">No Order Reference</option>
               {orders.map(o => <option key={o._id} value={o._id}>{o.orderNumber} - {o.customer?.company}</option>)}
@@ -217,21 +217,21 @@ export default function InstallationsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Job Date</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Job Date</label>
               <input 
                 type="date"
                 required
                 value={currentInst?.scheduledDate ? new Date(currentInst.scheduledDate).toISOString().split("T")[0] : ""}
                 onChange={(e) => setCurrentInst({ ...currentInst, scheduledDate: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Status</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Status</label>
               <select 
                 value={currentInst?.status || "scheduled"}
                 onChange={(e) => setCurrentInst({ ...currentInst, status: e.target.value })}
-                className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
               >
                 <option value="scheduled">Scheduled</option>
                 <option value="in_progress">In Progress</option>
@@ -241,20 +241,20 @@ export default function InstallationsPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1.5 block">Assign Technician</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Assign Technician</label>
             <select 
               required
               value={(currentInst?.assignedTo as any)?._id || (currentInst?.assignedTo as any) || ""}
               onChange={(e) => setCurrentInst({ ...currentInst, assignedTo: e.target.value as any })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
             >
               <option value="">Select Technician</option>
               {techs.map(t => <option key={t._id} value={t._id}>{t.firstName} {t.lastName}</option>)}
             </select>
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-lg shadow-[var(--accent)]/20 transition-all flex items-center gap-2">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               <span>{currentInst?._id ? "Update Job" : "Schedule Job"}</span>
             </button>

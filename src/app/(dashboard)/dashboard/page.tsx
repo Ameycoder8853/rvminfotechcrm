@@ -45,8 +45,8 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center">
-        <Loader2 className="w-12 h-12 text-[var(--accent)] animate-spin mb-4" />
-        <p className="text-sm font-bold text-[var(--foreground-muted)] uppercase tracking-[0.2em]">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
           Aggregating Intelligence...
         </p>
       </div>

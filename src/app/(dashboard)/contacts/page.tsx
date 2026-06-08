@@ -361,7 +361,7 @@ export default function ContactsPage() {
   if (!mounted) return null;
 
   return (
-    <div className="space-y-6 animate-fade-in p-2 lg:p-4 bg-[var(--background)] min-h-screen">
+    <div className="space-y-6 animate-fade-in p-2 lg:p-4 bg-background min-h-screen">
       
       {/* -------------------- VIEW MODE: LIST -------------------- */}
       {viewMode === "list" && (
@@ -369,11 +369,11 @@ export default function ContactsPage() {
           {/* Top Header Block */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+              <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
                 <Users size={22} className="stroke-[2.5]" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-[var(--foreground)] tracking-tight">Contact Management</h1>
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">Contact Management</h1>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -386,21 +386,21 @@ export default function ContactsPage() {
               />
               <button 
                 onClick={handleOpenNewForm}
-                className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <Plus size={16} className="stroke-[3]" />
                 <span>Add Contact</span>
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-3 py-2.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] rounded-lg text-sm font-semibold transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-3 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-semibold transition-colors cursor-pointer"
               >
                 <Upload size={15} />
                 <span>Import</span>
               </button>
               <button
                 onClick={handleCSVExport}
-                className="flex items-center gap-2 px-3 py-2.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] rounded-lg text-sm font-semibold transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-3 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-semibold transition-colors cursor-pointer"
               >
                 <Download size={15} />
                 <span>Export</span>
@@ -409,62 +409,62 @@ export default function ContactsPage() {
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="flex items-center justify-between bg-[var(--surface)] border border-[var(--border)] rounded-xl p-3 shadow-sm gap-4">
+          <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3 shadow-sm gap-4">
             <div className="flex items-center gap-3 flex-1">
-              <Search size={18} className="text-[var(--foreground-muted)] shrink-0 ml-1" />
+              <Search size={18} className="text-foreground-muted shrink-0 ml-1" />
               <input
                 type="text"
                 placeholder="Search by name, email, phone or company.."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none outline-none text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] w-full font-medium"
+                className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full font-medium"
               />
             </div>
-            <div className="relative shrink-0 flex items-center border-l border-[var(--border)] pl-4 gap-2">
+            <div className="relative shrink-0 flex items-center border-l border-border pl-4 gap-2">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-transparent outline-none border-none text-sm font-semibold text-[var(--foreground-secondary)] pr-8 cursor-pointer relative"
+                className="appearance-none bg-transparent outline-none border-none text-sm font-semibold text-foreground-secondary pr-8 cursor-pointer relative"
               >
-                <option value="" className="bg-[var(--surface)]">All Contacts</option>
-                <option value="lead" className="bg-[var(--surface)]">Lead</option>
-                <option value="customer" className="bg-[var(--surface)]">Customer</option>
+                <option value="" className="bg-surface">All Contacts</option>
+                <option value="lead" className="bg-surface">Lead</option>
+                <option value="customer" className="bg-surface">Customer</option>
               </select>
-              <ChevronDown size={14} className="text-[var(--foreground-muted)] absolute right-1 pointer-events-none" />
+              <ChevronDown size={14} className="text-foreground-muted absolute right-1 pointer-events-none" />
             </div>
           </div>
 
           {/* Table Section */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm">
-              <Loader2 className="w-10 h-10 text-[var(--accent)] animate-spin mb-4" />
-              <p className="text-sm text-[var(--foreground-secondary)] font-medium">Loading contact database...</p>
+            <div className="flex flex-col items-center justify-center py-24 bg-surface border border-border rounded-2xl shadow-sm">
+              <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+              <p className="text-sm text-foreground-secondary font-medium">Loading contact database...</p>
             </div>
           ) : (
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--border)] bg-[var(--background-secondary)]/50">
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Name</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Contact Info</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Company</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Status</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)]">Source</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-[var(--foreground-muted)] text-right pr-8">Actions</th>
+                    <tr className="border-b border-border bg-background-secondary/50">
+                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Name</th>
+                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Contact Info</th>
+                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Company</th>
+                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Status</th>
+                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Source</th>
+                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted text-right pr-8">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)]/50">
+                  <tbody className="divide-y divide-border/50">
                     {filtered.map((c) => (
-                      <tr key={c._id} className="hover:bg-[var(--surface-hover)]/45 transition-colors">
+                      <tr key={c._id} className="hover:bg-surface-hover/45 transition-colors">
                         {/* Name Column */}
                         <td className="px-6 py-4.5 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-xs font-bold text-[var(--accent)] shrink-0 border border-[var(--accent)]/15">
+                            <div className="w-9 h-9 rounded-full bg-accent-muted flex items-center justify-center text-xs font-bold text-accent shrink-0 border border-accent/15">
                               {getInitials(c.firstName, c.lastName)}
                             </div>
                             <div>
-                              <p className="font-semibold text-[var(--foreground)] text-[14px]">
+                              <p className="font-semibold text-foreground text-[14px]">
                                 {c.firstName} {c.lastName}
                               </p>
                             </div>
@@ -474,12 +474,12 @@ export default function ContactsPage() {
                         {/* Contact Info Column */}
                         <td className="px-6 py-4.5 whitespace-nowrap">
                           <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground-secondary)]">
-                              <Mail size={13} className="text-[var(--foreground-muted)] shrink-0" />
+                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground-secondary">
+                              <Mail size={13} className="text-foreground-muted shrink-0" />
                               <span>{c.email}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground-secondary)]">
-                              <Phone size={13} className="text-[var(--foreground-muted)] shrink-0" />
+                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground-secondary">
+                              <Phone size={13} className="text-foreground-muted shrink-0" />
                               <span>{c.phone}</span>
                             </div>
                           </div>
@@ -487,22 +487,22 @@ export default function ContactsPage() {
 
                         {/* Company Column */}
                         <td className="px-6 py-4.5 whitespace-nowrap">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground-secondary)]">
-                            <Building size={13} className="text-[var(--foreground-muted)] shrink-0" />
+                          <div className="flex items-center gap-2 text-xs font-semibold text-foreground-secondary">
+                            <Building size={13} className="text-foreground-muted shrink-0" />
                             <span>{c.company || "—"}</span>
                           </div>
                         </td>
 
                         {/* Status Badge Column */}
                         <td className="px-6 py-4.5 whitespace-nowrap">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[var(--warning-muted)] text-[var(--warning)] border border-[var(--warning)]/20">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-muted text-warning border border-warning/20">
                             {c.status}
                           </span>
                         </td>
 
                         {/* Source Column */}
                         <td className="px-6 py-4.5 whitespace-nowrap">
-                          <span className="text-xs font-bold text-[var(--foreground-secondary)] capitalize">
+                          <span className="text-xs font-bold text-foreground-secondary capitalize">
                             {c.source || "website"}
                           </span>
                         </td>
@@ -512,14 +512,14 @@ export default function ContactsPage() {
                           <div className="flex items-center justify-end gap-3.5">
                             <button 
                               onClick={() => handleOpenEditForm(c)}
-                              className="p-1 rounded text-[var(--accent)] hover:bg-[var(--accent-muted)] transition-colors cursor-pointer"
+                              className="p-1 rounded text-accent hover:bg-accent-muted transition-colors cursor-pointer"
                               title="Edit Contact"
                             >
                               <Edit size={15} className="stroke-[2.5]" />
                             </button>
                             <button 
                               onClick={() => handleDelete(c._id)}
-                              className="p-1 rounded text-[var(--danger)] hover:bg-[var(--danger-muted)] transition-colors cursor-pointer"
+                              className="p-1 rounded text-danger hover:bg-danger-muted transition-colors cursor-pointer"
                               title="Delete"
                             >
                               <Trash2 size={15} className="stroke-[2.5]" />
@@ -531,8 +531,8 @@ export default function ContactsPage() {
 
                     {filtered.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="text-center py-20 bg-[var(--background-secondary)]/10">
-                          <p className="text-sm font-medium text-[var(--foreground-muted)]">No contacts found</p>
+                        <td colSpan={6} className="text-center py-20 bg-background-secondary/10">
+                          <p className="text-sm font-medium text-foreground-muted">No contacts found</p>
                         </td>
                       </tr>
                     )}
@@ -548,19 +548,19 @@ export default function ContactsPage() {
       {(viewMode === "new" || viewMode === "edit") && (
         <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
+          <div className="flex items-center justify-between border-b border-border pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+              <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
                 <Users size={22} className="stroke-[2.5]" />
               </div>
-              <h1 className="text-2xl font-bold text-[var(--foreground)] tracking-tight">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
                 {viewMode === "new" ? "Add New Contact" : "Edit Contact Details"}
               </h1>
             </div>
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] rounded-lg text-sm font-semibold transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary rounded-lg text-sm font-semibold transition-colors cursor-pointer"
             >
               <ArrowLeft size={16} />
               <span>Back to Contacts</span>
@@ -568,192 +568,192 @@ export default function ContactsPage() {
           </div>
 
           {/* Section 1: Contact Information */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-[var(--border)] pb-3">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
                 <User size={16} />
               </div>
-              <h3 className="font-bold text-[var(--foreground)] text-base">Contact Information</h3>
+              <h3 className="font-bold text-foreground text-base">Contact Information</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Name *</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Name *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     required
                     placeholder="First Name"
                     value={currentContact.firstName || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, firstName: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                   <input
                     required
                     placeholder="Last Name"
                     value={currentContact.lastName || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, lastName: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Gender</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Gender</label>
                 <select
                   value={currentContact.gender || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, gender: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="" className="bg-[var(--surface)]">Select Gender</option>
-                  <option value="Male" className="bg-[var(--surface)]">Male</option>
-                  <option value="Female" className="bg-[var(--surface)]">Female</option>
-                  <option value="Other" className="bg-[var(--surface)]">Other</option>
+                  <option value="" className="bg-surface">Select Gender</option>
+                  <option value="Male" className="bg-surface">Male</option>
+                  <option value="Female" className="bg-surface">Female</option>
+                  <option value="Other" className="bg-surface">Other</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Mobile *</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Mobile *</label>
                 <div className="relative flex items-center">
                   <input
                     required
                     placeholder="+1 (555) 987-6543"
                     value={currentContact.phone || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, phone: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium pr-10"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium pr-10"
                   />
-                  <Phone size={15} className="absolute right-3.5 text-[var(--foreground-muted)]" />
+                  <Phone size={15} className="absolute right-3.5 text-foreground-muted" />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Email *</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Email *</label>
                 <input
                   required
                   type="email"
                   placeholder="name@example.com"
                   value={currentContact.email || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, email: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Location</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Location</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <select
                   value={currentContact.state || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, state: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="" className="bg-[var(--surface)]">Select State/Province</option>
-                  <option value="Delhi" className="bg-[var(--surface)]">Delhi</option>
-                  <option value="Maharashtra" className="bg-[var(--surface)]">Maharashtra</option>
-                  <option value="Karnataka" className="bg-[var(--surface)]">Karnataka</option>
-                  <option value="Haryana" className="bg-[var(--surface)]">Haryana</option>
-                  <option value="Uttar Pradesh" className="bg-[var(--surface)]">Uttar Pradesh</option>
+                  <option value="" className="bg-surface">Select State/Province</option>
+                  <option value="Delhi" className="bg-surface">Delhi</option>
+                  <option value="Maharashtra" className="bg-surface">Maharashtra</option>
+                  <option value="Karnataka" className="bg-surface">Karnataka</option>
+                  <option value="Haryana" className="bg-surface">Haryana</option>
+                  <option value="Uttar Pradesh" className="bg-surface">Uttar Pradesh</option>
                 </select>
                 <input
                   placeholder="District"
                   value={currentContact.district || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, district: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
                 <input
                   placeholder="Sub Location"
                   value={currentContact.subLocation || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, subLocation: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 2: Business Information */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-[var(--border)] pb-3">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
                 <Building size={16} />
               </div>
-              <h3 className="font-bold text-[var(--foreground)] text-base">Business Information</h3>
+              <h3 className="font-bold text-foreground text-base">Business Information</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Department/Designation</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Department/Designation</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <select
                     value={currentContact.department || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, department: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   >
-                    <option value="" className="bg-[var(--surface)]">Select Dept</option>
-                    <option value="Coding" className="bg-[var(--surface)]">Coding</option>
-                    <option value="Marketing" className="bg-[var(--surface)]">Marketing</option>
-                    <option value="Sales" className="bg-[var(--surface)]">Sales</option>
-                    <option value="Technical" className="bg-[var(--surface)]">Technical</option>
-                    <option value="HR" className="bg-[var(--surface)]">HR</option>
+                    <option value="" className="bg-surface">Select Dept</option>
+                    <option value="Coding" className="bg-surface">Coding</option>
+                    <option value="Marketing" className="bg-surface">Marketing</option>
+                    <option value="Sales" className="bg-surface">Sales</option>
+                    <option value="Technical" className="bg-surface">Technical</option>
+                    <option value="HR" className="bg-surface">HR</option>
                   </select>
                   <select
                     value={currentContact.designation || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, designation: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   >
-                    <option value="" className="bg-[var(--surface)]">Select Desig</option>
-                    <option value="Senior Lead" className="bg-[var(--surface)]">Senior Lead</option>
-                    <option value="Manager" className="bg-[var(--surface)]">Manager</option>
-                    <option value="Specialist" className="bg-[var(--surface)]">Specialist</option>
-                    <option value="Junior Rep" className="bg-[var(--surface)]">Junior Rep</option>
+                    <option value="" className="bg-surface">Select Desig</option>
+                    <option value="Senior Lead" className="bg-surface">Senior Lead</option>
+                    <option value="Manager" className="bg-surface">Manager</option>
+                    <option value="Specialist" className="bg-surface">Specialist</option>
+                    <option value="Junior Rep" className="bg-surface">Junior Rep</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Company</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Company</label>
                 <div className="relative flex items-center">
                   <input
                     placeholder="Company name"
                     value={currentContact.company || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, company: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium pr-10"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium pr-10"
                   />
-                  <Search size={14} className="absolute right-3.5 text-[var(--foreground-muted)] cursor-pointer" />
+                  <Search size={14} className="absolute right-3.5 text-foreground-muted cursor-pointer" />
                 </div>
-                <span className="text-[10px] text-[var(--foreground-muted)] mt-1.5 block">Search for existing companies</span>
+                <span className="text-[10px] text-foreground-muted mt-1.5 block">Search for existing companies</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Work Address</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Work Address</label>
                 <textarea
                   placeholder="Enter work address"
                   rows={3}
                   value={currentContact.workAddress || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, workAddress: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1 block">Work Phone</label>
+                  <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1 block">Work Phone</label>
                   <input
                     placeholder="Office phone number"
                     value={currentContact.workPhone || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, workPhone: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-1 block">Work Pin Code</label>
+                  <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1 block">Work Pin Code</label>
                   <input
                     placeholder="Postal code"
                     value={currentContact.workPinCode || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, workPinCode: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
@@ -761,238 +761,238 @@ export default function ContactsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Website URL</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Website URL</label>
                 <div className="relative flex items-center">
                   <input
                     placeholder="https://example.com"
                     value={currentContact.websiteUrl || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, websiteUrl: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium pr-10"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium pr-10"
                   />
-                  <Globe size={15} className="absolute right-3.5 text-[var(--foreground-muted)]" />
+                  <Globe size={15} className="absolute right-3.5 text-foreground-muted" />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Select Product</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Select Product</label>
                 <select
                   value={currentContact.product || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, product: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="" className="bg-[var(--surface)]">Select product for future</option>
-                  <option value="Software License" className="bg-[var(--surface)]">Software License</option>
-                  <option value="Hardware Rack Integration" className="bg-[var(--surface)]">Hardware Rack Integration</option>
-                  <option value="AMC Plan Annual" className="bg-[var(--surface)]">AMC Plan Annual</option>
-                  <option value="Networking Switch Setup" className="bg-[var(--surface)]">Networking Switch Setup</option>
+                  <option value="" className="bg-surface">Select product for future</option>
+                  <option value="Software License" className="bg-surface">Software License</option>
+                  <option value="Hardware Rack Integration" className="bg-surface">Hardware Rack Integration</option>
+                  <option value="AMC Plan Annual" className="bg-surface">AMC Plan Annual</option>
+                  <option value="Networking Switch Setup" className="bg-surface">Networking Switch Setup</option>
                 </select>
               </div>
             </div>
           </div>
 
           {/* Section 3: Other Details */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-[var(--border)] pb-3">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
                 <Tag size={16} />
               </div>
-              <h3 className="font-bold text-[var(--foreground)] text-base">Other Details</h3>
+              <h3 className="font-bold text-foreground text-base">Other Details</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Category / Sub Category</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Category / Sub Category</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     placeholder="Category"
                     value={currentContact.category || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, category: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                   <input
                     placeholder="Sub Category"
                     value={currentContact.subCategory || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, subCategory: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Source/Reference</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Source/Reference</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <select
                     value={currentContact.source || "website"}
                     onChange={(e) => setCurrentContact({ ...currentContact, source: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   >
-                    <option value="website" className="bg-[var(--surface)]">Website</option>
-                    <option value="event" className="bg-[var(--surface)]">Event</option>
-                    <option value="social media" className="bg-[var(--surface)]">Social Media</option>
-                    <option value="referral" className="bg-[var(--surface)]">Referral</option>
-                    <option value="cold_call" className="bg-[var(--surface)]">Cold Call</option>
-                    <option value="other" className="bg-[var(--surface)]">Other</option>
+                    <option value="website" className="bg-surface">Website</option>
+                    <option value="event" className="bg-surface">Event</option>
+                    <option value="social media" className="bg-surface">Social Media</option>
+                    <option value="referral" className="bg-surface">Referral</option>
+                    <option value="cold_call" className="bg-surface">Cold Call</option>
+                    <option value="other" className="bg-surface">Other</option>
                   </select>
                   <input
                     placeholder="Reference"
                     value={currentContact.reference || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, reference: e.target.value })}
-                    className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Classification</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Classification</label>
                 <input
                   placeholder="Classification"
                   value={currentContact.classification || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, classification: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Group</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Group</label>
                 <input
                   placeholder="Group"
                   value={currentContact.group || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, group: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Zone</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Zone</label>
                 <input
                   placeholder="Zone"
                   value={currentContact.zone || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, zone: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Contact Type</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Contact Type</label>
                 <select
                   value={currentContact.contactType || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, contactType: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="" className="bg-[var(--surface)]">Select Contact Type</option>
-                  <option value="Client" className="bg-[var(--surface)]">Client</option>
-                  <option value="Partner" className="bg-[var(--surface)]">Partner</option>
-                  <option value="Vendor" className="bg-[var(--surface)]">Vendor</option>
-                  <option value="Other" className="bg-[var(--surface)]">Other</option>
+                  <option value="" className="bg-surface">Select Contact Type</option>
+                  <option value="Client" className="bg-surface">Client</option>
+                  <option value="Partner" className="bg-surface">Partner</option>
+                  <option value="Vendor" className="bg-surface">Vendor</option>
+                  <option value="Other" className="bg-surface">Other</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">DOB</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">DOB</label>
                 <input
                   type="date"
                   value={currentContact.dob || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, dob: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium text-left"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium text-left"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Status</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Status</label>
                 <select
                   value={currentContact.status || "Lead"}
                   onChange={(e) => setCurrentContact({ ...currentContact, status: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="Lead" className="bg-[var(--surface)]">Lead</option>
-                  <option value="Customer" className="bg-[var(--surface)]">Customer</option>
+                  <option value="Lead" className="bg-surface">Lead</option>
+                  <option value="Customer" className="bg-surface">Customer</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Assigned To</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Assigned To</label>
                 <select
                   value={currentContact.assignedTo as any || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, assignedTo: e.target.value as any })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="" className="bg-[var(--surface)]">Unassigned</option>
-                  {users.map(u => <option key={u._id} value={u._id} className="bg-[var(--surface)]">{u.firstName} {u.lastName}</option>)}
+                  <option value="" className="bg-surface">Unassigned</option>
+                  {users.map(u => <option key={u._id} value={u._id} className="bg-surface">{u.firstName} {u.lastName}</option>)}
                 </select>
               </div>
             </div>
           </div>
 
           {/* Section 4: Add Diary Plan */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-[var(--border)] pb-3">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
                 <Calendar size={16} />
               </div>
-              <h3 className="font-bold text-[var(--foreground)] text-base">Add Diary Plan</h3>
+              <h3 className="font-bold text-foreground text-base">Add Diary Plan</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Plan Date (dd-mm-yyyy)</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Plan Date (dd-mm-yyyy)</label>
                 <input
                   type="date"
                   value={currentContact.planDate || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, planDate: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium text-left"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium text-left"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Plan Action Type</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Plan Action Type</label>
                 <select
                   value={currentContact.planActionType || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, planActionType: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 >
-                  <option value="" className="bg-[var(--surface)]">Select Action Type</option>
-                  <option value="Call" className="bg-[var(--surface)]">Call</option>
-                  <option value="Meeting" className="bg-[var(--surface)]">Meeting</option>
-                  <option value="Email" className="bg-[var(--surface)]">Email</option>
-                  <option value="Follow Up" className="bg-[var(--surface)]">Follow Up</option>
-                  <option value="Task" className="bg-[var(--surface)]">Task</option>
+                  <option value="" className="bg-surface">Select Action Type</option>
+                  <option value="Call" className="bg-surface">Call</option>
+                  <option value="Meeting" className="bg-surface">Meeting</option>
+                  <option value="Email" className="bg-surface">Email</option>
+                  <option value="Follow Up" className="bg-surface">Follow Up</option>
+                  <option value="Task" className="bg-surface">Task</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[var(--foreground-muted)] uppercase tracking-wider mb-2 block">Remarks</label>
+                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Remarks</label>
                 <input
                   placeholder="Add remarks for this plan"
                   value={currentContact.remarks || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, remarks: e.target.value })}
-                  className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 5: Additional Notes */}
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-4">
-            <h3 className="font-bold text-[var(--foreground)] text-base">Additional Notes</h3>
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="font-bold text-foreground text-base">Additional Notes</h3>
             <textarea
               placeholder="Add any additional information about this contact"
               rows={3}
               value={currentContact.additionalNotes || ""}
               onChange={(e) => setCurrentContact({ ...currentContact, additionalNotes: e.target.value })}
-              className="w-full bg-[var(--background-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] outline-none font-medium"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
             />
           </div>
 
           {/* Form Action Controls */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-all cursor-pointer"
             >
               <XCircle size={15} />
               <span>Cancel</span>
@@ -1000,7 +1000,7 @@ export default function ContactsPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-8 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer"
+              className="flex items-center gap-2 px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-md transition-all cursor-pointer"
             >
               {isSubmitting ? (
                 <Loader2 size={16} className="animate-spin" />

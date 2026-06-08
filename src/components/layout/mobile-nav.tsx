@@ -115,7 +115,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
       {/* Drawer */}
       <div
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-72 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col justify-between overflow-hidden",
+          "fixed top-0 left-0 z-50 h-full w-72 bg-sidebar-bg border-r border-sidebar-border transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col justify-between overflow-hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -123,18 +123,18 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
           {/* Bottom segment / Top segment */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 h-[var(--header-height)] border-b border-[var(--sidebar-border)] shrink-0">
+            <div className="flex items-center justify-between px-5 h-header-height border-b border-sidebar-border shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-[32px] h-[32px] rounded-[9px] bg-[var(--accent,#6366f1)] flex items-center justify-center shadow-sm shrink-0">
+                <div className="w-8 h-8 rounded-[9px] bg-accent flex items-center justify-center shadow-sm shrink-0">
                   <Layers size={16} className="text-white stroke-[2.2]" />
                 </div>
-                <span className="text-lg font-bold tracking-tight text-[var(--foreground)]">
+                <span className="text-lg font-bold tracking-tight text-foreground">
                   RVM <span className="gradient-text">CRM</span>
                 </span>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--sidebar-hover)] transition-colors"
+                className="p-2 rounded-lg text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover transition-colors"
               >
                 <X size={20} />
               </button>
@@ -152,11 +152,11 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                       isActive
-                        ? "bg-[var(--accent-muted)] text-[var(--accent-hover)]"
-                        : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--sidebar-hover)]"
+                        ? "bg-accent-muted text-accent-hover"
+                        : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
                     )}
                   >
-                    <span className={cn("shrink-0", isActive ? "text-[var(--accent)]" : "")}>
+                    <span className={cn("shrink-0", isActive ? "text-accent" : "")}>
                       {item.icon}
                     </span>
                     <span>{item.title}</span>
@@ -167,8 +167,8 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
           </div>
 
           {/* Bottom Footer segment with Theme Toggle */}
-          <div className="p-4 border-t border-[var(--sidebar-border)] bg-[var(--background)]/40 flex items-center justify-between shrink-0">
-            <span className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider">Appearance</span>
+          <div className="p-4 border-t border-sidebar-border bg-background/40 flex items-center justify-between shrink-0">
+            <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Appearance</span>
             <ThemeToggle />
           </div>
         </div>
