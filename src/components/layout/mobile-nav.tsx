@@ -75,7 +75,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
       ? (rawTeam.permissions as any)
       : null;
 
-    const defaultFallback = (isAdmin || isSenior) ? "all" : "none";
+    const defaultFallback = "all"; // Default to show modules; backend query filters enforce strict ownership boundaries
     const leadsPerm = perms?.leads || defaultFallback;
     const customersPerm = perms?.customers || defaultFallback;
     const invoicesPerm = perms?.invoices || defaultFallback;
