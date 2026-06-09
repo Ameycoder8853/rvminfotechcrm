@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Requester profile not found in DB" }, { status: 404 });
     }
 
-    const { firstName, lastName, email, password, roleTier: requestedRoleTier, teamId, phone } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { firstName, lastName, email, password, roleTier: requestedRoleTier, teamId, phone, orgId } = body;
 
     if (!email || !password || !firstName || !lastName || !requestedRoleTier) {
       return NextResponse.json({ error: "Missing required fields (email, password, firstName, lastName, roleTier)" }, { status: 400 });
@@ -51,9 +52,8 @@ export async function POST(req: NextRequest) {
         finalParentManagerId = undefined;
       } else {
         // Must specify orgId in req body for non-super_admin targets
-        const body = await req.json().catch(() => ({}));
-        if (body.orgId) {
-          finalOrgId = new mongoose.Types.ObjectId(body.orgId);
+        if (orgId) {
+          finalOrgId = new mongoose.Types.ObjectId(orgId);
         }
         if (teamId) {
           finalTeamId = new mongoose.Types.ObjectId(teamId);

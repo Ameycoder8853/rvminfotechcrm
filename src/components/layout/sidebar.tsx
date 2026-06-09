@@ -171,11 +171,13 @@ export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [sidebarLoading, setSidebarLoading] = useState(true);
 
   // Fetch current user details
   useEffect(() => {
     async function fetchMe() {
       try {
+        setSidebarLoading(true);
         const res = await fetch("/api/users/me");
         const data = await res.json();
         if (data.success) {
@@ -183,6 +185,8 @@ export default function Sidebar({ className }: SidebarProps) {
         }
       } catch (err) {
         console.error("Failed to load user details in sidebar:", err);
+      } finally {
+        setSidebarLoading(false);
       }
     }
     fetchMe();
@@ -279,6 +283,37 @@ export default function Sidebar({ className }: SidebarProps) {
         }
       ]
     });
+  }
+
+  if (sidebarLoading) {
+    return (
+      <aside
+        className={cn(
+          "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 w-sidebar-width bg-sidebar-bg border-r border-sidebar-border animate-fade-in",
+          className
+        )}
+      >
+        {/* Brand Header */}
+        <div className="flex items-center px-5 h-header-height border-b border-sidebar-border shrink-0 bg-transparent">
+          <div className="w-9.5 h-9.5 rounded-[11px] bg-accent/25 animate-pulse shrink-0" />
+          <div className="ml-3 h-5 w-24 bg-surface-hover animate-pulse rounded-md" />
+        </div>
+        {/* Skeleton items */}
+        <div className="flex-1 p-4 space-y-6">
+          <div className="space-y-3">
+            <div className="h-3 w-16 bg-surface-hover animate-pulse rounded-md" />
+            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+          </div>
+          <div className="space-y-3">
+            <div className="h-3 w-20 bg-surface-hover animate-pulse rounded-md" />
+            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+          </div>
+        </div>
+      </aside>
+    );
   }
 
   return (
@@ -412,6 +447,46 @@ export default function Sidebar({ className }: SidebarProps) {
           </div>
         ))}
       </nav>
+
+      {/* User Profile Footer Section displaying Roles & Details */}
+      {currentUser && (
+        <div className="p-4 border-t border-sidebar-border bg-background-secondary/25 flex flex-col gap-3 shrink-0">
+          <div className="flex items-center gap-3">
+            {currentUser.avatar ? (
+              <img src={currentUser.avatar} alt={currentUser.firstName} className="w-10 h-10 rounded-xl object-cover border border-border" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-accent-muted text-accent font-bold text-sm flex items-center justify-center shrink-0">
+                {`${currentUser.firstName?.[0] || ""}${currentUser.lastName?.[0] || ""}`.toUpperCase() || "U"}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-foreground truncate">{currentUser.firstName} {currentUser.lastName}</p>
+              <p className="text-xs text-foreground-secondary truncate">{currentUser.email}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Session Role</span>
+            {currentUser.roleTier === "super_admin" ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
+                Super Admin
+              </span>
+            ) : currentUser.roleTier === "admin" ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                Company Admin
+              </span>
+            ) : currentUser.roleTier === "senior" ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                Senior Manager
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                Junior Rep
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

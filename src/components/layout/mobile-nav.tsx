@@ -45,10 +45,12 @@ interface MobileNavProps {
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [mobileNavLoading, setMobileNavLoading] = useState(true);
 
   useEffect(() => {
     async function fetchMe() {
       try {
+        setMobileNavLoading(true);
         const res = await fetch("/api/users/me");
         const data = await res.json();
         if (data.success) {
@@ -56,6 +58,8 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
         }
       } catch (err) {
         console.error("Failed to load user details in mobile-nav:", err);
+      } finally {
+        setMobileNavLoading(false);
       }
     }
     if (isOpen) {
@@ -100,7 +104,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
     });
   };
 
-  const visibleNavItems = currentUser ? getFilteredNavItems() : navItems;
+  const visibleNavItems = getFilteredNavItems();
 
   return (
     <>
@@ -141,30 +145,97 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
             </div>
 
             {/* Nav Items */}
-            <nav className="p-3 space-y-1 overflow-y-auto flex-1 pb-16">
-              {visibleNavItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-accent-muted text-accent-hover"
-                        : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
-                    )}
-                  >
-                    <span className={cn("shrink-0", isActive ? "text-accent" : "")}>
-                      {item.icon}
-                    </span>
-                    <span>{item.title}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+            {mobileNavLoading ? (
+              <div className="flex-1 p-4 space-y-6 overflow-y-auto">
+                <div className="space-y-3">
+                  <div className="h-9 w-full bg-surface-hover/50 animate-pulse rounded-lg" />
+                  <div className="h-9 w-full bg-surface-hover/50 animate-pulse rounded-lg" />
+                  <div className="h-9 w-full bg-surface-hover/50 animate-pulse rounded-lg" />
+                </div>
+                <div className="space-y-3">
+                  <div className="h-9 w-full bg-surface-hover/50 animate-pulse rounded-lg" />
+                  <div className="h-9 w-full bg-surface-hover/50 animate-pulse rounded-lg" />
+                  <div className="h-9 w-full bg-surface-hover/50 animate-pulse rounded-lg" />
+                </div>
+              </div>
+            ) : (
+              <nav className="p-3 space-y-1 overflow-y-auto flex-1 pb-16">
+                {visibleNavItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-accent-muted text-accent-hover"
+                          : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
+                      )}
+                    >
+                      <span className={cn("shrink-0", isActive ? "text-accent" : "")}>
+                        {item.icon}
+                      </span>
+                      <span>{item.title}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
           </div>
+
+          {/* User Profile Footer Section */}
+          {mobileNavLoading ? (
+            <div className="p-4 border-t border-sidebar-border bg-background/40 flex flex-col gap-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-hover/50 animate-pulse shrink-0" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="h-4 w-28 bg-surface-hover/50 animate-pulse rounded" />
+                  <div className="h-3.5 w-36 bg-surface-hover/50 animate-pulse rounded" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            currentUser && (
+              <div className="p-4 border-t border-sidebar-border bg-background/40 flex flex-col gap-3 shrink-0">
+                <div className="flex items-center gap-3">
+                  {currentUser.avatar ? (
+                    <img src={currentUser.avatar} alt={currentUser.firstName} className="w-10 h-10 rounded-xl object-cover border border-border" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-accent-muted text-accent font-bold text-sm flex items-center justify-center shrink-0">
+                      {`${currentUser.firstName?.[0] || ""}${currentUser.lastName?.[0] || ""}`.toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-foreground truncate">{currentUser.firstName} {currentUser.lastName}</p>
+                    <p className="text-xs text-foreground-secondary truncate">{currentUser.email}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Session Role</span>
+                  {currentUser.roleTier === "super_admin" ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
+                      Super Admin
+                    </span>
+                  ) : currentUser.roleTier === "admin" ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                      Company Admin
+                    </span>
+                  ) : currentUser.roleTier === "senior" ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      Senior Manager
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                      Junior Rep
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          )}
 
           {/* Bottom Footer segment with Theme Toggle */}
           <div className="p-4 border-t border-sidebar-border bg-background/40 flex items-center justify-between shrink-0">
