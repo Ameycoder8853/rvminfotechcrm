@@ -33,6 +33,7 @@ const navItems = [
   { title: "Installations", href: "/installations", icon: <Wrench size={20} /> },
   { title: "Expenses", href: "/expenses", icon: <Receipt size={20} /> },
   { title: "Attendance", href: "/attendance", icon: <MapPin size={20} /> },
+  { title: "Team", href: "/teams", icon: <Users size={20} /> },
   { title: "Diary", href: "/diary", icon: <Calendar size={20} /> },
   { title: "Settings", href: "/settings", icon: <Settings size={20} /> },
 ];
@@ -89,8 +90,8 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
     return navItems.filter((item) => {
       if (isAdmin) return true;
 
-      // Seniors see all team-related modules
-      if (isSenior) return true;
+      // Hide "Team" for Junior representatives
+      if (item.title === "Team" && !isSenior) return false;
 
       if (item.title === "Leads" && leadsPerm === "none") return false;
       if (item.title === "Contacts" && customersPerm === "none") return false;

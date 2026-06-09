@@ -246,9 +246,6 @@ export default function Sidebar({ className }: SidebarProps) {
           // 2. Hide "Team" for Junior representatives
           if (item.title === "Team" && !isSenior) return false;
 
-          // 3. Seniors see all team-related modules
-          if (isSenior && item.title !== "Super Admin Operations") return true;
-
           // 3. Filter other items based on team module permissions
           if (item.title === "Lead Management" && leadsPerm === "none") return false;
           if (item.title === "Contact Management" && customersPerm === "none") return false;
