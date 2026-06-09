@@ -28,6 +28,15 @@ export async function GET(req: NextRequest) {
         await dbUser.save();
         filter.orgId = org._id;
       }
+
+      // If Senior manager, scope staff list to members of their team or reporting directly to them
+      if (dbUser.roleTier === "senior") {
+        filter.$or = [
+          { teamId: dbUser.teamId },
+          { parentManager: dbUser._id },
+          { _id: dbUser._id }
+        ];
+      }
     }
 
     const users = await User.find(filter)

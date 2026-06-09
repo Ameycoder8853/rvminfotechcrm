@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { firstName, lastName, email, password, roleTier: requestedRoleTier, teamId, phone, orgId } = body;
+    const { firstName, lastName, email, password, roleTier: requestedRoleTier, teamId, phone, orgId, permissions } = body;
 
     if (!email || !password || !firstName || !lastName || !requestedRoleTier) {
       return NextResponse.json({ error: "Missing required fields (email, password, firstName, lastName, roleTier)" }, { status: 400 });
@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
         parentManager: finalParentManagerId,
         phone: phone || "",
         isActive: true,
+        permissions: permissions || undefined,
       });
 
       return NextResponse.json({ success: true, user: newUser }, { status: 201 });

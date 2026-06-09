@@ -13,6 +13,12 @@ export interface IUser extends Document {
   phone?: string;
   avatar?: string;
   isActive: boolean;
+  permissions?: {
+    leads?: "none" | "read" | "write" | "all";
+    customers?: "none" | "read" | "write" | "all";
+    invoices?: "none" | "read" | "write" | "all";
+    tickets?: "none" | "read" | "write" | "all";
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,6 +45,12 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String, default: "" },
     avatar: { type: String, default: "" },
     isActive: { type: Boolean, default: true },
+    permissions: {
+      leads: { type: String, enum: ["none", "read", "write", "all"] },
+      customers: { type: String, enum: ["none", "read", "write", "all"] },
+      invoices: { type: String, enum: ["none", "read", "write", "all"] },
+      tickets: { type: String, enum: ["none", "read", "write", "all"] },
+    },
   },
   { timestamps: true }
 );

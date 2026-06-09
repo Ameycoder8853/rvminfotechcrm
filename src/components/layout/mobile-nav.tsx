@@ -74,16 +74,17 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
     const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
     const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
 
+    const userPerms = currentUser.permissions;
     const rawTeam = currentUser.teamId;
-    const perms = (rawTeam && typeof rawTeam === "object" && "permissions" in rawTeam)
+    const teamPerms = (rawTeam && typeof rawTeam === "object" && "permissions" in rawTeam)
       ? (rawTeam.permissions as any)
       : null;
 
     const defaultFallback = "all"; // Default to show modules; backend query filters enforce strict ownership boundaries
-    const leadsPerm = perms?.leads || defaultFallback;
-    const customersPerm = perms?.customers || defaultFallback;
-    const invoicesPerm = perms?.invoices || defaultFallback;
-    const ticketsPerm = perms?.tickets || defaultFallback;
+    const leadsPerm = userPerms?.leads || teamPerms?.leads || defaultFallback;
+    const customersPerm = userPerms?.customers || teamPerms?.customers || defaultFallback;
+    const invoicesPerm = userPerms?.invoices || teamPerms?.invoices || defaultFallback;
+    const ticketsPerm = userPerms?.tickets || teamPerms?.tickets || defaultFallback;
 
     return navItems.filter((item) => {
       if (isAdmin) return true;

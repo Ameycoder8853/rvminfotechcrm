@@ -17,15 +17,34 @@ export async function PATCH(
     await connectToDatabase();
     
     const dbUser = await getOrCreateDbUser();
-    const isAdmin = dbUser && (dbUser.roleTier === "admin" || dbUser.roleTier === "super_admin");
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Unauthorized: Admin or Super Admin access required" }, { status: 403 });
+    if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const isAdmin = dbUser.roleTier === "admin" || dbUser.roleTier === "super_admin";
+    const isSenior = dbUser.roleTier === "senior";
+
+    if (!isAdmin && !isSenior) {
+      return NextResponse.json({ error: "Unauthorized: Admin or Senior access required" }, { status: 403 });
     }
 
     const body = await req.json();
     
     const user = await User.findById(id);
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    // Senior manager access scoping check:
+    if (isSenior) {
+      const isJuniorInSameTeam = user.roleTier === "junior" && 
+        ((user.teamId && user.teamId.toString() === dbUser.teamId?.toString()) || 
+         (user.parentManager && user.parentManager.toString() === dbUser._id.toString()));
+      
+      if (!isJuniorInSameTeam) {
+        return NextResponse.json({ error: "Unauthorized: Seniors can only modify Juniors in their own team" }, { status: 403 });
+      }
+
+      if (body.roleTier && body.roleTier !== "junior") {
+        return NextResponse.json({ error: "Unauthorized: Seniors cannot promote user tiers" }, { status: 403 });
+      }
+    }
 
     // Update local database fields
     if (body.roleTier) {
@@ -44,6 +63,17 @@ export async function PATCH(
     if (body.teamId !== undefined) user.teamId = body.teamId;
     if (body.parentManager !== undefined) user.parentManager = body.parentManager;
     if (body.phone !== undefined) user.phone = body.phone;
+
+    if (body.permissions !== undefined) {
+      // Clear out empty string values to inherit from team defaults
+      const cleanedPermissions = { ...body.permissions };
+      for (const key of Object.keys(cleanedPermissions)) {
+        if (cleanedPermissions[key] === "") {
+          delete cleanedPermissions[key];
+        }
+      }
+      user.permissions = cleanedPermissions;
+    }
 
     await user.save();
 

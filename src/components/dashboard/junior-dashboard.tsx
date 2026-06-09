@@ -18,16 +18,21 @@ interface JuniorDashboardProps {
 
 export default function JuniorDashboard({ stats, currentUser }: JuniorDashboardProps) {
   // Defensive checks
+  const userPerms = currentUser?.permissions;
   const rawTeam = currentUser?.teamId;
-  const perms = (rawTeam && typeof rawTeam === "object" && "permissions" in rawTeam)
+  const teamPerms = (rawTeam && typeof rawTeam === "object" && "permissions" in rawTeam)
     ? (rawTeam.permissions as any)
     : null;
+
+  const defaultFallback = "all";
+  const leadsPerm = userPerms?.leads || teamPerms?.leads || defaultFallback;
+  const ticketsPerm = userPerms?.tickets || teamPerms?.tickets || defaultFallback;
 
   const isAdmin = currentUser?.roleTier === "admin" || currentUser?.roleTier === "super_admin";
   const isSuperAdmin = currentUser?.roleTier === "super_admin";
 
-  const hasLeads = isAdmin || isSuperAdmin || perms?.leads !== "none";
-  const hasTickets = isAdmin || isSuperAdmin || perms?.tickets !== "none";
+  const hasLeads = isAdmin || isSuperAdmin || leadsPerm !== "none";
+  const hasTickets = isAdmin || isSuperAdmin || ticketsPerm !== "none";
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">

@@ -25,6 +25,12 @@ interface UserProfile {
   teamId?: Team;
   parentManager?: { _id: string; firstName: string; lastName: string };
   isActive: boolean;
+  permissions?: {
+    leads?: "none" | "read" | "write" | "all";
+    customers?: "none" | "read" | "write" | "all";
+    invoices?: "none" | "read" | "write" | "all";
+    tickets?: "none" | "read" | "write" | "all";
+  };
 }
 
 export default function TeamsPage() {
@@ -115,16 +121,35 @@ export default function TeamsPage() {
     setIsEnrollMode(forceEnroll || !user);
     setEnrollPassword("");
     setEnrollPhone((user as any)?.phone || "");
-    setCurrentUserEdit(
-      user || {
-        firstName: "",
-        lastName: "",
-        email: "",
-        roleTier: "junior",
-        teamId: undefined,
-        parentManager: undefined,
+    
+    const defaultUser: any = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      roleTier: "junior",
+      teamId: undefined,
+      parentManager: undefined,
+      permissions: {
+        leads: "",
+        customers: "",
+        invoices: "",
+        tickets: "",
       }
-    );
+    };
+
+    if (user) {
+      setCurrentUserEdit({
+        ...user,
+        permissions: {
+          leads: (user as any).permissions?.leads || "",
+          customers: (user as any).permissions?.customers || "",
+          invoices: (user as any).permissions?.invoices || "",
+          tickets: (user as any).permissions?.tickets || "",
+        }
+      });
+    } else {
+      setCurrentUserEdit(defaultUser);
+    }
     setIsUserModalOpen(true);
   };
 
@@ -177,6 +202,7 @@ export default function TeamsPage() {
         teamId: (currentUserEdit.teamId as any)?._id || currentUserEdit.teamId || undefined,
         parentManager: (currentUserEdit.parentManager as any)?._id || currentUserEdit.parentManager || undefined,
         phone: enrollPhone,
+        permissions: (currentUserEdit as any).permissions,
       };
 
       if (isEnrollMode) {
@@ -411,10 +437,10 @@ export default function TeamsPage() {
                         )}
                       </div>
                     </div>
-                    {isAdmin && (
+                    {(isAdmin || (isSenior && u.roleTier === "junior")) && (
                       <button
                         onClick={() => handleOpenUserModal(u)}
-                        className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       >
                         <Edit size={14} />
                       </button>
@@ -772,6 +798,86 @@ export default function TeamsPage() {
                 </p>
               </div>
             )
+          )}
+
+          {/* Custom permissions override fields for Juniors & Seniors */}
+          {(currentUserEdit?.roleTier === "junior" || currentUserEdit?.roleTier === "senior") && (
+            <div className="space-y-4 border-t border-border pt-4 text-left">
+              <h4 className="text-xs font-bold text-foreground-muted uppercase tracking-widest pb-1">Individual Module Permissions</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-foreground-secondary mb-1 block">Leads Module</label>
+                  <select
+                    value={(currentUserEdit as any).permissions?.leads || ""}
+                    onChange={(e) => setCurrentUserEdit({
+                      ...currentUserEdit!,
+                      permissions: { ...((currentUserEdit as any).permissions || {}), leads: e.target.value as any }
+                    })}
+                    className="w-full bg-background-secondary border border-border rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                  >
+                    <option value="">Inherit Team Default</option>
+                    <option value="none">No Access (Hidden)</option>
+                    <option value="read">Read Only</option>
+                    <option value="write">Read & Write</option>
+                    <option value="all">All Rights (Full Control)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-foreground-secondary mb-1 block">Customers Module</label>
+                  <select
+                    value={(currentUserEdit as any).permissions?.customers || ""}
+                    onChange={(e) => setCurrentUserEdit({
+                      ...currentUserEdit!,
+                      permissions: { ...((currentUserEdit as any).permissions || {}), customers: e.target.value as any }
+                    })}
+                    className="w-full bg-background-secondary border border-border rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                  >
+                    <option value="">Inherit Team Default</option>
+                    <option value="none">No Access (Hidden)</option>
+                    <option value="read">Read Only</option>
+                    <option value="write">Read & Write</option>
+                    <option value="all">All Rights (Full Control)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-foreground-secondary mb-1 block">Invoices Module</label>
+                  <select
+                    value={(currentUserEdit as any).permissions?.invoices || ""}
+                    onChange={(e) => setCurrentUserEdit({
+                      ...currentUserEdit!,
+                      permissions: { ...((currentUserEdit as any).permissions || {}), invoices: e.target.value as any }
+                    })}
+                    className="w-full bg-background-secondary border border-border rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                  >
+                    <option value="">Inherit Team Default</option>
+                    <option value="none">No Access (Hidden)</option>
+                    <option value="read">Read Only</option>
+                    <option value="write">Read & Write</option>
+                    <option value="all">All Rights (Full Control)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-foreground-secondary mb-1 block">Service Tickets</label>
+                  <select
+                    value={(currentUserEdit as any).permissions?.tickets || ""}
+                    onChange={(e) => setCurrentUserEdit({
+                      ...currentUserEdit!,
+                      permissions: { ...((currentUserEdit as any).permissions || {}), tickets: e.target.value as any }
+                    })}
+                    className="w-full bg-background-secondary border border-border rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                  >
+                    <option value="">Inherit Team Default</option>
+                    <option value="none">No Access (Hidden)</option>
+                    <option value="read">Read Only</option>
+                    <option value="write">Read & Write</option>
+                    <option value="all">All Rights (Full Control)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
