@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 import SuperAdminDashboard from "@/components/dashboard/super-admin-dashboard";
 import AdminDashboard from "@/components/dashboard/admin-dashboard";
@@ -40,6 +41,8 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
+  const { user: clerkUser } = useUser();
+
   if (!mounted) return null;
 
   if (loading) {
@@ -53,20 +56,27 @@ export default function DashboardPage() {
     );
   }
 
-  const roleTier = currentUser?.roleTier || "junior";
+  const roleTier = currentUser?.roleTier || (clerkUser?.publicMetadata?.roleTier as string) || "junior";
+  const displayUser = currentUser || {
+    firstName: clerkUser?.firstName || "Staff",
+    lastName: clerkUser?.lastName || "Member",
+    email: clerkUser?.primaryEmailAddress?.emailAddress || "",
+    avatar: clerkUser?.imageUrl || "",
+    roleTier,
+  };
 
   if (roleTier === "super_admin") {
-    return <SuperAdminDashboard stats={stats} currentUser={currentUser} />;
+    return <SuperAdminDashboard stats={stats} currentUser={displayUser} />;
   }
 
   if (roleTier === "admin") {
-    return <AdminDashboard stats={stats} currentUser={currentUser} />;
+    return <AdminDashboard stats={stats} currentUser={displayUser} />;
   }
 
   if (roleTier === "senior") {
-    return <SeniorDashboard stats={stats} currentUser={currentUser} />;
+    return <SeniorDashboard stats={stats} currentUser={displayUser} />;
   }
 
   // Default to Junior dashboard
-  return <JuniorDashboard stats={stats} currentUser={currentUser} />;
+  return <JuniorDashboard stats={stats} currentUser={displayUser} />;
 }

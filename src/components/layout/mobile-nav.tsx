@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -47,14 +48,37 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [mobileNavLoading, setMobileNavLoading] = useState(true);
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+
+  // Fast client-side fallback using Clerk metadata to prevent blank drawer
+  useEffect(() => {
+    if (clerkLoaded && clerkUser && isOpen) {
+      const tier = (clerkUser.publicMetadata?.roleTier as string) || "junior";
+      setCurrentUser((prev: any) => {
+        if (prev && prev.clerkId === clerkUser.id) {
+          return prev;
+        }
+        return {
+          clerkId: clerkUser.id,
+          firstName: clerkUser.firstName || "Staff",
+          lastName: clerkUser.lastName || "Member",
+          email: clerkUser.primaryEmailAddress?.emailAddress || "",
+          avatar: clerkUser.imageUrl || "",
+          roleTier: tier,
+          permissions: prev?.permissions || {},
+          teamId: prev?.teamId || null,
+        };
+      });
+      setMobileNavLoading(false);
+    }
+  }, [clerkUser, clerkLoaded, isOpen]);
 
   useEffect(() => {
     async function fetchMe() {
       try {
-        setMobileNavLoading(true);
         const res = await fetch("/api/users/me");
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.data) {
           setCurrentUser(data.data);
         }
       } catch (err) {

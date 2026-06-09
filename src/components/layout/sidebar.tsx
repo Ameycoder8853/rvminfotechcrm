@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Users,
@@ -172,15 +173,38 @@ export default function Sidebar({ className }: SidebarProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [sidebarLoading, setSidebarLoading] = useState(true);
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
 
-  // Fetch current user details
+  // Fast client-side fallback using Clerk metadata to prevent blank sidebar
+  useEffect(() => {
+    if (clerkLoaded && clerkUser) {
+      const tier = (clerkUser.publicMetadata?.roleTier as string) || "junior";
+      setCurrentUser((prev: any) => {
+        if (prev && prev.clerkId === clerkUser.id) {
+          return prev;
+        }
+        return {
+          clerkId: clerkUser.id,
+          firstName: clerkUser.firstName || "Staff",
+          lastName: clerkUser.lastName || "Member",
+          email: clerkUser.primaryEmailAddress?.emailAddress || "",
+          avatar: clerkUser.imageUrl || "",
+          roleTier: tier,
+          permissions: prev?.permissions || {},
+          teamId: prev?.teamId || null,
+        };
+      });
+      setSidebarLoading(false);
+    }
+  }, [clerkUser, clerkLoaded]);
+
+  // Fetch current user details from DB
   useEffect(() => {
     async function fetchMe() {
       try {
-        setSidebarLoading(true);
         const res = await fetch("/api/users/me");
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.data) {
           setCurrentUser(data.data);
         }
       } catch (err) {
