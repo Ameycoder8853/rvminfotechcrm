@@ -21,7 +21,7 @@ interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
-  roleTier: "super_admin" | "admin" | "senior" | "junior";
+  roleTier: "super_admin" | "admin" | "senior" | "junior" | "none";
   teamId?: Team;
   parentManager?: { _id: string; firstName: string; lastName: string };
   isActive: boolean;
@@ -782,6 +782,7 @@ export default function TeamsPage() {
                     onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, roleTier: e.target.value as any })}
                     className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                   >
+                    <option value="none">None (Access Blocked)</option>
                     <option value="junior">Junior (Access to assigned items)</option>
                     <option value="senior">Senior (Team Manager/Lead)</option>
                     <option value="admin">Administrator (Full Access)</option>

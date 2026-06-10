@@ -105,7 +105,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
       ? (rawTeam.permissions as any)
       : null;
 
-    const defaultFallback = (currentUser.roleTier === "senior" || currentUser.roleTier === "junior") ? "none" : "all";
+    const defaultFallback = (currentUser.roleTier === "super_admin" || currentUser.roleTier === "admin") ? "all" : "none";
     const leadsPerm = userPerms?.leads || teamPerms?.leads || defaultFallback;
     const customersPerm = userPerms?.customers || teamPerms?.customers || defaultFallback;
     const invoicesPerm = userPerms?.invoices || teamPerms?.invoices || defaultFallback;

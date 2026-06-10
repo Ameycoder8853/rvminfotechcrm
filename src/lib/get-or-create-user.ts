@@ -45,8 +45,8 @@ export async function getOrCreateDbUser() {
       firstName: clerkUser.firstName || "",
       lastName: clerkUser.lastName || "",
       avatar: clerkUser.imageUrl || "",
-      role: (clerkUser.publicMetadata?.role as string) || "admin",
-      roleTier: (clerkUser.publicMetadata?.role as string) || (clerkUser.publicMetadata?.roleTier as any) || "admin",
+      role: (clerkUser.publicMetadata?.role as string) || "sales",
+      roleTier: (clerkUser.publicMetadata?.roleTier as any) || "none",
       isActive: true,
     });
     console.log(`[DB] Auto-created user record for ${primaryEmail}`);

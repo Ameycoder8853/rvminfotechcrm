@@ -66,6 +66,7 @@ export async function POST(req: Request) {
         lastName: last_name || "",
         avatar: image_url || "",
         role: (public_metadata?.role as string) || "sales",
+        roleTier: (public_metadata?.roleTier as string) || "none",
         isActive: true,
       });
 
@@ -84,6 +85,7 @@ export async function POST(req: Request) {
           lastName: last_name || "",
           avatar: image_url || "",
           role: (public_metadata?.role as string) || "sales",
+          roleTier: (public_metadata?.roleTier as string) || "none",
         },
         { upsert: true, new: true }
       );
