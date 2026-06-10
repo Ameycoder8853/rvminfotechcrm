@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import StatusBadge from "@/components/shared/status-badge";
-import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download } from "lucide-react";
+import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download, Shield } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import Modal from "@/components/shared/modal";
+import { usePermission } from "@/hooks/use-permission";
 
 interface Lead {
   _id: string;
@@ -300,7 +301,35 @@ export default function LeadsPage() {
     }
   };
 
-  if (!mounted) return null;
+  const { hasAccess, canWrite, loading: permLoading } = usePermission("leads");
+
+  if (!mounted || permLoading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
+          Checking Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 bg-danger/10 text-danger rounded-full">
+          <Shield size={48} className="animate-pulse" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">Access Denied</h2>
+          <p className="text-sm text-foreground-secondary leading-relaxed">
+            You do not have the required permissions to access the Leads module. 
+            Please contact your organization administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -313,21 +342,25 @@ export default function LeadsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <input
-            type="file"
-            accept=".csv"
-            ref={fileInputRef}
-            onChange={handleCSVImport}
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-medium transition-colors"
-            title="Import from CSV"
-          >
-            <Upload size={16} />
-            <span className="hidden md:inline">Import CSV</span>
-          </button>
+          {canWrite && (
+            <>
+              <input
+                type="file"
+                accept=".csv"
+                ref={fileInputRef}
+                onChange={handleCSVImport}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-medium transition-colors"
+                title="Import from CSV"
+              >
+                <Upload size={16} />
+                <span className="hidden md:inline">Import CSV</span>
+              </button>
+            </>
+          )}
           <button
             onClick={handleCSVExport}
             className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-medium transition-colors"
@@ -336,13 +369,15 @@ export default function LeadsPage() {
             <Download size={16} />
             <span className="hidden md:inline">Export CSV</span>
           </button>
-          <button 
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
-          >
-            <Plus size={18} />
-            <span>Add Lead</span>
-          </button>
+          {canWrite && (
+            <button 
+              onClick={() => handleOpenModal()}
+              className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
+            >
+              <Plus size={18} />
+              <span>Add Lead</span>
+            </button>
+          )}
         </div>
       </div>
 
