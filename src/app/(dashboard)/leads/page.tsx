@@ -433,10 +433,14 @@ export default function LeadsPage() {
                         <td className="px-4 py-3 font-semibold text-foreground">₹{lead.value.toLocaleString()}</td>
                         <td className="px-4 py-3"><StatusBadge status={lead.status} /></td>
                         <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1.5 rounded-md text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors"><Edit size={15} /></button>
-                            <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1.5 rounded-md text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors"><Trash2 size={15} /></button>
-                          </div>
+                          {canWrite ? (
+                            <div className="flex items-center justify-end gap-1">
+                              <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1.5 rounded-md text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors"><Edit size={15} /></button>
+                              <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1.5 rounded-md text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors"><Trash2 size={15} /></button>
+                            </div>
+                          ) : (
+                            <span className="text-foreground-muted text-xs">—</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -445,7 +449,7 @@ export default function LeadsPage() {
               </div>
             </div>
           )}
-
+ 
           {view === "kanban" && (
             <DragDropContext onDragEnd={onDragEnd}>
               <div className="flex gap-4 overflow-x-auto pb-6 -mx-4 px-4 scrollbar-thin scrollbar-thumb-border">
@@ -462,22 +466,26 @@ export default function LeadsPage() {
                         {(provided, snapshot) => (
                           <div {...provided.droppableProps} ref={provided.innerRef} className={`p-3 flex-1 overflow-y-auto space-y-3 transition-colors ${snapshot.isDraggingOver ? "bg-accent-muted/5" : ""}`}>
                             {colLeads.map((lead, index) => (
-                              <Draggable key={lead._id} draggableId={lead._id} index={index}>
+                              <Draggable key={lead._id} draggableId={lead._id} index={index} isDragDisabled={!canWrite}>
                                 {(provided, snapshot) => (
                                   <div ref={provided.innerRef} {...provided.draggableProps} className={`bg-surface border border-border rounded-lg p-4 shadow-sm hover:border-accent/50 transition-all group ${snapshot.isDragging ? "shadow-2xl border-accent ring-2 ring-accent/20 rotate-1 scale-[1.02] z-50" : ""}`}>
                                     <div className="flex items-start justify-between mb-1">
                                       <h3 className="text-sm font-bold text-foreground leading-tight group-hover:text-accent transition-colors">{lead.title}</h3>
-                                      <div {...provided.dragHandleProps} className="p-1 -m-1 cursor-grab active:cursor-grabbing text-foreground-muted opacity-40 group-hover:opacity-100 transition-opacity">
-                                        <GripVertical size={14} />
-                                      </div>
+                                      {canWrite && (
+                                        <div {...provided.dragHandleProps} className="p-1 -m-1 cursor-grab active:cursor-grabbing text-foreground-muted opacity-40 group-hover:opacity-100 transition-opacity">
+                                          <GripVertical size={14} />
+                                        </div>
+                                      )}
                                     </div>
                                     <p className="text-xs text-foreground-secondary mb-3">{lead.company}</p>
                                     <div className="flex items-center justify-between">
                                       <span className="text-xs font-bold text-foreground">₹{lead.value.toLocaleString()}</span>
-                                      <div className="flex items-center gap-1">
-                                        <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1 rounded-md text-foreground-muted hover:text-foreground transition-colors"><Edit size={13} /></button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1 rounded-md text-foreground-muted hover:text-danger transition-colors"><Trash2 size={13} /></button>
-                                      </div>
+                                      {canWrite && (
+                                        <div className="flex items-center gap-1">
+                                          <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1 rounded-md text-foreground-muted hover:text-foreground transition-colors"><Edit size={13} /></button>
+                                          <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1 rounded-md text-foreground-muted hover:text-danger transition-colors"><Trash2 size={13} /></button>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 )}

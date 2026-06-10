@@ -261,9 +261,37 @@ export default function TeamsPage() {
 
   if (!mounted) return null;
 
+  if (loading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
+          Checking Access...
+        </p>
+      </div>
+    );
+  }
+
   const isSuperAdmin = currentUser?.roleTier === "super_admin";
   const isAdmin = currentUser?.roleTier === "admin" || isSuperAdmin;
   const isSenior = currentUser?.roleTier === "senior" || isSuperAdmin;
+
+  if (!isAdmin && !isSenior) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 bg-danger/10 text-danger rounded-full">
+          <Shield size={48} className="animate-pulse" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">Access Denied</h2>
+          <p className="text-sm text-foreground-secondary leading-relaxed">
+            You do not have the required permissions to access the Teams & Access Control page. 
+            Please contact your organization administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in text-foreground">

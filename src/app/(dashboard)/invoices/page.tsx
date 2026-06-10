@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Filter, Eye, Edit, Trash2, Receipt, Loader2, Download, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Plus, Search, Filter, Eye, Edit, Trash2, Receipt, Loader2, Download, CheckCircle2, Clock, XCircle, Shield } from "lucide-react";
 import Modal from "@/components/shared/modal";
 import StatusBadge from "@/components/shared/status-badge";
+import { usePermission } from "@/hooks/use-permission";
 
 interface Invoice {
   _id: string;
@@ -26,6 +27,7 @@ export default function InvoicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { hasAccess, canWrite, loading: permLoading } = usePermission("invoices");
 
   const fetchData = useCallback(async () => {
     try {
@@ -114,7 +116,33 @@ export default function InvoicesPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted || permLoading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
+          Checking Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 bg-danger/10 text-danger rounded-full">
+          <Shield size={48} className="animate-pulse" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">Access Denied</h2>
+          <p className="text-sm text-foreground-secondary leading-relaxed">
+            You do not have the required permissions to access the Invoices module. 
+            Please contact your organization administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -123,12 +151,14 @@ export default function InvoicesPage() {
           <h1 className="text-2xl font-bold text-foreground">Invoice Generate</h1>
           <p className="text-sm text-foreground-secondary mt-1">Professional billing and financial tracking</p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20"
-        >
-          <Plus size={18} /><span>Generate Invoice</span>
-        </button>
+        {canWrite && (
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20"
+          >
+            <Plus size={18} /><span>Generate Invoice</span>
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}
@@ -185,17 +215,25 @@ export default function InvoicesPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-4 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => handleOpenModal(invoice)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-background-secondary text-foreground-secondary text-xs font-bold hover:bg-surface-hover transition-colors">
-                <Edit size={14} /> Edit
-              </button>
-              <button className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-white transition-all">
-                <Download size={14} />
-              </button>
-              <button onClick={() => handleDelete(invoice._id)} className="p-2 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-all">
-                <Trash2 size={14} />
-              </button>
-            </div>
+            {canWrite ? (
+              <div className="flex items-center gap-2 pt-4 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => handleOpenModal(invoice)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-background-secondary text-foreground-secondary text-xs font-bold hover:bg-surface-hover transition-colors">
+                  <Edit size={14} /> Edit
+                </button>
+                <button className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-white transition-all">
+                  <Download size={14} />
+                </button>
+                <button onClick={() => handleDelete(invoice._id)} className="p-2 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-all">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 pt-4 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-white transition-all text-xs font-bold">
+                  <Download size={14} /> Download PDF
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

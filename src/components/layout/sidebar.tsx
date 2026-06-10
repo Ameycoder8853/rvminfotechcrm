@@ -255,7 +255,7 @@ export default function Sidebar({ className }: SidebarProps) {
       ? (rawTeam.permissions as any)
       : null;
 
-    const defaultFallback = "all"; // Default to show modules; backend query filters enforce strict ownership boundaries
+    const defaultFallback = (currentUser.roleTier === "senior" || currentUser.roleTier === "junior") ? "none" : "all";
     const leadsPerm = userPerms?.leads || teamPerms?.leads || defaultFallback;
     const customersPerm = userPerms?.customers || teamPerms?.customers || defaultFallback;
     const invoicesPerm = userPerms?.invoices || teamPerms?.invoices || defaultFallback;

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import StatusBadge from "@/components/shared/status-badge";
 import { Plus, Search, Shield, AlertTriangle, Loader2, Edit, Trash2 } from "lucide-react";
 import Modal from "@/components/shared/modal";
+import { usePermission } from "@/hooks/use-permission";
 
 interface AMC {
   _id: string;
@@ -27,6 +28,7 @@ export default function AMCPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAmc, setCurrentAmc] = useState<Partial<AMC> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { hasAccess, canWrite, loading: permLoading } = usePermission("tickets");
 
   const fetchData = useCallback(async () => {
     try {
@@ -114,7 +116,33 @@ export default function AMCPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted || permLoading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
+          Checking Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 bg-danger/10 text-danger rounded-full">
+          <Shield size={48} className="animate-pulse" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">Access Denied</h2>
+          <p className="text-sm text-foreground-secondary leading-relaxed">
+            You do not have the required permissions to access the AMC module. 
+            Please contact your organization administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -124,12 +152,14 @@ export default function AMCPage() {
           <h1 className="text-2xl font-bold text-foreground">AMC Management</h1>
           <p className="text-sm text-foreground-secondary mt-1">Real Annual Maintenance Contract tracking</p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
-        >
-          <Plus size={18} /><span>New AMC</span>
-        </button>
+        {canWrite && (
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
+          >
+            <Plus size={18} /><span>New AMC</span>
+          </button>
+        )}
       </div>
 
       {expiringSoonCount > 0 && (
@@ -161,10 +191,12 @@ export default function AMCPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((amc) => (
             <div key={amc._id} className="group bg-surface border border-border rounded-xl p-5 hover:border-accent transition-all shadow-sm hover:shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <button onClick={() => handleOpenModal(amc)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-accent border border-border shadow-sm"><Edit size={14} /></button>
-                <button onClick={() => handleDelete(amc._id)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-danger border border-border shadow-sm"><Trash2 size={14} /></button>
-              </div>
+              {canWrite && (
+                <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                  <button onClick={() => handleOpenModal(amc)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-accent border border-border shadow-sm"><Edit size={14} /></button>
+                  <button onClick={() => handleDelete(amc._id)} className="p-1.5 rounded-lg bg-background text-foreground-muted hover:text-danger border border-border shadow-sm"><Trash2 size={14} /></button>
+                </div>
+              )}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Shield size={18} className="text-accent" />

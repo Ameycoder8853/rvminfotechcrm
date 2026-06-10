@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import StatusBadge from "@/components/shared/status-badge";
-import { Plus, Search, FileText, Eye, Edit, ArrowRightLeft, Loader2, Trash2 } from "lucide-react";
+import { Plus, Search, FileText, Eye, Edit, ArrowRightLeft, Loader2, Trash2, Shield } from "lucide-react";
 import Modal from "@/components/shared/modal";
+import { usePermission } from "@/hooks/use-permission";
 
 interface Quote {
   _id: string;
@@ -26,6 +27,7 @@ export default function QuotesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentQuote, setCurrentQuote] = useState<Partial<Quote> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { hasAccess, canWrite, loading: permLoading } = usePermission("invoices");
 
   const fetchData = useCallback(async () => {
     try {
@@ -132,7 +134,33 @@ export default function QuotesPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted || permLoading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
+          Checking Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 bg-danger/10 text-danger rounded-full">
+          <Shield size={48} className="animate-pulse" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">Access Denied</h2>
+          <p className="text-sm text-foreground-secondary leading-relaxed">
+            You do not have the required permissions to access the Quotations module. 
+            Please contact your organization administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -142,13 +170,15 @@ export default function QuotesPage() {
           <h1 className="text-2xl font-bold text-foreground">Quotations</h1>
           <p className="text-sm text-foreground-secondary mt-1">Create and manage real sales quotations</p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
-        >
-          <Plus size={18} />
-          <span>New Quote</span>
-        </button>
+        {canWrite && (
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
+          >
+            <Plus size={18} />
+            <span>New Quote</span>
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 max-w-sm">
@@ -191,15 +221,19 @@ export default function QuotesPage() {
                       {new Date(quote.validUntil).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleOpenModal(quote)} className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors" title="Edit"><Edit size={16} /></button>
-                        {quote.status === "accepted" && (
-                          <button onClick={() => handleConvertToOrder(quote)} className="p-1.5 rounded-lg text-success hover:bg-success-muted transition-colors" title="Convert to Order">
-                            <ArrowRightLeft size={16} />
-                          </button>
-                        )}
-                        <button onClick={() => handleDelete(quote._id)} className="p-1.5 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors" title="Delete"><Trash2 size={16} /></button>
-                      </div>
+                      {canWrite ? (
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => handleOpenModal(quote)} className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors" title="Edit"><Edit size={16} /></button>
+                          {quote.status === "accepted" && (
+                            <button onClick={() => handleConvertToOrder(quote)} className="p-1.5 rounded-lg text-success hover:bg-success-muted transition-colors" title="Convert to Order">
+                              <ArrowRightLeft size={16} />
+                            </button>
+                          )}
+                          <button onClick={() => handleDelete(quote._id)} className="p-1.5 rounded-lg text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors" title="Delete"><Trash2 size={16} /></button>
+                        </div>
+                      ) : (
+                        <span className="text-foreground-muted text-xs mr-2">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}

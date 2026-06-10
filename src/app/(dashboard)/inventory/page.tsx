@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Package, Search, Plus, ArrowUpRight, TrendingUp, AlertTriangle, BadgeAlert } from "lucide-react";
+import { Package, Search, Plus, ArrowUpRight, TrendingUp, AlertTriangle, BadgeAlert, Loader2, Shield } from "lucide-react";
+import { usePermission } from "@/hooks/use-permission";
 
 export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { hasAccess, canWrite, loading } = usePermission("invoices");
 
   const inventoryItems = [
     { id: "INV-001", name: "Cat6 Ethernet Cable (305m)", category: "Cables", stock: 45, unit: "Rolls", status: "In Stock", price: "$120" },
@@ -19,6 +21,34 @@ export default function InventoryPage() {
     item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (loading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-foreground-muted uppercase tracking-[0.2em]">
+          Checking Access...
+        </p>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 bg-danger/10 text-danger rounded-full">
+          <Shield size={48} className="animate-pulse" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h2 className="text-2xl font-black tracking-tight text-foreground">Access Denied</h2>
+          <p className="text-sm text-foreground-secondary leading-relaxed">
+            You do not have the required permissions to access the Inventory module. 
+            Please contact your organization administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in p-2 lg:p-4 bg-[#f8f9fc] min-h-screen">
       {/* Header */}
@@ -31,10 +61,12 @@ export default function InventoryPage() {
             <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Inventory & Assets</h1>
           </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer">
-          <Plus size={16} className="stroke-[3]" />
-          <span>Add Asset</span>
-        </button>
+        {canWrite && (
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer">
+            <Plus size={16} className="stroke-[3]" />
+            <span>Add Asset</span>
+          </button>
+        )}
       </div>
 
       {/* Stats Grid */}

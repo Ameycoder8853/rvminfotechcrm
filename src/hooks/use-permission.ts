@@ -53,7 +53,7 @@ export function usePermission(moduleKey: "leads" | "customers" | "invoices" | "t
     ? (rawTeam.permissions as any)
     : null;
 
-  const defaultFallback = "all";
+  const defaultFallback = (roleTier === "senior" || roleTier === "junior") ? "none" : "all";
   const permLevel = (userPerms?.[moduleKey] || teamPerms?.[moduleKey] || defaultFallback) as PermissionLevel;
 
   return {
