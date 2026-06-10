@@ -422,7 +422,7 @@ export default function LeadsPage() {
                       <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted hidden md:table-cell">Company</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Value</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Status</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted hidden lg:table-cell text-right">Actions</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted hidden lg:table-cell text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -456,7 +456,7 @@ export default function LeadsPage() {
                 {kanbanColumns.map((col) => {
                   const colLeads = filteredLeads.filter((l) => l.status === col.key);
                   return (
-                    <div key={col.key} className="min-w-[300px] w-[300px] shrink-0 flex flex-col bg-background-secondary/30 rounded-xl border border-border h-[calc(100vh-280px)]">
+                    <div key={col.key} className="min-w-75 w-75 shrink-0 flex flex-col bg-background-secondary/30 rounded-xl border border-border h-[calc(100vh-280px)]">
                       <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-surface/50 rounded-t-xl">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
                         <span className="text-sm font-bold text-foreground">{col.label}</span>
