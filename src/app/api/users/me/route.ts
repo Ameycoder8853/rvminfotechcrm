@@ -28,14 +28,24 @@ export async function GET(req: NextRequest) {
       const clerk = await clerkClient();
       const clerkUser = await clerk.users.getUser(userId);
       if (clerkUser) {
-        const clerkRole = (clerkUser.publicMetadata?.role as string) || (clerkUser.publicMetadata?.roleTier as string);
-        if (clerkRole && (dbUser.roleTier !== clerkRole || (clerkRole === "admin" && dbUser.role !== "admin"))) {
-          dbUser.roleTier = clerkRole as any;
-          if (clerkRole === "admin" || clerkRole === "super_admin") {
-            dbUser.role = "admin";
-          }
+        const clerkRoleTier = clerkUser.publicMetadata?.roleTier as string;
+        const clerkRole = clerkUser.publicMetadata?.role as string;
+        
+        let needsSave = false;
+        
+        if (clerkRoleTier && dbUser.roleTier !== clerkRoleTier) {
+          dbUser.roleTier = clerkRoleTier as any;
+          needsSave = true;
+        }
+        
+        if (clerkRole && dbUser.role !== clerkRole) {
+          dbUser.role = clerkRole as any;
+          needsSave = true;
+        }
+        
+        if (needsSave) {
           await dbUser.save();
-          console.log(`[DB] Synced roleTier to ${clerkRole} from Clerk metadata`);
+          console.log(`[DB] Synced roleTier to ${dbUser.roleTier} and role to ${dbUser.role} from Clerk metadata`);
         }
       }
     } catch (clerkErr) {
