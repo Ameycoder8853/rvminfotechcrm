@@ -50,19 +50,19 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in p-2 lg:p-4 bg-[#f8f9fc] min-h-screen">
+    <div className="space-y-6 animate-fade-in p-2 lg:p-4 bg-background min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
             <Package size={22} className="stroke-[2.5]" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Inventory & Assets</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Inventory & Assets</h1>
           </div>
         </div>
         {canWrite && (
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer">
             <Plus size={16} className="stroke-[3]" />
             <span>Add Asset</span>
           </button>
@@ -71,91 +71,91 @@ export default function InventoryPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total SKU Items</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-2">140 items</h3>
-            <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1 mt-1.5">
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Total SKU Items</p>
+            <h3 className="text-2xl font-bold text-foreground mt-2">140 items</h3>
+            <span className="text-xs font-semibold text-success flex items-center gap-1 mt-1.5">
               <TrendingUp size={12} />
               <span>+4% this week</span>
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <div className="w-12 h-12 rounded-2xl bg-accent-muted flex items-center justify-center text-accent">
             <Package size={22} />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Low Stock SKU Alert</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-2">3 SKUs</h3>
-            <span className="text-xs font-semibold text-amber-500 flex items-center gap-1 mt-1.5">
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Low Stock SKU Alert</p>
+            <h3 className="text-2xl font-bold text-foreground mt-2">3 SKUs</h3>
+            <span className="text-xs font-semibold text-warning flex items-center gap-1 mt-1.5">
               <AlertTriangle size={12} />
               <span>Needs immediate reorder</span>
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
+          <div className="w-12 h-12 rounded-2xl bg-warning-muted flex items-center justify-center text-warning">
             <BadgeAlert size={22} />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-surface p-5 rounded-2xl border border-border shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Valuation</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-2">$24,850</h3>
-            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1 mt-1.5">
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Estimated Valuation</p>
+            <h3 className="text-2xl font-bold text-foreground mt-2">$24,850</h3>
+            <span className="text-xs font-semibold text-foreground-muted flex items-center gap-1 mt-1.5">
               <ArrowUpRight size={12} />
               <span>Asset valuation model</span>
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-600">
+          <div className="w-12 h-12 rounded-2xl bg-background-secondary flex items-center justify-center text-foreground-secondary">
             <Package size={22} />
           </div>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50/20">
-          <Search size={18} className="text-slate-400 shrink-0" />
+      <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center gap-3 bg-background-secondary/20">
+          <Search size={18} className="text-foreground-muted shrink-0" />
           <input
             type="text"
             placeholder="Search inventory assets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm text-slate-700 placeholder-slate-400 w-full font-medium"
+            className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full font-medium"
           />
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Asset Name</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">SKU Code</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Category</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Stock Qty</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Status</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Unit Price</th>
+              <tr className="border-b border-border bg-background-secondary/50">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Asset Name</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">SKU Code</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Category</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Stock Qty</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Status</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Unit Price</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100/70">
+            <tbody className="divide-y divide-border/70">
               {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/40 transition-colors">
-                  <td className="px-6 py-4.5 font-semibold text-slate-800 text-sm">{item.name}</td>
-                  <td className="px-6 py-4.5 text-xs font-bold text-indigo-600">{item.id}</td>
-                  <td className="px-6 py-4.5 text-xs font-semibold text-slate-500">{item.category}</td>
-                  <td className="px-6 py-4.5 text-sm font-semibold text-slate-700">{item.stock} {item.unit}</td>
+                <tr key={item.id} className="hover:bg-surface-hover/40 transition-colors">
+                  <td className="px-6 py-4.5 font-semibold text-foreground text-sm">{item.name}</td>
+                  <td className="px-6 py-4.5 text-xs font-bold text-accent">{item.id}</td>
+                  <td className="px-6 py-4.5 text-xs font-semibold text-foreground-secondary">{item.category}</td>
+                  <td className="px-6 py-4.5 text-sm font-semibold text-foreground-secondary">{item.stock} {item.unit}</td>
                   <td className="px-6 py-4.5">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                      item.status === "In Stock" ? "bg-emerald-50 text-emerald-600 border border-emerald-100/40" :
-                      item.status === "Low Stock" ? "bg-amber-50 text-amber-600 border border-amber-100/40" :
-                      "bg-red-50 text-red-600 border border-red-100/40"
+                      item.status === "In Stock" ? "bg-success-muted text-success border border-success/20" :
+                      item.status === "Low Stock" ? "bg-warning-muted text-warning border border-warning/20" :
+                      "bg-danger-muted text-danger border border-danger/20"
                     }`}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4.5 text-sm font-bold text-slate-800">{item.price}</td>
+                  <td className="px-6 py-4.5 text-sm font-bold text-foreground">{item.price}</td>
                 </tr>
               ))}
             </tbody>

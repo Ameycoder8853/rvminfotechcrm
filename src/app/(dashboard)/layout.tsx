@@ -6,6 +6,7 @@ import { Loader2, Lock, Mail, LogOut } from "lucide-react";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import MobileNav from "@/components/layout/mobile-nav";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({
   children,
@@ -15,7 +16,23 @@ export default function DashboardLayout({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { signOut } = useClerk();
+
+  useEffect(() => {
+    const collapsed = localStorage.getItem("sidebar-collapsed");
+    if (collapsed === "true") {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  const handleToggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("sidebar-collapsed", String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     async function fetchMe() {
@@ -101,7 +118,10 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      <Sidebar />
+      <Sidebar 
+        isCollapsed={isCollapsed} 
+        onToggleCollapse={handleToggleCollapse} 
+      />
 
       {/* Mobile Navigation */}
       <MobileNav
@@ -110,7 +130,10 @@ export default function DashboardLayout({
       />
 
       {/* Main Content Area */}
-      <div className="lg:pl-sidebar-width min-h-screen flex flex-col transition-all duration-300">
+      <div className={cn(
+        "min-h-screen flex flex-col transition-all duration-300",
+        isCollapsed ? "lg:pl-sidebar-collapsed-width" : "lg:pl-sidebar-width"
+      )}>
         <Header onMenuClick={() => setMobileNavOpen(true)} />
 
         <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">

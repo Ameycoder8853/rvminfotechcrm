@@ -18,6 +18,7 @@ import {
   Calendar,
   Settings,
   ChevronRight,
+  ChevronLeft,
   Phone,
   Clock,
   Package,
@@ -166,9 +167,11 @@ const navigationSections: NavSection[] = [
 
 interface SidebarProps {
   className?: string;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export default function Sidebar({ className }: SidebarProps) {
+export default function Sidebar({ className, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [currentUser, setCurrentUser] = useState<any | null>(null);
@@ -311,29 +314,42 @@ export default function Sidebar({ className }: SidebarProps) {
     return (
       <aside
         className={cn(
-          "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 w-sidebar-width bg-sidebar-bg border-r border-sidebar-border animate-fade-in",
+          "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 bg-sidebar-bg border-r border-sidebar-border animate-fade-in transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-sidebar-collapsed-width" : "w-sidebar-width",
           className
         )}
       >
         {/* Brand Header */}
-        <div className="flex items-center px-5 h-header-height border-b border-sidebar-border shrink-0 bg-transparent">
+        <div className={cn(
+          "flex items-center h-header-height border-b border-sidebar-border shrink-0 bg-transparent transition-all duration-300",
+          isCollapsed ? "justify-center px-0" : "px-5"
+        )}>
           <div className="w-9.5 h-9.5 rounded-[11px] bg-accent/25 animate-pulse shrink-0" />
-          <div className="ml-3 h-5 w-24 bg-surface-hover animate-pulse rounded-md" />
+          {!isCollapsed && <div className="ml-3 h-5 w-24 bg-surface-hover animate-pulse rounded-md" />}
         </div>
         {/* Skeleton items */}
-        <div className="flex-1 p-4 space-y-6">
-          <div className="space-y-3">
-            <div className="h-3 w-16 bg-surface-hover animate-pulse rounded-md" />
-            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
-            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+        {!isCollapsed ? (
+          <div className="flex-1 p-4 space-y-6">
+            <div className="space-y-3">
+              <div className="h-3 w-16 bg-surface-hover animate-pulse rounded-md" />
+              <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+              <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+            </div>
+            <div className="space-y-3">
+              <div className="h-3 w-20 bg-surface-hover animate-pulse rounded-md" />
+              <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+              <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+              <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+            </div>
           </div>
-          <div className="space-y-3">
-            <div className="h-3 w-20 bg-surface-hover animate-pulse rounded-md" />
-            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
-            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
-            <div className="h-9 w-full bg-surface-hover animate-pulse rounded-lg" />
+        ) : (
+          <div className="flex-1 py-4 space-y-6 flex flex-col items-center">
+            <div className="w-8 h-8 rounded-lg bg-surface-hover animate-pulse" />
+            <div className="w-8 h-8 rounded-lg bg-surface-hover animate-pulse" />
+            <div className="w-8 h-8 rounded-lg bg-surface-hover animate-pulse" />
+            <div className="w-8 h-8 rounded-lg bg-surface-hover animate-pulse" />
           </div>
-        </div>
+        )}
       </aside>
     );
   }
@@ -341,33 +357,55 @@ export default function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out w-sidebar-width",
+        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out relative",
+        isCollapsed ? "w-sidebar-collapsed-width" : "w-sidebar-width",
         "bg-sidebar-bg border-r border-sidebar-border",
         className
       )}
     >
+      {/* Desktop Collapse Toggle Button */}
+      {onToggleCollapse && (
+        <button
+          onClick={onToggleCollapse}
+          className="hidden lg:flex absolute -right-3 top-[20px] z-50 w-6 h-6 rounded-full border border-sidebar-border bg-sidebar-bg items-center justify-center text-foreground-muted hover:text-foreground shadow-sm cursor-pointer transition-transform duration-200"
+        >
+          {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
+      )}
+
       {/* Brand Header: Beautiful logo squircle and gradient-text exact matching screenshot */}
-      <div className="flex items-center justify-between px-5 h-header-height border-b border-sidebar-border shrink-0 bg-transparent">
+      <div className={cn(
+        "flex items-center h-header-height border-b border-sidebar-border shrink-0 bg-transparent transition-all duration-300 relative",
+        isCollapsed ? "justify-center px-0" : "justify-between px-5"
+      )}>
         <div className="flex items-center gap-3">
           <div className="w-9.5 h-9.5 rounded-[11px] bg-accent flex items-center justify-center shadow-sm shrink-0">
             <Layers size={19} className="text-white stroke-[2.2]" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">
-            RVM <span className="gradient-text">CRM</span>
-          </span>
+          {!isCollapsed && (
+            <span className="text-xl font-bold tracking-tight text-foreground animate-fade-in whitespace-nowrap">
+              RVM <span className="gradient-text">CRM</span>
+            </span>
+          )}
         </div>
-        <button className="lg:hidden text-foreground-muted hover:text-foreground transition-colors p-1 cursor-pointer">
-          <X size={16} />
-        </button>
+        {!isCollapsed && (
+          <button className="lg:hidden text-foreground-muted hover:text-foreground transition-colors p-1 cursor-pointer">
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {/* Menu List structured in Premium Sections */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 bg-transparent scrollbar-thin">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 bg-transparent scrollbar-thin transition-all duration-300">
         {visibleSections.map((section) => (
           <div key={section.category} className="space-y-1.5">
-            <div className="px-4 text-[10px] font-bold tracking-wider text-foreground-muted uppercase">
-              {section.category}
-            </div>
+            {isCollapsed ? (
+              <div className="mx-2 my-3 border-t border-sidebar-border/50" />
+            ) : (
+              <div className="px-4 text-[10px] font-bold tracking-wider text-foreground-muted uppercase transition-all duration-300">
+                {section.category}
+              </div>
+            )}
             <div className="space-y-0.5">
               {section.items.map((item) => {
                 const hasSubItems = !!item.subItems;
@@ -377,9 +415,12 @@ export default function Sidebar({ className }: SidebarProps) {
                   ? item.subItems?.some((sub) => pathname === sub.href || pathname.startsWith(sub.href + "?"))
                   : pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href || ""));
 
+                // If collapsed, clicking an item with subItems navigates directly to the first subItem
+                const itemTargetHref = hasSubItems ? item.subItems?.[0]?.href : item.href;
+
                 return (
                   <div key={item.title} className="space-y-0.5">
-                    {hasSubItems ? (
+                    {hasSubItems && !isCollapsed ? (
                       <button
                         onClick={() => toggleExpand(item.title)}
                         className={cn(
@@ -411,16 +452,19 @@ export default function Sidebar({ className }: SidebarProps) {
                       </button>
                     ) : (
                       <Link
-                        href={item.href || "#"}
+                        href={itemTargetHref || "#"}
                         title={item.title}
                         className={cn(
-                          "flex items-center justify-between px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 group",
+                          "flex items-center transition-all duration-150 group",
+                          isCollapsed 
+                            ? "justify-center w-10 h-10 mx-auto rounded-xl animate-fade-in"
+                            : "justify-between px-4 py-2 rounded-lg w-full text-sm font-semibold",
                           isMainActive
                             ? "text-accent bg-accent-muted"
                             : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
                         )}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className={cn("flex items-center", isCollapsed ? "justify-center" : "gap-3")}>
                           <span
                             className={cn(
                               "shrink-0 transition-colors",
@@ -429,37 +473,46 @@ export default function Sidebar({ className }: SidebarProps) {
                           >
                             {item.icon}
                           </span>
-                          <span>{item.title}</span>
+                          {!isCollapsed && <span className="animate-fade-in whitespace-nowrap">{item.title}</span>}
                         </div>
-                        <ChevronRight 
-                          size={14} 
-                          className={cn(
-                            "transition-colors",
-                            isMainActive ? "text-accent" : "text-foreground-muted group-hover:text-foreground-secondary"
-                          )}
-                        />
+                        {!isCollapsed && (
+                          <ChevronRight 
+                            size={14} 
+                            className={cn(
+                              "transition-colors",
+                              isMainActive ? "text-accent" : "text-foreground-muted group-hover:text-foreground-secondary"
+                            )}
+                          />
+                        )}
                       </Link>
                     )}
 
-                    {hasSubItems && isExpanded && (
-                      <div className="space-y-0.5 transition-all duration-300">
-                        {item.subItems?.map((sub) => {
-                          const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + "?");
-                          return (
-                            <Link
-                              key={sub.href}
-                              href={sub.href}
-                              className={cn(
-                                "flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors pl-11",
-                                isSubActive
-                                  ? "text-accent hover:text-accent-hover"
-                                  : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover/40"
-                              )}
-                            >
-                              {sub.title}
-                            </Link>
-                          );
-                        })}
+                    {hasSubItems && !isCollapsed && (
+                      <div
+                        className={cn(
+                          "grid transition-all duration-300 ease-in-out",
+                          isExpanded ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                        )}
+                      >
+                        <div className="overflow-hidden space-y-0.5">
+                          {item.subItems?.map((sub) => {
+                            const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + "?");
+                            return (
+                              <Link
+                                key={sub.href}
+                                href={sub.href}
+                                className={cn(
+                                  "flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors pl-11",
+                                  isSubActive
+                                    ? "text-accent hover:text-accent-hover"
+                                    : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover/40"
+                                )}
+                              >
+                                {sub.title}
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -472,41 +525,48 @@ export default function Sidebar({ className }: SidebarProps) {
 
       {/* User Profile Footer Section displaying Roles & Details */}
       {currentUser && (
-        <div className="p-4 border-t border-sidebar-border bg-background-secondary/25 flex flex-col gap-3 shrink-0">
-          <div className="flex items-center gap-3">
+        <div className={cn(
+          "p-4 border-t border-sidebar-border bg-background-secondary/25 flex flex-col gap-3 shrink-0 transition-all duration-300",
+          isCollapsed ? "items-center" : ""
+        )}>
+          <div className={cn("flex items-center w-full", isCollapsed ? "justify-center" : "gap-3")}>
             {currentUser.avatar ? (
-              <img src={currentUser.avatar} alt={currentUser.firstName} className="w-10 h-10 rounded-xl object-cover border border-border" />
+              <img src={currentUser.avatar} alt={currentUser.firstName} className="w-10 h-10 rounded-xl object-cover border border-border shrink-0" />
             ) : (
               <div className="w-10 h-10 rounded-xl bg-accent-muted text-accent font-bold text-sm flex items-center justify-center shrink-0">
                 {`${currentUser.firstName?.[0] || ""}${currentUser.lastName?.[0] || ""}`.toUpperCase() || "U"}
               </div>
             )}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-foreground truncate">{currentUser.firstName} {currentUser.lastName}</p>
-              <p className="text-xs text-foreground-secondary truncate">{currentUser.email}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Session Role</span>
-            {currentUser.roleTier === "super_admin" ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
-                Super Admin
-              </span>
-            ) : currentUser.roleTier === "admin" ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                Company Admin
-              </span>
-            ) : currentUser.roleTier === "senior" ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                Senior Manager
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-slate-500/10 text-slate-400 border border-slate-500/20">
-                Junior Rep
-              </span>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1 animate-fade-in">
+                <p className="text-sm font-bold text-foreground truncate">{currentUser.firstName} {currentUser.lastName}</p>
+                <p className="text-xs text-foreground-secondary truncate">{currentUser.email}</p>
+              </div>
             )}
           </div>
+          
+          {!isCollapsed && (
+            <div className="flex items-center justify-between mt-1 animate-fade-in">
+              <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Session Role</span>
+              {currentUser.roleTier === "super_admin" ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
+                  Super Admin
+                </span>
+              ) : currentUser.roleTier === "admin" ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  Company Admin
+                </span>
+              ) : currentUser.roleTier === "senior" ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Senior Manager
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                  Junior Rep
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </aside>
