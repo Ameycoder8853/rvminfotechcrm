@@ -21,6 +21,7 @@ interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  role?: string;
   roleTier: "super_admin" | "admin" | "senior" | "junior" | "none";
   teamId?: Team;
   parentManager?: { _id: string; firstName: string; lastName: string };
@@ -454,13 +455,23 @@ export default function TeamsPage() {
                     <div>
                       <p className="font-semibold text-sm">{u.firstName} {u.lastName}</p>
                       <p className="text-[10px] text-foreground-secondary mt-0.5">{u.email}</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
                         <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-accent-muted text-accent">
                           {u.roleTier}
                         </span>
+                        {u.role && (
+                          <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-surface-active text-foreground-secondary">
+                            {u.role}
+                          </span>
+                        )}
                         {u.teamId && (
                           <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-surface-active text-foreground-secondary">
                             {u.teamId.name}
+                          </span>
+                        )}
+                        {u.parentManager && (
+                          <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            Senior: {u.parentManager.firstName} {u.parentManager.lastName}
                           </span>
                         )}
                       </div>
