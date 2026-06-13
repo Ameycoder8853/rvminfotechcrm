@@ -357,7 +357,7 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out relative",
+        "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out",
         isCollapsed ? "w-sidebar-collapsed-width" : "w-sidebar-width",
         "bg-sidebar-bg border-r border-sidebar-border",
         className
@@ -367,7 +367,7 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
       {onToggleCollapse && (
         <button
           onClick={onToggleCollapse}
-          className="hidden lg:flex absolute -right-3 top-[20px] z-50 w-6 h-6 rounded-full border border-sidebar-border bg-sidebar-bg items-center justify-center text-foreground-muted hover:text-foreground shadow-sm cursor-pointer transition-transform duration-200"
+          className="hidden lg:flex absolute -right-3 top-5 z-50 w-6 h-6 rounded-full border border-sidebar-border bg-sidebar-bg items-center justify-center text-foreground-muted hover:text-foreground shadow-sm cursor-pointer transition-transform duration-200"
         >
           {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
         </button>
