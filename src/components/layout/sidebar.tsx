@@ -315,7 +315,7 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
       <aside
         className={cn(
           "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 bg-sidebar-bg border-r border-sidebar-border animate-fade-in transition-all duration-300 ease-in-out",
-          isCollapsed ? "w-[72px]" : "w-[260px]",
+          isCollapsed ? "w-18" : "w-65",
           className
         )}
       >
@@ -358,7 +358,7 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
     <aside
       className={cn(
         "hidden lg:flex flex-col fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-[72px]" : "w-[260px]",
+        isCollapsed ? "w-18" : "w-65",
         "bg-sidebar-bg border-r border-sidebar-border",
         className
       )}

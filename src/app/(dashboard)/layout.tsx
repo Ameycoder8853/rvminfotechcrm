@@ -132,7 +132,7 @@ export default function DashboardLayout({
       {/* Main Content Area */}
       <div className={cn(
         "min-h-screen flex flex-col transition-all duration-300",
-        isCollapsed ? "lg:pl-[72px]" : "lg:pl-[260px]"
+        isCollapsed ? "lg:pl-18" : "lg:pl-65"
       )}>
         <Header onMenuClick={() => setMobileNavOpen(true)} />
 
