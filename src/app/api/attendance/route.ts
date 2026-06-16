@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Attendance from "@/models/Attendance";
 import User from "@/models/User";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,8 +15,9 @@ export async function GET(req: NextRequest) {
     const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const filter: Record<string, unknown> = {};
-    if (dbUser.role !== "admin") filter.user = dbUser._id;
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const filter: Record<string, unknown> = { ...baseFilter };
+    if (dbUser.roleTier !== "admin" && dbUser.roleTier !== "super_admin") filter.user = dbUser._id;
 
     const records = await Attendance.find(filter)
       .populate("user", "firstName lastName")
@@ -40,12 +42,14 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const record = await Attendance.create({
       user: dbUser._id,
       type: body.type,
       coordinates: body.coordinates,
       address: body.address || "",
       notes: body.notes || "",
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: record }, { status: 201 });

@@ -73,6 +73,28 @@ export async function getAccessFilter(dbUser: any, impersonateOrgId?: string): P
     return baseFilter;
   }
 
-  // Fallback to absolute security (no access)
+// Fallback to absolute security (no access)
   return { _id: new mongoose.Types.ObjectId() };
+}
+
+/**
+ * Next.js Request-scoped helper that automatically extracts impersonation cookies
+ * and resolves the correct multi-tenant database filter query.
+ */
+import { NextRequest } from "next/server";
+export async function getScopedFilter(req: NextRequest, dbUser: any): Promise<Record<string, any>> {
+  const impersonateOrgId = req.cookies.get("rvm_impersonate_org_id")?.value;
+  return getAccessFilter(dbUser, impersonateOrgId);
+}
+
+/**
+ * Returns the correct organization context ObjectId to write/create business records
+ * under (handles standard organization mapping and Super Admin impersonation writes).
+ */
+export function getWriteOrgId(req: NextRequest, dbUser: any): mongoose.Types.ObjectId | undefined {
+  const impersonateOrgId = req.cookies.get("rvm_impersonate_org_id")?.value;
+  if (dbUser.roleTier === "super_admin" && impersonateOrgId) {
+    return new mongoose.Types.ObjectId(impersonateOrgId);
+  }
+  return dbUser.orgId ? new mongoose.Types.ObjectId(dbUser.orgId) : undefined;
 }

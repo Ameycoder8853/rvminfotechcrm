@@ -5,6 +5,7 @@ import Quote from "@/models/Quote";
 import User from "@/models/User";
 import { generateId } from "@/lib/utils";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,13 +13,17 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
     const [quotes, total] = await Promise.all([
-      Quote.find().populate("customer", "firstName lastName company").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
-      Quote.countDocuments(),
+      Quote.find(baseFilter).populate("customer", "firstName lastName company").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      Quote.countDocuments(baseFilter),
     ]);
 
     return NextResponse.json({ success: true, data: quotes, total, page, limit, totalPages: Math.ceil(total / limit) });
@@ -38,10 +43,12 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const quote = await Quote.create({
       ...body,
       quoteNumber: generateId("QT"),
       createdBy: dbUser._id,
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: quote }, { status: 201 });

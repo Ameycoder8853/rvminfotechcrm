@@ -158,11 +158,13 @@ export default function SuperAdminPage() {
       if (activeImpersonatedOrg === orgId) {
         sessionStorage.removeItem("rvm_impersonate_org_id");
         sessionStorage.removeItem("rvm_impersonate_org_name");
+        document.cookie = "rvm_impersonate_org_id=; path=/; max-age=0";
         setActiveImpersonatedOrg(null);
         alert("Impersonation cleared. Viewing global logs.");
       } else {
         sessionStorage.setItem("rvm_impersonate_org_id", orgId);
         sessionStorage.setItem("rvm_impersonate_org_name", orgName);
+        document.cookie = `rvm_impersonate_org_id=${orgId}; path=/; max-age=31536000`; // 1 year
         setActiveImpersonatedOrg(orgId);
         alert(`Now impersonating context: ${orgName}. Database requests will filter to this company.`);
       }

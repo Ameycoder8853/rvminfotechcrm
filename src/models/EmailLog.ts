@@ -8,10 +8,13 @@ export interface IEmailLog extends Document {
   status: "sent" | "failed" | "opened";
   timestamp: Date;
   createdAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
-const EmailLogSchema = new Schema<IEmailLog>(
-  {
+const EmailLogSchema = new Schema<IEmailLog>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     subject: { type: String, required: true },
@@ -22,8 +25,7 @@ const EmailLogSchema = new Schema<IEmailLog>(
       default: "sent",
     },
     timestamp: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 if (mongoose.models.EmailLog) {

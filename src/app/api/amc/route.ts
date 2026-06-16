@@ -5,6 +5,7 @@ import AMC from "@/models/AMC";
 import User from "@/models/User";
 import { generateId } from "@/lib/utils";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,10 +13,14 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { ...baseFilter };
     if (status) filter.status = status;
 
     const amcs = await AMC.find(filter)
@@ -40,10 +45,12 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const amc = await AMC.create({
       ...body,
       contractNumber: generateId("AMC"),
       createdBy: dbUser._id,
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: amc }, { status: 201 });

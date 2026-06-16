@@ -21,6 +21,8 @@ export interface IOrder extends Document {
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
 const OrderItemSchema = new Schema<IOrderItem>({
@@ -30,8 +32,9 @@ const OrderItemSchema = new Schema<IOrderItem>({
   total: { type: Number, required: true },
 });
 
-const OrderSchema = new Schema<IOrder>(
-  {
+const OrderSchema = new Schema<IOrder>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     orderNumber: { type: String, required: true, unique: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     quote: { type: Schema.Types.ObjectId, ref: "Quote" },
@@ -47,8 +50,7 @@ const OrderSchema = new Schema<IOrder>(
     deliveryDate: { type: Date },
     notes: { type: String, default: "" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 OrderSchema.index({ orderNumber: 1 });

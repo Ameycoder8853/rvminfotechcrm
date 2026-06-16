@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import CallLog from "@/models/CallLog";
 import EmailLog from "@/models/EmailLog";
+import { getScopedFilter } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 // DELETE /api/comms/[id] — Delete comm log (call or email)
 export async function DELETE(
@@ -15,13 +17,16 @@ export async function DELETE(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
     // Check if it's a Call Log first
-    let deleted = await CallLog.findByIdAndDelete(id);
+    let deleted = await CallLog.findOneAndDelete({ _id: id, ...baseFilter });
 
     // If not found, check if it's an Email Log
     if (!deleted) {
-      deleted = await EmailLog.findByIdAndDelete(id);
+      deleted = await EmailLog.findOneAndDelete({ _id: id, ...baseFilter });
     }
 
     if (!deleted) {

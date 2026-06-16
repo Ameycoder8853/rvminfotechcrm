@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Invoice from "@/models/Invoice";
 import { generateId } from "@/lib/utils";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,7 +12,10 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
-    const invoices = await Invoice.find()
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const invoices = await Invoice.find(baseFilter)
       .populate("customer", "firstName lastName company")
       .sort({ createdAt: -1 })
       .lean();
@@ -28,6 +33,9 @@ export async function POST(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const body = await req.json();
     
     const invoiceNumber = generateId("INV");
@@ -35,6 +43,8 @@ export async function POST(req: NextRequest) {
     const invoice = await Invoice.create({
       ...body,
       invoiceNumber,
+      orgId: writeOrgId,
+      createdBy: dbUser._id,
     });
 
     return NextResponse.json({ success: true, data: invoice }, { status: 201 });

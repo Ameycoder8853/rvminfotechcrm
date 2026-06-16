@@ -9,10 +9,13 @@ export interface ICallLog extends Document {
   outcome: string;
   timestamp: Date;
   createdAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
-const CallLogSchema = new Schema<ICallLog>(
-  {
+const CallLogSchema = new Schema<ICallLog>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     type: {
@@ -24,8 +27,7 @@ const CallLogSchema = new Schema<ICallLog>(
     notes: { type: String, default: "" },
     outcome: { type: String, default: "" },
     timestamp: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 const CallLog: Model<ICallLog> =

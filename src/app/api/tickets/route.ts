@@ -5,6 +5,7 @@ import Ticket from "@/models/Ticket";
 import User from "@/models/User";
 import { generateId } from "@/lib/utils";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +21,8 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const status = searchParams.get("status");
 
-    const filter: Record<string, unknown> = {};
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const filter: Record<string, unknown> = { ...baseFilter };
     if (status) filter.status = status;
     if (dbUser.role === "service_tech") filter.assignedTech = dbUser._id;
 
@@ -46,10 +48,12 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const ticket = await Ticket.create({
       ...body,
       ticketNumber: generateId("TKT"),
       createdBy: dbUser._id,
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: ticket }, { status: 201 });

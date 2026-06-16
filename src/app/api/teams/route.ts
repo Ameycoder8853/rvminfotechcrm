@@ -35,6 +35,20 @@ export async function GET(req: NextRequest) {
         await dbUser.save();
         query.orgId = org._id;
       }
+
+      // Senior sees only their assigned team
+      if (dbUser.roleTier === "senior") {
+        if (dbUser.teamId) {
+          query._id = dbUser.teamId;
+        } else {
+          return NextResponse.json({ success: true, data: [] });
+        }
+      }
+
+      // Junior cannot view teams list
+      if (dbUser.roleTier === "junior") {
+        return NextResponse.json({ error: "Forbidden: Junior users cannot access teams list" }, { status: 403 });
+      }
     }
 
     const teams = await Team.find(query).sort({ createdAt: -1 }).lean();
@@ -61,8 +75,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { seniorManager, ...teamData } = body;
     
-    // Inject orgId into the body
-    if (!teamData.orgId) {
+    // Inject and enforce orgId
+    if (dbUser.roleTier !== "super_admin") {
+      teamData.orgId = dbUser.orgId;
+    } else if (!teamData.orgId) {
       if (dbUser.orgId) {
         teamData.orgId = dbUser.orgId;
       } else {

@@ -21,6 +21,8 @@ export interface ITicket extends Document {
   resolvedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
 const ServiceHistorySchema = new Schema<IServiceHistoryEntry>({
@@ -30,8 +32,9 @@ const ServiceHistorySchema = new Schema<IServiceHistoryEntry>({
   notes: { type: String, default: "" },
 });
 
-const TicketSchema = new Schema<ITicket>(
-  {
+const TicketSchema = new Schema<ITicket>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     ticketNumber: { type: String, required: true, unique: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     issueDescription: { type: String, required: true },
@@ -55,8 +58,7 @@ const TicketSchema = new Schema<ITicket>(
     serviceHistory: [ServiceHistorySchema],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     resolvedAt: { type: Date },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 TicketSchema.index({ ticketNumber: 1 });

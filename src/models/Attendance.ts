@@ -8,13 +8,15 @@ export interface IAttendance extends Document {
     lat: number;
     lng: number;
   };
+  orgId?: mongoose.Types.ObjectId;
   address: string;
   notes: string;
   createdAt: Date;
 }
 
-const AttendanceSchema = new Schema<IAttendance>(
-  {
+const AttendanceSchema = new Schema<IAttendance>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     type: {
       type: String,
@@ -28,8 +30,7 @@ const AttendanceSchema = new Schema<IAttendance>(
     },
     address: { type: String, default: "" },
     notes: { type: String, default: "" },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 AttendanceSchema.index({ user: 1, timestamp: -1 });

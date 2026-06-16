@@ -20,6 +20,8 @@ export interface ILead extends Document {
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
 const LeadNoteSchema = new Schema<ILeadNote>({
@@ -28,8 +30,9 @@ const LeadNoteSchema = new Schema<ILeadNote>({
   createdAt: { type: Date, default: Date.now },
 });
 
-const LeadSchema = new Schema<ILead>(
-  {
+const LeadSchema = new Schema<ILead>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     title: { type: String, required: true },
     source: {
       type: String,
@@ -53,8 +56,7 @@ const LeadSchema = new Schema<ILead>(
     notes: [LeadNoteSchema],
     followUpDate: { type: Date },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 LeadSchema.index({ status: 1, assignedTo: 1 });

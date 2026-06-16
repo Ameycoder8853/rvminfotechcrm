@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Attendance from "@/models/Attendance";
+import { getScopedFilter } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 export async function DELETE(
   req: NextRequest,
@@ -13,8 +15,11 @@ export async function DELETE(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const record = await Attendance.findByIdAndDelete(id);
+    const record = await Attendance.findOneAndDelete({ _id: id, ...baseFilter });
 
     if (!record) return NextResponse.json({ error: "Record not found" }, { status: 404 });
 

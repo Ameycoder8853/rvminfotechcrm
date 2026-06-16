@@ -2,6 +2,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
+import Team from "@/models/Team";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 // PATCH /api/users/[id] — Update user settings
@@ -31,6 +32,11 @@ export async function PATCH(
     const user = await User.findById(id);
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    // Validate organization context for Company Admins
+    if (dbUser.roleTier === "admin" && user.orgId?.toString() !== dbUser.orgId?.toString()) {
+      return NextResponse.json({ error: "Forbidden: Admins can only modify users in their own organization" }, { status: 403 });
+    }
+
     // Senior manager access scoping check:
     if (isSenior) {
       const isJuniorInSameTeam = user.roleTier === "junior" && 
@@ -43,6 +49,36 @@ export async function PATCH(
 
       if (body.roleTier && body.roleTier !== "junior") {
         return NextResponse.json({ error: "Unauthorized: Seniors cannot promote user tiers" }, { status: 403 });
+      }
+
+      if (body.role && body.role !== "sales" && body.role !== "service_tech" && body.role !== "field_agent") {
+        return NextResponse.json({ error: "Unauthorized: Invalid role specified for Junior" }, { status: 403 });
+      }
+
+      // Enforce permission levels limit for Seniors
+      if (body.permissions) {
+        const seniorTeam = dbUser.teamId ? await Team.findById(dbUser.teamId) : null;
+        const LEVELS = { none: 0, read: 1, write: 2, all: 3 };
+        const getLevel = (val: string) => LEVELS[val as keyof typeof LEVELS] ?? 0;
+
+        for (const key of ["leads", "customers", "invoices", "tickets"]) {
+          if (body.permissions[key]) {
+            const authorizerLevelStr = (dbUser.permissions as any)?.[key] || (seniorTeam?.permissions as any)?.[key] || "none";
+            if (getLevel(body.permissions[key]) > getLevel(authorizerLevelStr)) {
+              return NextResponse.json({ 
+                error: `Forbidden: Cannot assign "${body.permissions[key]}" permission on "${key}" because it exceeds your own permission level ("${authorizerLevelStr}")` 
+              }, { status: 403 });
+            }
+          }
+        }
+      }
+    }
+
+    // Validate team ID organization ownership
+    if (body.teamId) {
+      const teamObj = await Team.findById(body.teamId);
+      if (!teamObj || (dbUser.roleTier !== "super_admin" && teamObj.orgId?.toString() !== dbUser.orgId?.toString())) {
+        return NextResponse.json({ error: "Forbidden: Selected team does not belong to your organization" }, { status: 403 });
       }
     }
 

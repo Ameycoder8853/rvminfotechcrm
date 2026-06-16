@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Customer from "@/models/Customer"; // Ensure Customer model is registered for populate queries
+import { getScopedFilter } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 export async function PATCH(
   req: NextRequest,
@@ -14,9 +16,13 @@ export async function PATCH(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
     const body = await req.json();
+    delete body.orgId;
     
-    const order = await Order.findByIdAndUpdate(id, body, { new: true })
+    const order = await Order.findOneAndUpdate({ _id: id, ...baseFilter }, body, { new: true })
       .populate("customer", "firstName lastName company");
 
     if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -38,8 +44,11 @@ export async function DELETE(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const order = await Order.findByIdAndDelete(id);
+    const order = await Order.findOneAndDelete({ _id: id, ...baseFilter });
 
     if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 

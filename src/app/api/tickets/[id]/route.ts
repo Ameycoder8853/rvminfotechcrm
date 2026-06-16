@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Ticket from "@/models/Ticket";
+import { getScopedFilter } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 export async function PATCH(
   req: NextRequest,
@@ -13,9 +15,13 @@ export async function PATCH(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
     const body = await req.json();
+    delete body.orgId;
     
-    const ticket = await Ticket.findByIdAndUpdate(id, body, { new: true })
+    const ticket = await Ticket.findOneAndUpdate({ _id: id, ...baseFilter }, body, { new: true })
       .populate("customer", "firstName lastName company")
       .populate("assignedTech", "firstName lastName");
 
@@ -38,8 +44,10 @@ export async function DELETE(
 
     const { id } = await params;
     await connectToDatabase();
-
-    const ticket = await Ticket.findByIdAndDelete(id);
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const ticket = await Ticket.findOneAndDelete({ _id: id, ...baseFilter });
 
     if (!ticket) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
 

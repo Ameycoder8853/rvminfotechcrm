@@ -59,6 +59,7 @@ export interface ICustomer extends Document {
   interactions: IInteraction[];
   createdBy: Types.ObjectId;
   assignedTo?: Types.ObjectId; // Reference to assigned Junior sales rep
+  orgId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -123,6 +124,7 @@ const CustomerSchema = new Schema<ICustomer>(
     interactions: [InteractionSchema],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
   },
   { timestamps: true }
 );

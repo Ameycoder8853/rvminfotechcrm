@@ -66,7 +66,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Company Admins can only enroll Seniors or Juniors" }, { status: 403 });
       }
       if (teamId) {
-        finalTeamId = new mongoose.Types.ObjectId(teamId);
+        const teamObj = await Team.findById(teamId);
+        if (!teamObj || teamObj.orgId?.toString() !== requester.orgId?.toString()) {
+          return NextResponse.json({ error: "Forbidden: Selected team does not belong to your organization" }, { status: 403 });
+        }
+        finalTeamId = teamObj._id;
       }
       finalParentManagerId = requester._id;
     } 
@@ -77,6 +81,24 @@ export async function POST(req: NextRequest) {
       }
       finalTeamId = requester.teamId; // Inherited
       finalParentManagerId = requester._id;
+
+      // Enforce permission levels limit for Seniors
+      if (permissions) {
+        const seniorTeam = requester.teamId ? await Team.findById(requester.teamId) : null;
+        const LEVELS = { none: 0, read: 1, write: 2, all: 3 };
+        const getLevel = (val: string) => LEVELS[val as keyof typeof LEVELS] ?? 0;
+
+        for (const key of ["leads", "customers", "invoices", "tickets"]) {
+          if (permissions[key]) {
+            const authorizerLevelStr = (requester.permissions as any)?.[key] || (seniorTeam?.permissions as any)?.[key] || "none";
+            if (getLevel(permissions[key]) > getLevel(authorizerLevelStr)) {
+              return NextResponse.json({ 
+                error: `Forbidden: Cannot assign "${permissions[key]}" permission on "${key}" because it exceeds your own permission level ("${authorizerLevelStr}")` 
+              }, { status: 403 });
+            }
+          }
+        }
+      }
     } 
     // D. Juniors cannot enroll anyone
     else {

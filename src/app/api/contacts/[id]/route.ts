@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter } from "@/lib/rbac-filter";
 
 // GET /api/contacts/[id]
 export async function GET(
@@ -18,14 +19,10 @@ export async function GET(
     
     const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const contact = await Customer.findById(id).populate("assignedTo", "firstName lastName").lean();
-    if (!contact) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
-
-    // BOLA/IDOR checks
-    if (dbUser.roleTier === "junior" && String(contact.assignedTo?._id || contact.assignedTo) !== String(dbUser._id)) {
-      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
-    }
+    const contact = await Customer.findOne({ _id: id, ...baseFilter }).populate("assignedTo", "firstName lastName").lean();
+    if (!contact) return NextResponse.json({ error: "Contact not found or access denied" }, { status: 404 });
 
     return NextResponse.json({ success: true, data: contact });
   } catch (error) {
@@ -48,16 +45,13 @@ export async function PATCH(
     
     const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const existing = await Customer.findById(id);
-    if (!existing) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
-
-    // BOLA/IDOR checks
-    if (dbUser.roleTier === "junior" && String(existing.assignedTo) !== String(dbUser._id)) {
-      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
-    }
+    const existing = await Customer.findOne({ _id: id, ...baseFilter });
+    if (!existing) return NextResponse.json({ error: "Contact not found or access denied" }, { status: 404 });
 
     const body = await req.json();
+    delete body.orgId;
 
     if (body.email) body.emails = [body.email];
     if (body.phone) body.phones = [body.phone];
@@ -68,7 +62,7 @@ export async function PATCH(
       };
     }
 
-    const contact = await Customer.findByIdAndUpdate(id, body, { new: true })
+    const contact = await Customer.findOneAndUpdate({ _id: id, ...baseFilter }, body, { new: true })
       .populate("assignedTo", "firstName lastName");
 
     return NextResponse.json({ success: true, data: contact });
@@ -92,16 +86,10 @@ export async function DELETE(
     
     const dbUser = await getOrCreateDbUser();
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const existing = await Customer.findById(id);
-    if (!existing) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
-
-    // BOLA/IDOR checks
-    if (dbUser.roleTier === "junior" && String(existing.assignedTo) !== String(dbUser._id)) {
-      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
-    }
-
-    await Customer.findByIdAndDelete(id);
+    const deletedContact = await Customer.findOneAndDelete({ _id: id, ...baseFilter });
+    if (!deletedContact) return NextResponse.json({ error: "Contact not found or access denied" }, { status: 404 });
 
     return NextResponse.json({ success: true, message: "Contact deleted successfully" });
   } catch (error) {

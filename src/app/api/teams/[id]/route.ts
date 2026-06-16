@@ -15,9 +15,26 @@ export async function GET(
 
     const { id } = await params;
     await connectToDatabase();
-    const team = await Team.findById(id).lean();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const team = await Team.findById(id).lean();
     if (!team) return NextResponse.json({ error: "Team not found" }, { status: 404 });
+
+    // Enforce multi-tenancy context
+    if (dbUser.roleTier !== "super_admin" && team.orgId?.toString() !== dbUser.orgId?.toString()) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
+
+    // Senior sees only their assigned team
+    if (dbUser.roleTier === "senior" && dbUser.teamId?.toString() !== team._id.toString()) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
+
+    // Junior cannot access teams details
+    if (dbUser.roleTier === "junior") {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
 
     return NextResponse.json({ success: true, data: team });
   } catch (error) {
@@ -42,10 +59,21 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized: Admin access required" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const team = await Team.findByIdAndUpdate(id, body, { new: true });
+    const teamObj = await Team.findById(id);
+    if (!teamObj) return NextResponse.json({ error: "Team not found" }, { status: 404 });
 
-    if (!team) return NextResponse.json({ error: "Team not found" }, { status: 404 });
+    // Validate organization context
+    if (dbUser.roleTier !== "super_admin" && teamObj.orgId?.toString() !== dbUser.orgId?.toString()) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
+
+    const body = await req.json();
+    // Strip out orgId updates for non-super-admins
+    if (dbUser.roleTier !== "super_admin") {
+      delete body.orgId;
+    }
+
+    const team = await Team.findByIdAndUpdate(id, body, { new: true });
 
     return NextResponse.json({ success: true, data: team });
   } catch (error) {
@@ -70,9 +98,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized: Admin access required" }, { status: 403 });
     }
 
-    const team = await Team.findByIdAndDelete(id);
+    const teamObj = await Team.findById(id);
+    if (!teamObj) return NextResponse.json({ error: "Team not found" }, { status: 404 });
 
-    if (!team) return NextResponse.json({ error: "Team not found" }, { status: 404 });
+    // Validate organization context
+    if (dbUser.roleTier !== "super_admin" && teamObj.orgId?.toString() !== dbUser.orgId?.toString()) {
+      return NextResponse.json({ error: "Forbidden: Access Denied" }, { status: 403 });
+    }
+
+    const team = await Team.findByIdAndDelete(id);
 
     return NextResponse.json({ success: true, message: "Team deleted successfully" });
   } catch (error) {

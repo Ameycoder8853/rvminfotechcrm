@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Expense from "@/models/Expense";
+import { getScopedFilter } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 export async function PATCH(
   req: NextRequest,
@@ -13,9 +15,13 @@ export async function PATCH(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
     const body = await req.json();
+    delete body.orgId;
     
-    const expense = await Expense.findByIdAndUpdate(id, body, { new: true }).populate("user", "firstName lastName");
+    const expense = await Expense.findOneAndUpdate({ _id: id, ...baseFilter }, body, { new: true }).populate("user", "firstName lastName");
 
     if (!expense) return NextResponse.json({ error: "Expense not found" }, { status: 404 });
 
@@ -36,8 +42,11 @@ export async function DELETE(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const expense = await Expense.findByIdAndDelete(id);
+    const expense = await Expense.findOneAndDelete({ _id: id, ...baseFilter });
 
     if (!expense) return NextResponse.json({ error: "Expense not found" }, { status: 404 });
 

@@ -13,10 +13,13 @@ export interface IDiaryEntry extends Document {
   isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
-const DiaryEntrySchema = new Schema<IDiaryEntry>(
-  {
+const DiaryEntrySchema = new Schema<IDiaryEntry>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true },
     description: { type: String, default: "" },
@@ -31,8 +34,7 @@ const DiaryEntrySchema = new Schema<IDiaryEntry>(
     customer: { type: Schema.Types.ObjectId, ref: "Customer" },
     location: { type: String, default: "" },
     isCompleted: { type: Boolean, default: false },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 DiaryEntrySchema.index({ user: 1, date: 1 });

@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Lead from "@/models/Lead";
 import User from "@/models/User";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 // GET /api/leads — List leads
 export async function GET(req: NextRequest) {
@@ -20,15 +21,9 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const status = searchParams.get("status");
 
-    const filter: Record<string, unknown> = {};
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const filter: Record<string, unknown> = { ...baseFilter };
     if (status) filter.status = status;
-    // Role-Based Access Control (RBAC) Hierarchy Filters
-    if (dbUser.roleTier === "junior") {
-      filter.assignedTo = dbUser._id;
-    } else if (dbUser.roleTier === "senior" && dbUser.teamId) {
-      const teamUserIds = await User.find({ teamId: dbUser.teamId }).select("_id");
-      filter.assignedTo = { $in: teamUserIds.map((u) => u._id) };
-    }
 
     const [leads, total] = await Promise.all([
       Lead.find(filter)
@@ -60,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
+    const writeOrgId = getWriteOrgId(req, dbUser);
     if (Array.isArray(body)) {
       const formatted = body.map((item: any) => ({
         title: item.title || "Imported Lead",
@@ -70,12 +66,13 @@ export async function POST(req: NextRequest) {
         priority: item.priority || "medium",
         createdBy: dbUser._id,
         assignedTo: item.assignedTo || dbUser._id,
+        orgId: writeOrgId,
       }));
       const leads = await Lead.insertMany(formatted);
       return NextResponse.json({ success: true, count: leads.length, data: leads }, { status: 201 });
     }
 
-    const lead = await Lead.create({ ...body, createdBy: dbUser._id });
+    const lead = await Lead.create({ ...body, orgId: writeOrgId, createdBy: dbUser._id });
 
     return NextResponse.json({ success: true, data: lead }, { status: 201 });
   } catch (error) {

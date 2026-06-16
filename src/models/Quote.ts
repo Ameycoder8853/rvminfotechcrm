@@ -24,6 +24,8 @@ export interface IQuote extends Document {
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
 const QuoteItemSchema = new Schema<IQuoteItem>({
@@ -34,8 +36,9 @@ const QuoteItemSchema = new Schema<IQuoteItem>({
   total: { type: Number, required: true },
 });
 
-const QuoteSchema = new Schema<IQuote>(
-  {
+const QuoteSchema = new Schema<IQuote>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     quoteNumber: { type: String, required: true, unique: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     lead: { type: Schema.Types.ObjectId, ref: "Lead" },
@@ -53,8 +56,7 @@ const QuoteSchema = new Schema<IQuote>(
     notes: { type: String, default: "" },
     convertedToOrder: { type: Schema.Types.ObjectId, ref: "Order" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 QuoteSchema.index({ quoteNumber: 1 });

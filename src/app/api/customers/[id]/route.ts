@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
+import { getScopedFilter } from "@/lib/rbac-filter";
+import { getOrCreateDbUser } from "@/lib/get-or-create-user";
 
 // GET /api/customers/[id]
 export async function GET(
@@ -14,9 +16,12 @@ export async function GET(
 
     const { id } = await params;
     await connectToDatabase();
-    const customer = await Customer.findById(id).populate("assignedTo", "firstName lastName").lean();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const customer = await Customer.findOne({ _id: id, ...baseFilter }).populate("assignedTo", "firstName lastName").lean();
 
-    if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    if (!customer) return NextResponse.json({ error: "Customer not found or access denied" }, { status: 404 });
 
     return NextResponse.json({ success: true, data: customer });
   } catch (error) {
@@ -36,7 +41,11 @@ export async function PATCH(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
     const body = await req.json();
+    delete body.orgId;
 
     if (body.email) body.emails = [body.email];
     if (body.phone) body.phones = [body.phone];
@@ -46,7 +55,7 @@ export async function PATCH(
         city: body.city,
       };
     }
-    const customer = await Customer.findByIdAndUpdate(id, body, { new: true }).populate("assignedTo", "firstName lastName");
+    const customer = await Customer.findOneAndUpdate({ _id: id, ...baseFilter }, body, { new: true }).populate("assignedTo", "firstName lastName");
 
     if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
@@ -68,8 +77,11 @@ export async function DELETE(
 
     const { id } = await params;
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
 
-    const customer = await Customer.findByIdAndDelete(id);
+    const customer = await Customer.findOneAndDelete({ _id: id, ...baseFilter });
 
     if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 

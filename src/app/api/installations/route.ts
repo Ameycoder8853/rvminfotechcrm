@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Installation from "@/models/Installation";
 import User from "@/models/User";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,10 +12,14 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { ...baseFilter };
     if (status) filter.status = status;
 
     const installations = await Installation.find(filter)
@@ -41,9 +46,11 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const installation = await Installation.create({
       ...body,
       createdBy: dbUser._id,
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: installation }, { status: 201 });

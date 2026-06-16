@@ -6,6 +6,7 @@ import User from "@/models/User";
 import Customer from "@/models/Customer"; // Ensure Customer model is registered for populate queries
 import { generateId } from "@/lib/utils";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,12 +14,16 @@ export async function GET(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
+    const dbUser = await getOrCreateDbUser();
+    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const baseFilter = await getScopedFilter(req, dbUser);
+
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
     const status = searchParams.get("status");
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { ...baseFilter };
     if (status) filter.status = status;
 
     const [orders, total] = await Promise.all([
@@ -43,10 +48,12 @@ export async function POST(req: NextRequest) {
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const body = await req.json();
+    const writeOrgId = getWriteOrgId(req, dbUser);
     const order = await Order.create({
       ...body,
       orderNumber: generateId("ORD"),
       createdBy: dbUser._id,
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: order }, { status: 201 });

@@ -18,12 +18,14 @@ export interface IInvoice extends Document {
   dueDate: Date;
   issueDate: Date;
   notes: string;
+  orgId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const InvoiceSchema = new Schema<IInvoice>(
-  {
+const InvoiceSchema = new Schema<IInvoice>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     invoiceNumber: { type: String, required: true, unique: true },
     order: { type: Schema.Types.ObjectId, ref: "Order" },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },

@@ -14,6 +14,7 @@ export interface IAMC extends Document {
   endDate: Date;
   status: string;
   services: { description: string; frequency: string }[];
+  orgId?: mongoose.Types.ObjectId;
   value: number;
   renewalReminder: Date;
   serviceSchedule: IServiceScheduleEntry[];
@@ -29,8 +30,9 @@ const ServiceScheduleSchema = new Schema<IServiceScheduleEntry>({
   notes: { type: String, default: "" },
 });
 
-const AMCSchema = new Schema<IAMC>(
-  {
+const AMCSchema = new Schema<IAMC>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     contractNumber: { type: String, required: true, unique: true },
     startDate: { type: Date, required: true },
@@ -50,8 +52,7 @@ const AMCSchema = new Schema<IAMC>(
     renewalReminder: { type: Date },
     serviceSchedule: [ServiceScheduleSchema],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 AMCSchema.index({ contractNumber: 1 });

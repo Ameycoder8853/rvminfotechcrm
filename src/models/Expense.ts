@@ -12,10 +12,13 @@ export interface IExpense extends Document {
   approvalNotes: string;
   createdAt: Date;
   updatedAt: Date;
+
+  orgId?: mongoose.Types.ObjectId;
 }
 
-const ExpenseSchema = new Schema<IExpense>(
-  {
+const ExpenseSchema = new Schema<IExpense>({
+    orgId: { type: Schema.Types.ObjectId, ref: "Organization", index: true },
+
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     category: {
       type: String,
@@ -33,8 +36,7 @@ const ExpenseSchema = new Schema<IExpense>(
     },
     approvedBy: { type: Schema.Types.ObjectId, ref: "User" },
     approvalNotes: { type: String, default: "" },
-  },
-  { timestamps: true }
+  }, { timestamps: true }
 );
 
 ExpenseSchema.index({ user: 1, status: 1 });

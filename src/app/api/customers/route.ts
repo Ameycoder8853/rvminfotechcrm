@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Customer from "@/models/Customer";
 import User from "@/models/User";
 import { getOrCreateDbUser } from "@/lib/get-or-create-user";
+import { getScopedFilter, getWriteOrgId } from "@/lib/rbac-filter";
 
 // GET /api/customers — List customers with team filtering
 export async function GET(req: NextRequest) {
@@ -20,28 +21,25 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "1000"); // Allow fetching all for large lists
     const search = searchParams.get("search") || "";
 
-    const filter: Record<string, any> = {};
+    const baseFilter = await getScopedFilter(req, dbUser);
+    const filter: Record<string, any> = { ...baseFilter };
     if (search) {
-      filter.$or = [
+      const searchConditions = [
         { firstName: { $regex: search, $options: "i" } },
         { lastName: { $regex: search, $options: "i" } },
         { company: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
       ];
-    }
-
-    // Role-Based Access Control (RBAC) Hierarchical Filtering
-    if (dbUser.roleTier === "junior") {
-      // Juniors only see customers assigned directly to them
-      filter.assignedTo = dbUser._id;
-    } else if (dbUser.roleTier === "senior" && dbUser.teamId) {
-      // Seniors see all customers assigned to users in their team
-      const teamUserIds = await User.find({ teamId: dbUser.teamId }).select("_id");
-      filter.$or = filter.$or || [];
-      filter.$or.push(
-        { assignedTo: { $in: teamUserIds.map((u) => u._id) } },
-        { createdBy: { $in: teamUserIds.map((u) => u._id) } }
-      );
+      if (filter.$or) {
+        const existingOr = filter.$or;
+        delete filter.$or;
+        filter.$and = [
+          { $or: existingOr },
+          { $or: searchConditions }
+        ];
+      } else {
+        filter.$or = searchConditions;
+      }
     }
 
     const [customers, total] = await Promise.all([
@@ -81,6 +79,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Check if it's a bulk array import
+    const writeOrgId = getWriteOrgId(req, dbUser);
     if (Array.isArray(body)) {
       const formatted = body.map((item: any) => {
         const emails = item.email ? [item.email] : (item.emails || []);
@@ -103,6 +102,7 @@ export async function POST(req: NextRequest) {
           },
           createdBy: dbUser._id,
           assignedTo: item.assignedTo || dbUser._id,
+          orgId: writeOrgId,
         };
       });
 
@@ -123,6 +123,7 @@ export async function POST(req: NextRequest) {
       ...body,
       createdBy: dbUser._id,
       assignedTo: body.assignedTo || dbUser._id,
+      orgId: writeOrgId,
     });
 
     return NextResponse.json({ success: true, data: customer }, { status: 201 });
