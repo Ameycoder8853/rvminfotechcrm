@@ -23,7 +23,11 @@ export async function getAccessFilter(dbUser: any, impersonateOrgId?: string): P
     if (impersonateOrgId) {
       return { orgId: new mongoose.Types.ObjectId(impersonateOrgId) };
     }
-    return {};
+    // Restrict to their assigned organization if they have one. Otherwise, see no records.
+    if (dbUser.orgId) {
+      return { orgId: new mongoose.Types.ObjectId(dbUser.orgId) };
+    }
+    return { _id: new mongoose.Types.ObjectId() }; // Empty query (forces no results)
   }
 
   // Ensure organization context exists for non-super admins

@@ -17,7 +17,13 @@ export async function GET(req: NextRequest) {
     
     const query: Record<string, any> = {};
     if (dbUser) {
-      if (dbUser.orgId) {
+      if (dbUser.roleTier === "super_admin") {
+        // Super Admins can list all teams or filter by orgId parameter
+        const orgIdParam = req.nextUrl.searchParams.get("orgId");
+        if (orgIdParam) {
+          query.orgId = orgIdParam;
+        }
+      } else if (dbUser.orgId) {
         query.orgId = dbUser.orgId;
       } else {
         // Self-healing: create a default organization if none exists and assign it to user
@@ -48,8 +54,8 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
     const dbUser = await getOrCreateDbUser();
-    if (!dbUser || dbUser.roleTier !== "admin") {
-      return NextResponse.json({ error: "Unauthorized: Admin access required" }, { status: 403 });
+    if (!dbUser || (dbUser.roleTier !== "admin" && dbUser.roleTier !== "super_admin")) {
+      return NextResponse.json({ error: "Unauthorized: Admin or Super Admin access required" }, { status: 403 });
     }
 
     const body = await req.json();
@@ -110,7 +116,7 @@ export async function POST(req: NextRequest) {
           roleTier: "senior",
           orgId: team.orgId,
           teamId: team._id,
-          parentManager: dbUser._id,
+          parentManager: dbUser.roleTier === "super_admin" ? undefined : dbUser._id,
           phone: phone || "",
           isActive: true,
         });

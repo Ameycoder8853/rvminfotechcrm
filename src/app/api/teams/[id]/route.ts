@@ -38,7 +38,7 @@ export async function PATCH(
     const { id } = await params;
     await connectToDatabase();
     const dbUser = await getOrCreateDbUser();
-    if (!dbUser || dbUser.roleTier !== "admin") {
+    if (!dbUser || (dbUser.roleTier !== "admin" && dbUser.roleTier !== "super_admin")) {
       return NextResponse.json({ error: "Unauthorized: Admin access required" }, { status: 403 });
     }
 
@@ -66,7 +66,7 @@ export async function DELETE(
     const { id } = await params;
     await connectToDatabase();
     const dbUser = await getOrCreateDbUser();
-    if (!dbUser || dbUser.roleTier !== "admin") {
+    if (!dbUser || (dbUser.roleTier !== "admin" && dbUser.roleTier !== "super_admin")) {
       return NextResponse.json({ error: "Unauthorized: Admin access required" }, { status: 403 });
     }
 
