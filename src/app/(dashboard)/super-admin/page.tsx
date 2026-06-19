@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   Plus, Building2, Shield, Loader2, ArrowRight, Globe, Users, 
   ShieldAlert, Lock, Unlock, Search, Check, Edit, Trash2, 
-  Mail, PhoneCall, CheckCircle, AlertCircle
+  Mail, PhoneCall, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
+  Settings, Key, Eye
 } from "lucide-react";
 import Modal from "@/components/shared/modal";
 
@@ -58,18 +59,14 @@ export default function SuperAdminPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [teamsLoading, setTeamsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<"companies" | "users" | "teams">("companies");
-  
-  // Impersonation state
   const [activeImpersonatedOrg, setActiveImpersonatedOrg] = useState<string | null>(null);
 
-  // Search queries
-  const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [orgSearchQuery, setOrgSearchQuery] = useState("");
-  const [teamSearchQuery, setTeamSearchQuery] = useState("");
+  // Expanded organizations state
+  const [expandedOrgs, setExpandedOrgs] = useState<Record<string, boolean>>({});
+
+  // Unified global search query
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Modals state
   const [isOrgModalOpen, setIsOrgModalOpen] = useState(false);
@@ -77,9 +74,11 @@ export default function SuperAdminPage() {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form states: Organization
+  // Form states: Organization Create/Edit
+  const [editingOrgId, setEditingOrgId] = useState<string | null>(null);
   const [newOrgName, setNewOrgName] = useState("");
   const [newOrgSlug, setNewOrgSlug] = useState("");
+  const [orgStatus, setOrgStatus] = useState<"active" | "suspended">("active");
 
   // Form states: User Enroll/Edit
   const [currentUserEdit, setCurrentUserEdit] = useState<Partial<UserProfile> | null>(null);
@@ -106,7 +105,6 @@ export default function SuperAdminPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      setUsersLoading(true);
       const res = await fetch("/api/users");
       const data = await res.json();
       if (data.success) {
@@ -114,14 +112,11 @@ export default function SuperAdminPage() {
       }
     } catch (error) {
       console.error("Failed to load users:", error);
-    } finally {
-      setUsersLoading(false);
     }
   }, []);
 
   const fetchTeams = useCallback(async () => {
     try {
-      setTeamsLoading(true);
       const res = await fetch("/api/teams");
       const data = await res.json();
       if (data.success) {
@@ -129,8 +124,6 @@ export default function SuperAdminPage() {
       }
     } catch (error) {
       console.error("Failed to load teams:", error);
-    } finally {
-      setTeamsLoading(false);
     }
   }, []);
 
@@ -152,7 +145,7 @@ export default function SuperAdminPage() {
     }
   }, [fetchAllData]);
 
-  // IMPERSONATION
+  // IMPERSONATION (Inspect database)
   const handleImpersonate = (orgId: string, orgName: string) => {
     if (typeof window !== "undefined") {
       if (activeImpersonatedOrg === orgId) {
@@ -160,7 +153,7 @@ export default function SuperAdminPage() {
         sessionStorage.removeItem("rvm_impersonate_org_name");
         document.cookie = "rvm_impersonate_org_id=; path=/; max-age=0";
         setActiveImpersonatedOrg(null);
-        alert("Impersonation cleared. Viewing global logs.");
+        alert("Impersonation cleared. Viewing global database.");
       } else {
         sessionStorage.setItem("rvm_impersonate_org_id", orgId);
         sessionStorage.setItem("rvm_impersonate_org_name", orgName);
@@ -173,9 +166,18 @@ export default function SuperAdminPage() {
   };
 
   // ORGANIZATION ACTIONS
-  const handleOpenOrgModal = () => {
-    setNewOrgName("");
-    setNewOrgSlug("");
+  const handleOpenOrgModal = (org: Organization | null = null) => {
+    if (org) {
+      setEditingOrgId(org._id);
+      setNewOrgName(org.name);
+      setNewOrgSlug(org.slug);
+      setOrgStatus(org.status);
+    } else {
+      setEditingOrgId(null);
+      setNewOrgName("");
+      setNewOrgSlug("");
+      setOrgStatus("active");
+    }
     setIsOrgModalOpen(true);
   };
 
@@ -185,18 +187,26 @@ export default function SuperAdminPage() {
 
     try {
       setIsSubmitting(true);
-      const res = await fetch("/api/organizations", {
-        method: "POST",
+      const url = editingOrgId ? `/api/organizations/${editingOrgId}` : "/api/organizations";
+      const method = editingOrgId ? "PATCH" : "POST";
+      const body: Record<string, any> = { name: newOrgName, slug: newOrgSlug };
+      if (editingOrgId) {
+        body.status = orgStatus;
+      }
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newOrgName, slug: newOrgSlug }),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
         setIsOrgModalOpen(false);
-        fetchOrgs();
+        setEditingOrgId(null);
+        fetchAllData();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to create organization.");
+        alert(err.error || "Failed to save organization.");
       }
     } catch (error) {
       console.error("Failed to submit organization:", error);
@@ -205,13 +215,37 @@ export default function SuperAdminPage() {
     }
   };
 
+  const handleDeleteOrg = async (orgId: string, name: string) => {
+    if (!confirm(`Are you absolutely sure you want to permanently delete the organization "${name}"?\nThis will remove the organization, delete all associated teams, and unassign all associated users. This action CANNOT be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/organizations/${orgId}`, {
+        method: "DELETE"
+      });
+
+      if (res.ok) {
+        alert("Organization and associated components deleted successfully.");
+        fetchAllData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete organization.");
+      }
+    } catch (error) {
+      console.error("Failed to delete organization:", error);
+    }
+  };
+
   const autoGenerateSlug = (val: string) => {
     setNewOrgName(val);
-    setNewOrgSlug(val.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""));
+    if (!editingOrgId) {
+      setNewOrgSlug(val.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""));
+    }
   };
 
   // USER PROFILE ACTIONS
-  const handleOpenUserModal = (user: UserProfile | null = null) => {
+  const handleOpenUserModal = (user: UserProfile | null = null, defaultOrgId: string = "") => {
     if (user) {
       setIsEnrollMode(false);
       setCurrentUserEdit(user);
@@ -225,11 +259,11 @@ export default function SuperAdminPage() {
         firstName: "",
         lastName: "",
         email: "",
-        roleTier: "junior",
-        role: "sales",
+        roleTier: defaultOrgId ? "junior" : "super_admin",
+        role: defaultOrgId ? "sales" : "admin",
         phone: "",
       });
-      setSelectedOrgId("");
+      setSelectedOrgId(defaultOrgId);
       setSelectedTeamId("");
       setSelectedParentId("");
       setEnrollPassword("");
@@ -256,7 +290,6 @@ export default function SuperAdminPage() {
       };
 
       if (isEnrollMode) {
-        // Create user
         const res = await fetch("/api/users/enroll", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -274,7 +307,6 @@ export default function SuperAdminPage() {
           alert(err.error || "Failed to enroll user.");
         }
       } else {
-        // Edit user
         const res = await fetch(`/api/users/${currentUserEdit._id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -315,7 +347,7 @@ export default function SuperAdminPage() {
   };
 
   const handleDeleteUser = async (userId: string, email: string) => {
-    if (!confirm(`Are you absolutely sure you want to permanently delete the user ${email}?\nThis will remove them from the database and delete their authentication credentials in Clerk. This action CANNOT be undone.`)) {
+    if (!confirm(`Are you absolutely sure you want to permanently delete the user ${email}?\nThis will remove them from the database and delete their Clerk account. This action CANNOT be undone.`)) {
       return;
     }
 
@@ -325,7 +357,7 @@ export default function SuperAdminPage() {
       });
 
       if (res.ok) {
-        alert("User account and authentication profile deleted successfully.");
+        alert("User account deleted successfully.");
         fetchAllData();
       } else {
         const err = await res.json();
@@ -337,7 +369,7 @@ export default function SuperAdminPage() {
   };
 
   // TEAM ACTIONS
-  const handleOpenTeamModal = (team: Team | null = null) => {
+  const handleOpenTeamModal = (team: Team | null = null, defaultOrgId: string = "") => {
     if (team) {
       setCurrentTeamEdit(team);
       setSelectedOrgId(typeof team.orgId === "object" ? team.orgId._id : team.orgId);
@@ -352,7 +384,7 @@ export default function SuperAdminPage() {
           tickets: "all"
         }
       });
-      setSelectedOrgId("");
+      setSelectedOrgId(defaultOrgId);
     }
     setIsTeamModalOpen(true);
   };
@@ -381,7 +413,7 @@ export default function SuperAdminPage() {
 
       if (res.ok) {
         setIsTeamModalOpen(false);
-        fetchTeams();
+        fetchAllData();
       } else {
         const err = await res.json();
         alert(err.error || "Failed to save team.");
@@ -401,7 +433,7 @@ export default function SuperAdminPage() {
         method: "DELETE"
       });
       if (res.ok) {
-        fetchTeams();
+        fetchAllData();
       } else {
         const err = await res.json();
         alert(err.error || "Failed to delete team.");
@@ -411,31 +443,52 @@ export default function SuperAdminPage() {
     }
   };
 
-  // SEARCH FILTERS
+  // HIERARCHICAL FILTERS
+  const toggleOrgCollapse = (orgId: string) => {
+    setExpandedOrgs(prev => ({
+      ...prev,
+      [orgId]: !prev[orgId]
+    }));
+  };
+
+  const getTeamsForOrg = (orgId: string) => {
+    const orgTeams = teams.filter((t) => (typeof t.orgId === "object" ? t.orgId._id : t.orgId) === orgId);
+    if (!searchQuery) return orgTeams;
+    const query = searchQuery.toLowerCase();
+    return orgTeams.filter((t) => t.name.toLowerCase().includes(query) || (t.description || "").toLowerCase().includes(query));
+  };
+
+  const getUsersForOrg = (orgId: string | null) => {
+    const orgUsers = users.filter((u) => (u.orgId?._id || null) === orgId);
+    if (!searchQuery) return orgUsers;
+    const query = searchQuery.toLowerCase();
+    return orgUsers.filter((u) => {
+      const fullName = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
+      const email = (u.email || "").toLowerCase();
+      return fullName.includes(query) || email.includes(query);
+    });
+  };
+
+  // Filter organizations shown based on search query
   const filteredOrgs = organizations.filter((org) => {
-    const query = orgSearchQuery.toLowerCase();
-    return org.name.toLowerCase().includes(query) || org.slug.toLowerCase().includes(query);
+    const query = searchQuery.toLowerCase();
+    const orgMatches = org.name.toLowerCase().includes(query) || org.slug.toLowerCase().includes(query);
+    if (orgMatches) return true;
+
+    // Check if any team under this org matches
+    const matchingTeams = getTeamsForOrg(org._id);
+    if (matchingTeams.length > 0) return true;
+
+    // Check if any user under this org matches
+    const matchingUsers = getUsersForOrg(org._id);
+    if (matchingUsers.length > 0) return true;
+
+    return false;
   });
 
-  const filteredUsers = users.filter((u) => {
-    const query = userSearchQuery.toLowerCase();
-    const fullName = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
-    const email = (u.email || "").toLowerCase();
-    const orgName = (u.orgId?.name || "Sovereign").toLowerCase();
-    const teamName = (u.teamId?.name || "No Team").toLowerCase();
-    return fullName.includes(query) || email.includes(query) || orgName.includes(query) || teamName.includes(query);
-  });
+  const globalUnassignedUsers = getUsersForOrg(null);
 
-  const filteredTeams = teams.filter((t) => {
-    const query = teamSearchQuery.toLowerCase();
-    const name = t.name.toLowerCase();
-    const desc = (t.description || "").toLowerCase();
-    const orgName = (typeof t.orgId === "object" ? t.orgId.name : 
-      organizations.find(o => o._id === t.orgId)?.name || "").toLowerCase();
-    return name.includes(query) || desc.includes(query) || orgName.includes(query);
-  });
-
-  // Dynamic dropdown lists matching selected organization context
+  // Dynamic dropdown lists matching selected organization context in Modals
   const availableTeams = selectedOrgId 
     ? teams.filter(t => (typeof t.orgId === "object" ? t.orgId._id : t.orgId) === selectedOrgId)
     : [];
@@ -449,45 +502,32 @@ export default function SuperAdminPage() {
   return (
     <div className="space-y-8 animate-fade-in text-foreground">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
             <Shield size={22} className="stroke-[2.5]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Super Admin Control Hub</h1>
-            <p className="text-sm text-foreground-secondary">Manage organizations, enroll and assign users to teams, edit permission schemes, and restrict direct customer scoping.</p>
+            <p className="text-sm text-foreground-secondary">Manage organizations, and edit their nested teams and users hierarchically.</p>
           </div>
         </div>
         
         <div className="flex items-center gap-3">
-          {activeTab === "companies" && (
-            <button
-              onClick={handleOpenOrgModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-md shadow-accent/10"
-            >
-              <Plus size={16} />
-              <span>Register Company</span>
-            </button>
-          )}
-          {activeTab === "users" && (
-            <button
-              onClick={() => handleOpenUserModal(null)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-md shadow-accent/10"
-            >
-              <Plus size={16} />
-              <span>Enroll User Profile</span>
-            </button>
-          )}
-          {activeTab === "teams" && (
-            <button
-              onClick={() => handleOpenTeamModal(null)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-md shadow-accent/10"
-            >
-              <Plus size={16} />
-              <span>Create Dynamic Team</span>
-            </button>
-          )}
+          <button
+            onClick={() => handleOpenOrgModal(null)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-md shadow-accent/10"
+          >
+            <Plus size={16} />
+            <span>Register Company</span>
+          </button>
+          <button
+            onClick={() => handleOpenUserModal(null, "")}
+            className="flex items-center gap-2 px-4 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer shadow-sm"
+          >
+            <Plus size={16} />
+            <span>Enroll Global Admin</span>
+          </button>
         </div>
       </div>
 
@@ -509,50 +549,16 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-border gap-6">
-        <button
-          onClick={() => setActiveTab("companies")}
-          className={`pb-4 text-sm font-bold relative transition-colors cursor-pointer ${
-            activeTab === "companies" ? "text-accent" : "text-foreground-secondary hover:text-foreground"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Building2 size={16} />
-            <span>Company Registries</span>
-          </div>
-          {activeTab === "companies" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full animate-fade-in" />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab("users")}
-          className={`pb-4 text-sm font-bold relative transition-colors cursor-pointer ${
-            activeTab === "users" ? "text-accent" : "text-foreground-secondary hover:text-foreground"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Users size={16} />
-            <span>Global User Profiles</span>
-          </div>
-          {activeTab === "users" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full animate-fade-in" />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab("teams")}
-          className={`pb-4 text-sm font-bold relative transition-colors cursor-pointer ${
-            activeTab === "teams" ? "text-accent" : "text-foreground-secondary hover:text-foreground"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Shield size={16} />
-            <span>Global Teams & Access</span>
-          </div>
-          {activeTab === "teams" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full animate-fade-in" />
-          )}
-        </button>
+      {/* Search Filter bar */}
+      <div className="relative flex items-center max-w-md w-full bg-surface border border-border rounded-xl">
+        <Search className="absolute left-3.5 text-foreground-muted w-4 h-4" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search companies, slugs, teams, and user profiles..."
+          className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-accent text-foreground placeholder-foreground-muted"
+        />
       </div>
 
       {loading ? (
@@ -561,376 +567,371 @@ export default function SuperAdminPage() {
           <p className="text-sm text-foreground-secondary font-semibold">Loading control configurations...</p>
         </div>
       ) : (
-        <>
-          {/* TAB 1: COMPANIES */}
-          {activeTab === "companies" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-                <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <h3 className="font-bold text-base">Registered CRM Tenants ({filteredOrgs.length})</h3>
-                  <div className="relative flex items-center max-w-xs w-full">
-                    <Search className="absolute left-3 text-foreground-muted w-4 h-4" />
-                    <input
-                      type="text"
-                      value={orgSearchQuery}
-                      onChange={(e) => setOrgSearchQuery(e.target.value)}
-                      placeholder="Search companies..."
-                      className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs font-semibold outline-none focus:border-accent text-foreground"
-                    />
+        <div className="space-y-6">
+          
+          {/* HIERARCHICAL ORGANIZATIONS LIST */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Building2 size={18} className="text-foreground-muted" />
+              <span>CRM Tenant Registry ({filteredOrgs.length})</span>
+            </h2>
+
+            {filteredOrgs.map((org) => {
+              const isCollapsed = expandedOrgs[org._id] === true;
+              const orgTeams = getTeamsForOrg(org._id);
+              const orgUsers = getUsersForOrg(org._id);
+              const isImpersonating = activeImpersonatedOrg === org._id;
+
+              return (
+                <div 
+                  key={org._id} 
+                  className={`bg-surface border rounded-2xl overflow-hidden shadow-sm transition-all duration-200 ${
+                    isImpersonating ? "border-warning/50 ring-1 ring-warning/20 bg-warning/5" : "border-border"
+                  }`}
+                >
+                  {/* Collapsible Header */}
+                  <div 
+                    onClick={() => toggleOrgCollapse(org._id)}
+                    className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-surface-hover/30 select-none transition-colors border-b border-border/40"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div 
+                        className={`p-2 rounded-lg ${
+                          isImpersonating ? "bg-warning/10 text-warning" : "bg-accent-muted text-accent"
+                        }`}
+                      >
+                        <Building2 size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-base text-foreground truncate">{org.name}</h3>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
+                            org.status === "active" 
+                              ? "bg-green-500/10 text-green-500 border border-green-500/20" 
+                              : "bg-red-500/10 text-red-500 border border-red-500/20"
+                          }`}>
+                            {org.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-foreground-secondary font-medium mt-0.5">
+                          Slug: <span className="text-foreground font-bold">{org.slug}.rvmcrm.com</span>
+                          <span className="mx-2">•</span>
+                          {orgTeams.length} Teams
+                          <span className="mx-2">•</span>
+                          {orgUsers.length} Users
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Org Action Buttons */}
+                    <div className="flex items-center gap-2 sm:self-center" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleImpersonate(org._id, org.name)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          isImpersonating
+                            ? "bg-warning text-black hover:bg-warning-hover font-extrabold"
+                            : "bg-accent-muted text-accent hover:bg-accent hover:text-white"
+                        }`}
+                        title="Impersonate organization to inspect its database"
+                      >
+                        <Eye size={12} />
+                        <span>{isImpersonating ? "Stop Inspecting" : "Inspect DB"}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleOpenOrgModal(org)}
+                        className="p-2 bg-surface border border-border hover:border-border-hover text-foreground-secondary hover:text-foreground rounded-lg transition-all cursor-pointer"
+                        title="Edit organization registry details"
+                      >
+                        <Edit size={13} />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteOrg(org._id, org.name)}
+                        className="p-2 bg-red-500/5 border border-red-500/15 hover:bg-red-500 rounded-lg text-red-500 hover:text-white transition-all cursor-pointer"
+                        title="Delete organization registry"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+
+                      <div className="pl-1 text-foreground-muted">
+                        {isCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-border bg-background-secondary/35 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">
-                        <th className="px-5 py-3.5">Company Name</th>
-                        <th className="px-5 py-3.5">Subdomain Slug</th>
-                        <th className="px-5 py-3.5">Status</th>
-                        <th className="px-5 py-3.5 text-right pr-6">Impersonation</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/45 text-sm">
-                      {filteredOrgs.map((org) => {
-                        const isImpersonating = activeImpersonatedOrg === org._id;
-                        return (
-                          <tr key={org._id} className="hover:bg-surface-hover/40 transition-colors">
-                            <td className="px-5 py-4 font-semibold text-foreground">{org.name}</td>
-                            <td className="px-5 py-4 font-medium text-foreground-secondary">{org.slug}.rvmcrm.com</td>
-                            <td className="px-5 py-4">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20">
-                                {org.status}
-                              </span>
-                            </td>
-                            <td className="px-5 py-4 text-right pr-6">
-                              <button
-                                onClick={() => handleImpersonate(org._id, org.name)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                  isImpersonating
-                                    ? "bg-warning hover:bg-warning-hover text-black"
-                                    : "bg-accent-muted hover:bg-accent text-accent hover:text-white"
-                                }`}
-                              >
-                                <span>{isImpersonating ? "Stop Inspecting" : "Inspect Database"}</span>
-                                <ArrowRight size={12} />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
 
-                      {filteredOrgs.length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="text-center py-16 text-foreground-muted font-medium">
-                            No organizations found matching search query.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  {/* Collapsible Content */}
+                  {!isCollapsed && (
+                    <div className="p-6 bg-background-secondary/10 space-y-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        {/* TEAMS NESTED SECTION */}
+                        <div className="bg-surface border border-border rounded-xl p-5 space-y-4 shadow-sm">
+                          <div className="flex items-center justify-between border-b border-border pb-3">
+                            <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
+                              <Shield size={15} className="text-foreground-secondary" />
+                              <span>Organization Teams ({orgTeams.length})</span>
+                            </h4>
+                            <button
+                              onClick={() => handleOpenTeamModal(null, org._id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent/10 hover:bg-accent text-accent hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            >
+                              <Plus size={11} />
+                              <span>Add Team</span>
+                            </button>
+                          </div>
+
+                          {orgTeams.length === 0 ? (
+                            <p className="text-xs text-foreground-muted py-6 text-center">No teams registered under this organization.</p>
+                          ) : (
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                              {orgTeams.map((team) => (
+                                <div key={team._id} className="p-3 bg-background border border-border/80 rounded-xl hover:border-border transition-all flex items-start justify-between gap-3 group">
+                                  <div className="min-w-0">
+                                    <h5 className="font-bold text-xs text-foreground truncate">{team.name}</h5>
+                                    <p className="text-[11px] text-foreground-secondary leading-normal line-clamp-1 mt-0.5">{team.description || "No description provided."}</p>
+                                    <div className="flex flex-wrap gap-x-2.5 gap-y-1 mt-2 text-[9px] font-extrabold uppercase text-accent tracking-wider">
+                                      <span>Leads: {team.permissions.leads}</span>
+                                      <span className="text-border">•</span>
+                                      <span>Cust: {team.permissions.customers}</span>
+                                      <span className="text-border">•</span>
+                                      <span>Inv: {team.permissions.invoices}</span>
+                                      <span className="text-border">•</span>
+                                      <span>Tkt: {team.permissions.tickets}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => handleOpenTeamModal(team)}
+                                      className="p-1 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
+                                    >
+                                      <Edit size={11} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteTeam(team._id, team.name)}
+                                      className="p-1 hover:bg-red-500/10 rounded text-red-500 transition-all cursor-pointer"
+                                    >
+                                      <Trash2 size={11} />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* USERS NESTED SECTION */}
+                        <div className="bg-surface border border-border rounded-xl p-5 space-y-4 shadow-sm">
+                          <div className="flex items-center justify-between border-b border-border pb-3">
+                            <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
+                              <Users size={15} className="text-foreground-secondary" />
+                              <span>Organization Users ({orgUsers.length})</span>
+                            </h4>
+                            <button
+                              onClick={() => handleOpenUserModal(null, org._id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent/10 hover:bg-accent text-accent hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            >
+                              <Plus size={11} />
+                              <span>Enroll User</span>
+                            </button>
+                          </div>
+
+                          {orgUsers.length === 0 ? (
+                            <p className="text-xs text-foreground-muted py-6 text-center">No users enrolled under this organization.</p>
+                          ) : (
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                              {orgUsers.map((user) => {
+                                const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "U";
+                                return (
+                                  <div key={user._id} className="p-3 bg-background border border-border/80 rounded-xl hover:border-border transition-all flex items-center justify-between gap-3 group">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      {user.avatar ? (
+                                        <img src={user.avatar} alt={user.firstName} className="w-8 h-8 rounded-lg object-cover border border-border shrink-0" />
+                                      ) : (
+                                        <div className="w-8 h-8 rounded-lg bg-accent-muted text-accent font-bold text-[10px] flex items-center justify-center shrink-0">
+                                          {initials}
+                                        </div>
+                                      )}
+                                      <div className="min-w-0">
+                                        <h5 className="font-bold text-xs text-foreground truncate">{user.firstName} {user.lastName}</h5>
+                                        <p className="text-[10px] text-foreground-secondary truncate leading-none mt-0.5">{user.email}</p>
+                                        <div className="flex items-center gap-2 mt-1.5">
+                                          {user.roleTier === "admin" ? (
+                                            <span className="inline-flex items-center px-1.5 py-0.2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 rounded text-[8px] font-bold uppercase">Admin</span>
+                                          ) : user.roleTier === "senior" ? (
+                                            <span className="inline-flex items-center px-1.5 py-0.2 bg-blue-500/10 text-blue-400 border border-blue-500/15 rounded text-[8px] font-bold uppercase">Senior (Mngr)</span>
+                                          ) : user.roleTier === "junior" ? (
+                                            <span className="inline-flex items-center px-1.5 py-0.2 bg-slate-500/10 text-slate-400 border border-slate-500/15 rounded text-[8px] font-bold uppercase">Junior (Rep)</span>
+                                          ) : (
+                                            <span className="inline-flex items-center px-1.5 py-0.2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/15 rounded text-[8px] font-bold uppercase">No Access</span>
+                                          )}
+                                          {user.teamId && (
+                                            <span className="text-[9px] text-foreground-muted font-medium truncate">
+                                              Team: <span className="font-semibold text-foreground-secondary">{user.teamId.name}</span>
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        onClick={() => handleOpenUserModal(user)}
+                                        className="p-1 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
+                                        title="Edit profile & permissions"
+                                      >
+                                        <Edit size={11} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleToggleUserStatus(user._id, user.isActive)}
+                                        className="p-1 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
+                                        title={user.isActive ? "Suspend User" : "Activate User"}
+                                      >
+                                        {user.isActive ? <Lock size={11} className="text-red-400" /> : <Unlock size={11} className="text-green-400" />}
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteUser(user._id, user.email)}
+                                        className="p-1 hover:bg-red-500/10 rounded text-red-500 transition-all cursor-pointer"
+                                        title="Permanently Delete User"
+                                      >
+                                        <Trash2 size={11} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    </div>
+                  )}
+
                 </div>
+              );
+            })}
+
+            {filteredOrgs.length === 0 && (
+              <div className="bg-surface border border-border rounded-2xl p-12 text-center text-foreground-secondary font-medium">
+                No organizations found matching search criteria.
               </div>
+            )}
+          </div>
 
-              <div className="bg-surface border border-border rounded-2xl p-5 space-y-5 h-fit shadow-sm">
-                <h3 className="font-bold text-base flex items-center gap-2">
-                  <Globe className="text-accent w-5 h-5" />
-                  <span>CRM Tenant Hub</span>
+          {/* GLOBAL / UNASSIGNED SYSTEM USERS SECTION */}
+          {globalUnassignedUsers.length > 0 && (
+            <div className="bg-surface border border-border rounded-2xl p-6 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="font-bold text-base text-foreground flex items-center gap-2">
+                  <Shield size={18} className="text-purple-400" />
+                  <span>Global System Admins & Unassigned Users ({globalUnassignedUsers.length})</span>
                 </h3>
-                <p className="text-xs text-foreground-secondary leading-relaxed">
-                  Tenant organizations segregate client databases completely. Registering a company generates an isolated space where teams, staff members, leads, and orders reside.
-                </p>
-                <div className="p-4 bg-background rounded-xl space-y-2 border border-border">
-                  <div className="flex gap-2 text-warning items-center text-xs font-bold uppercase tracking-wider mb-1">
-                    <AlertCircle size={14} />
-                    <span>Scoping Policy</span>
-                  </div>
-                  <p className="text-[11px] text-foreground-secondary leading-relaxed">
-                    By default, your account is configured to see <strong>zero client database rows</strong>. To view data, click <strong>Inspect Database</strong> on any organization to filter lead and contact lists to that company.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: USER PROFILES */}
-          {activeTab === "users" && (
-            <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-              <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="font-bold text-base">Global User Account Directory ({filteredUsers.length})</h3>
-                  <p className="text-xs text-foreground-secondary mt-0.5">Edit credentials, assign organizations, customize role access tiers, and suspend or delete profiles.</p>
-                </div>
-                <div className="relative flex items-center max-w-xs w-full">
-                  <Search className="absolute left-3 text-foreground-muted w-4 h-4" />
-                  <input
-                    type="text"
-                    value={userSearchQuery}
-                    onChange={(e) => setUserSearchQuery(e.target.value)}
-                    placeholder="Search users, email, company, team..."
-                    className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs font-semibold outline-none focus:border-accent text-foreground"
-                  />
-                </div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-border bg-background-secondary/35 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">
-                      <th className="px-5 py-3.5">User Profile</th>
-                      <th className="px-5 py-3.5">Assigned Organization & Team</th>
-                      <th className="px-5 py-3.5">Access Tier</th>
-                      <th className="px-5 py-3.5">Account Status</th>
-                      <th className="px-5 py-3.5 text-right pr-6">Administrative Actions</th>
+                    <tr className="border-b border-border text-[10px] font-bold uppercase tracking-wider text-foreground-muted bg-background-secondary/20">
+                      <th className="px-4 py-3">Profile</th>
+                      <th className="px-4 py-3">Access Tier</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 text-right pr-6">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/45 text-sm">
-                    {filteredUsers.map((user) => {
+                  <tbody className="divide-y divide-border/45 text-xs font-semibold">
+                    {globalUnassignedUsers.map((user) => {
                       const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "U";
                       return (
-                        <tr key={user._id} className="hover:bg-surface-hover/40 transition-colors">
-                          <td className="px-5 py-4 flex items-center gap-3">
+                        <tr key={user._id} className="hover:bg-surface-hover/20 transition-colors">
+                          <td className="px-4 py-3.5 flex items-center gap-2.5">
                             {user.avatar ? (
-                              <img src={user.avatar} alt={user.firstName} className="w-9 h-9 rounded-xl object-cover border border-border" />
+                              <img src={user.avatar} alt={user.firstName} className="w-8 h-8 rounded-lg object-cover border border-border shrink-0" />
                             ) : (
-                              <div className="w-9 h-9 rounded-xl bg-accent-muted text-accent font-bold text-xs flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-lg bg-accent-muted text-accent font-bold text-[10px] flex items-center justify-center shrink-0">
                                 {initials}
                               </div>
                             )}
                             <div>
-                              <div className="font-semibold text-foreground flex items-center gap-1.5">
-                                <span>{user.firstName} {user.lastName}</span>
-                              </div>
-                              <div className="text-xs text-foreground-secondary flex items-center gap-1 mt-0.5">
-                                <Mail size={12} className="text-foreground-muted" />
-                                <span>{user.email}</span>
-                              </div>
+                              <div className="text-foreground">{user.firstName} {user.lastName}</div>
+                              <div className="text-[10px] text-foreground-secondary font-medium mt-0.5">{user.email}</div>
                             </div>
                           </td>
-                          <td className="px-5 py-4">
-                            {user.orgId ? (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                                  <Building2 size={13} className="text-foreground-secondary" />
-                                  <span>{user.orgId.name}</span>
-                                </div>
-                                <div className="text-xs text-foreground-secondary">
-                                  Team: <span className="font-medium text-foreground">{user.teamId?.name || "None Assigned"}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1.5 text-purple-400 font-semibold">
-                                <Shield size={13} />
-                                <span>Global (Sovereign)</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-5 py-4">
+                          <td className="px-4 py-3.5">
                             {user.roleTier === "super_admin" ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
                                 Super Admin
                               </span>
-                            ) : user.roleTier === "admin" ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                                Company Admin
-                              </span>
-                            ) : user.roleTier === "senior" ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                Senior Manager
-                              </span>
-                            ) : user.roleTier === "junior" ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">
-                                Junior Rep
-                              </span>
                             ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                                Pending Access
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                                Pending Org
                               </span>
                             )}
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-4 py-3.5">
                             {user.isActive ? (
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-green-500">
-                                <Check size={14} />
+                              <span className="text-green-500 inline-flex items-center gap-1">
+                                <Check size={12} />
                                 <span>Active</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-red-500">
-                                <ShieldAlert size={14} />
+                              <span className="text-red-500 inline-flex items-center gap-1">
+                                <ShieldAlert size={12} />
                                 <span>Suspended</span>
                               </span>
                             )}
                           </td>
-                          <td className="px-5 py-4 text-right pr-6">
-                            <div className="inline-flex items-center gap-2">
-                              {/* Edit Action */}
+                          <td className="px-4 py-3.5 text-right pr-6">
+                            <div className="inline-flex items-center gap-1.5">
                               <button
                                 onClick={() => handleOpenUserModal(user)}
-                                className="p-2 bg-surface hover:bg-surface-hover border border-border hover:border-border-hover rounded-xl text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
-                                title="Edit Profile settings"
+                                className="p-1.5 hover:bg-surface border border-transparent hover:border-border rounded-lg text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
                               >
-                                <Edit size={14} />
+                                <Edit size={12} />
                               </button>
-
-                              {/* Toggle active button */}
                               <button
                                 onClick={() => handleToggleUserStatus(user._id, user.isActive)}
-                                className={`inline-flex items-center gap-1 px-3 py-2 border rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                  user.isActive
-                                    ? "bg-red-500/5 hover:bg-red-500/10 border-red-500/15 hover:border-red-500/30 text-red-500"
-                                    : "bg-green-500/5 hover:bg-green-500/10 border-green-500/15 hover:border-green-500/30 text-green-500"
-                                }`}
+                                className="p-1.5 hover:bg-surface border border-transparent hover:border-border rounded-lg text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
                               >
-                                {user.isActive ? <Lock size={12} /> : <Unlock size={12} />}
-                                <span>{user.isActive ? "Suspend" : "Activate"}</span>
+                                {user.isActive ? <Lock size={12} className="text-red-400" /> : <Unlock size={12} className="text-green-400" />}
                               </button>
-
-                              {/* Delete Action */}
                               <button
                                 onClick={() => handleDeleteUser(user._id, user.email)}
-                                className="p-2 bg-red-500/5 hover:bg-red-500 hover:text-white border border-red-500/15 hover:border-red-500 rounded-xl text-red-500 transition-all cursor-pointer animate-fade-in"
-                                title="Delete user account"
+                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-all cursor-pointer"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={12} />
                               </button>
                             </div>
                           </td>
                         </tr>
                       );
                     })}
-
-                    {filteredUsers.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="text-center py-16 text-foreground-muted font-medium">
-                          No user profiles found matching search query.
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           )}
 
-          {/* TAB 3: DYNAMIC TEAMS */}
-          {activeTab === "teams" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                <div className="bg-surface border border-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <h3 className="font-bold text-base">Global Enterprise Teams ({filteredTeams.length})</h3>
-                  <div className="relative flex items-center max-w-xs w-full">
-                    <Search className="absolute left-3 text-foreground-muted w-4 h-4" />
-                    <input
-                      type="text"
-                      value={teamSearchQuery}
-                      onChange={(e) => setTeamSearchQuery(e.target.value)}
-                      placeholder="Search teams..."
-                      className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs font-semibold outline-none focus:border-accent text-foreground"
-                    />
-                  </div>
-                </div>
-
-                {filteredTeams.length === 0 ? (
-                  <div className="bg-surface border border-border rounded-2xl p-12 text-center text-foreground-muted font-medium">
-                    No teams found matching search criteria.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredTeams.map((team) => {
-                      const orgName = typeof team.orgId === "object" ? team.orgId.name : 
-                        organizations.find(o => o._id === team.orgId)?.name || "Default Organization";
-                      return (
-                        <div
-                          key={team._id}
-                          className="bg-surface border border-border rounded-2xl p-5 space-y-4 hover:border-border-hover transition-all group relative card-hover"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-bold text-base text-foreground">{team.name}</h3>
-                              <p className="text-xs text-foreground-secondary font-medium mt-1 flex items-center gap-1">
-                                <Building2 size={12} className="text-foreground-muted" />
-                                <span>{orgName}</span>
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => handleOpenTeamModal(team)}
-                                className="p-1.5 bg-background border border-border hover:bg-surface-active rounded-lg text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
-                              >
-                                <Edit size={13} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteTeam(team._id, team.name)}
-                                className="p-1.5 bg-red-500/5 border border-red-500/15 hover:bg-red-500 rounded-lg text-red-500 hover:text-white transition-all cursor-pointer"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </div>
-
-                          <p className="text-xs text-foreground-secondary leading-relaxed line-clamp-2">{team.description || "No description provided."}</p>
-
-                          <div className="border-t border-border/60 pt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-xs font-medium">
-                            <div className="flex items-center justify-between">
-                              <span className="text-foreground-secondary">Leads</span>
-                              <span className="font-bold text-accent uppercase text-[10px] tracking-wider">{team.permissions.leads}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-foreground-secondary">Customers</span>
-                              <span className="font-bold text-accent uppercase text-[10px] tracking-wider">{team.permissions.customers}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-foreground-secondary">Invoices</span>
-                              <span className="font-bold text-accent uppercase text-[10px] tracking-wider">{team.permissions.invoices}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-foreground-secondary">Tickets</span>
-                              <span className="font-bold text-accent uppercase text-[10px] tracking-wider">{team.permissions.tickets}</span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-surface border border-border rounded-2xl p-5 space-y-4 h-fit shadow-sm">
-                <h3 className="font-bold text-base flex items-center gap-2">
-                  <Shield size={18} className="text-accent" />
-                  <span>Dynamic Access Control</span>
-                </h3>
-                <p className="text-xs text-foreground-secondary leading-relaxed">
-                  Teams map out functional groups (e.g. "Sales", "Support") inside an organization. Members of a team inherit its dynamic module permissions (leads, invoices, tickets, customers) as access rules.
-                </p>
-                <div className="p-3.5 bg-background rounded-xl border border-border space-y-2.5">
-                  <h4 className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Dynamic Scopes</h4>
-                  <ul className="text-[11px] font-medium space-y-1.5 list-disc list-inside text-foreground-secondary">
-                    <li><strong>None:</strong> Module is hidden from sidebar.</li>
-                    <li><strong>Read:</strong> Users can inspect but not create.</li>
-                    <li><strong>Write:</strong> Read, write, and configure.</li>
-                    <li><strong>All:</strong> Owner rights, logs, exports.</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
+        </div>
       )}
 
-      {/* MODAL 1: REGISTER ORGANIZATION */}
+      {/* MODAL 1: REGISTER/EDIT ORGANIZATION */}
       <Modal
         isOpen={isOrgModalOpen}
-        onClose={() => setIsOrgModalOpen(false)}
-        title="Register New Client Organization"
+        onClose={() => {
+          setIsOrgModalOpen(false);
+          setEditingOrgId(null);
+        }}
+        title={editingOrgId ? "Edit Organization Registry" : "Register New Client Organization"}
       >
         <form onSubmit={handleOrgSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block font- Outfit">Company Name</label>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Company Name</label>
             <input
               required
               value={newOrgName}
               onChange={(e) => autoGenerateSlug(e.target.value)}
-              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
               placeholder="Acme Corporation"
             />
           </div>
@@ -940,9 +941,10 @@ export default function SuperAdminPage() {
             <div className="relative flex items-center">
               <input
                 required
+                disabled={!!editingOrgId}
                 value={newOrgSlug}
                 onChange={(e) => setNewOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none pr-32"
+                className="w-full bg-background disabled:bg-surface-active border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none pr-32 font-semibold"
                 placeholder="acme"
               />
               <span className="absolute right-4 text-xs font-bold text-foreground-muted">.rvmcrm.com</span>
@@ -950,10 +952,27 @@ export default function SuperAdminPage() {
             <span className="text-[10px] text-foreground-muted mt-1.5 block">Determines subdomain URL prefix. Must contain only lowercase alphanumeric characters.</span>
           </div>
 
+          {editingOrgId && (
+            <div>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Organization Status</label>
+              <select
+                value={orgStatus}
+                onChange={(e) => setOrgStatus(e.target.value as any)}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
+              >
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
-              onClick={() => setIsOrgModalOpen(false)}
+              onClick={() => {
+                setIsOrgModalOpen(false);
+                setEditingOrgId(null);
+              }}
               className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all cursor-pointer"
             >
               Cancel
@@ -964,7 +983,7 @@ export default function SuperAdminPage() {
               className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-              <span>Register Instance</span>
+              <span>{editingOrgId ? "Save Changes" : "Register Instance"}</span>
             </button>
           </div>
         </form>
@@ -974,7 +993,7 @@ export default function SuperAdminPage() {
       <Modal
         isOpen={isUserModalOpen}
         onClose={() => setIsUserModalOpen(false)}
-        title={isEnrollMode ? "Enroll Staff Account" : "Edit User Profile settings"}
+        title={isEnrollMode ? "Enroll Client Account" : "Edit User Profile settings"}
       >
         <form onSubmit={handleUserSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -984,7 +1003,7 @@ export default function SuperAdminPage() {
                 required
                 value={currentUserEdit?.firstName || ""}
                 onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, firstName: e.target.value })}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="John"
               />
             </div>
@@ -994,7 +1013,7 @@ export default function SuperAdminPage() {
                 required
                 value={currentUserEdit?.lastName || ""}
                 onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, lastName: e.target.value })}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="Doe"
               />
             </div>
@@ -1009,7 +1028,7 @@ export default function SuperAdminPage() {
                 disabled={!isEnrollMode}
                 value={currentUserEdit?.email || ""}
                 onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, email: e.target.value })}
-                className="w-full bg-background disabled:bg-surface-active border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                className="w-full bg-background disabled:bg-surface-active border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="john.doe@company.com"
               />
             </div>
@@ -1018,7 +1037,7 @@ export default function SuperAdminPage() {
               <input
                 value={currentUserEdit?.phone || ""}
                 onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, phone: e.target.value })}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="e.g. +1 555-0199"
               />
             </div>
@@ -1032,7 +1051,7 @@ export default function SuperAdminPage() {
                 type="password"
                 value={enrollPassword}
                 onChange={(e) => setEnrollPassword(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="Minimum 8 characters"
               />
             </div>
@@ -1040,11 +1059,11 @@ export default function SuperAdminPage() {
 
           <div className="border-t border-border pt-3 mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block font-medium">Access Tier</label>
+              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Access Tier</label>
               <select
                 value={currentUserEdit?.roleTier || "junior"}
                 onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, roleTier: e.target.value as any })}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
               >
                 <option value="none">None (Access Blocked)</option>
                 <option value="junior">Junior Rep (Confined context)</option>
@@ -1059,7 +1078,7 @@ export default function SuperAdminPage() {
                 <select
                   value={currentUserEdit?.role || "sales"}
                   onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, role: e.target.value })}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                 >
                   <option value="sales">Sales Representative</option>
                   <option value="service_tech">Service Technician</option>
@@ -1082,7 +1101,7 @@ export default function SuperAdminPage() {
                     setSelectedTeamId("");
                     setSelectedParentId("");
                   }}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                 >
                   <option value="">None / Global (Orphaned)</option>
                   {organizations.map(o => (
@@ -1098,7 +1117,7 @@ export default function SuperAdminPage() {
                     <select
                       value={selectedTeamId}
                       onChange={(e) => setSelectedTeamId(e.target.value)}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                     >
                       <option value="">No Team</option>
                       {availableTeams.map(t => (
@@ -1112,7 +1131,7 @@ export default function SuperAdminPage() {
                     <select
                       value={selectedParentId}
                       onChange={(e) => setSelectedParentId(e.target.value)}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                     >
                       <option value="">No Supervisor (Reports directly to Admin)</option>
                       {availableSeniors
@@ -1152,7 +1171,7 @@ export default function SuperAdminPage() {
       <Modal
         isOpen={isTeamModalOpen}
         onClose={() => setIsTeamModalOpen(false)}
-        title={currentTeamEdit?._id ? "Configure Dynamic Team" : "Create Dynamic Team"}
+        title={currentTeamEdit?._id ? "Configure Team" : "Create New Team"}
       >
         <form onSubmit={handleTeamSubmit} className="space-y-4">
           <div>
@@ -1162,7 +1181,7 @@ export default function SuperAdminPage() {
               disabled={!!currentTeamEdit?._id}
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="w-full bg-background disabled:bg-surface-active border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer"
+              className="w-full bg-background disabled:bg-surface-active border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
             >
               <option value="" disabled>Choose an organization...</option>
               {organizations.map(o => (
@@ -1178,8 +1197,8 @@ export default function SuperAdminPage() {
                 required
                 value={currentTeamEdit?.name || ""}
                 onChange={(e) => setCurrentTeamEdit({ ...currentTeamEdit!, name: e.target.value })}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
-                placeholder="Acme Support division"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
+                placeholder="Acme Sales Division"
               />
             </div>
             <div>
@@ -1187,7 +1206,7 @@ export default function SuperAdminPage() {
               <textarea
                 value={currentTeamEdit?.description || ""}
                 onChange={(e) => setCurrentTeamEdit({ ...currentTeamEdit!, description: e.target.value })}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2 text-xs text-foreground focus:border-accent outline-none h-16 resize-none"
+                className="w-full bg-background border border-border rounded-xl px-4 py-2 text-xs text-foreground focus:border-accent outline-none h-16 resize-none font-semibold"
                 placeholder="Workflow responsibilities for members of this team..."
               />
             </div>
@@ -1205,9 +1224,9 @@ export default function SuperAdminPage() {
                     ...currentTeamEdit!,
                     permissions: { ...currentTeamEdit!.permissions!, leads: e.target.value as any }
                   })}
-                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                 >
-                  <option value="none font-semibold">Hidden</option>
+                  <option value="none">Hidden</option>
                   <option value="read">Read Only</option>
                   <option value="write">Write Only</option>
                   <option value="all">Full Rights</option>
@@ -1222,7 +1241,7 @@ export default function SuperAdminPage() {
                     ...currentTeamEdit!,
                     permissions: { ...currentTeamEdit!.permissions!, customers: e.target.value as any }
                   })}
-                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                 >
                   <option value="none">Hidden</option>
                   <option value="read">Read Only</option>
@@ -1239,7 +1258,7 @@ export default function SuperAdminPage() {
                     ...currentTeamEdit!,
                     permissions: { ...currentTeamEdit!.permissions!, invoices: e.target.value as any }
                   })}
-                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                 >
                   <option value="none">Hidden</option>
                   <option value="read">Read Only</option>
@@ -1256,7 +1275,7 @@ export default function SuperAdminPage() {
                     ...currentTeamEdit!,
                     permissions: { ...currentTeamEdit!.permissions!, tickets: e.target.value as any }
                   })}
-                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
                 >
                   <option value="none">Hidden</option>
                   <option value="read">Read Only</option>

@@ -96,8 +96,15 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
     if (!currentUser) return [];
 
     const isSuperAdmin = currentUser.roleTier === "super_admin";
-    const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
-    const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
+    if (isSuperAdmin) {
+      return [
+        { title: "Dashboard", href: "/dashboard", icon: <LayoutDashboard size={20} /> },
+        { title: "Super Admin Operations", href: "/super-admin", icon: <Shield size={20} /> }
+      ];
+    }
+
+    const isAdmin = currentUser.roleTier === "admin";
+    const isSenior = currentUser.roleTier === "senior";
 
     const userPerms = currentUser.permissions;
     const rawTeam = currentUser.teamId;
@@ -105,7 +112,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
       ? (rawTeam.permissions as any)
       : null;
 
-    const defaultFallback = (currentUser.roleTier === "super_admin" || currentUser.roleTier === "admin") ? "all" : "none";
+    const defaultFallback = (currentUser.roleTier === "admin") ? "all" : "none";
     const leadsPerm = userPerms?.leads || teamPerms?.leads || defaultFallback;
     const customersPerm = userPerms?.customers || teamPerms?.customers || defaultFallback;
     const invoicesPerm = userPerms?.invoices || teamPerms?.invoices || defaultFallback;

@@ -248,8 +248,22 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
     if (!currentUser) return [];
 
     const isSuperAdmin = currentUser.roleTier === "super_admin";
-    const isAdmin = currentUser.roleTier === "admin" || isSuperAdmin;
-    const isSenior = currentUser.roleTier === "senior" || isSuperAdmin;
+    if (isSuperAdmin) {
+      return navigationSections
+        .map((section) => {
+          if (section.category === "Overview") {
+            return {
+              ...section,
+              items: section.items.filter((item) => item.title === "Dashboard"),
+            };
+          }
+          return null;
+        })
+        .filter((section): section is NavSection => section !== null && section.items.length > 0);
+    }
+
+    const isAdmin = currentUser.roleTier === "admin";
+    const isSenior = currentUser.roleTier === "senior";
 
     // Retrieve permissions
     const userPerms = currentUser.permissions;
@@ -258,7 +272,7 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
       ? (rawTeam.permissions as any)
       : null;
 
-    const defaultFallback = (currentUser.roleTier === "super_admin" || currentUser.roleTier === "admin") ? "all" : "none";
+    const defaultFallback = (currentUser.roleTier === "admin") ? "all" : "none";
     const leadsPerm = userPerms?.leads || teamPerms?.leads || defaultFallback;
     const customersPerm = userPerms?.customers || teamPerms?.customers || defaultFallback;
     const invoicesPerm = userPerms?.invoices || teamPerms?.invoices || defaultFallback;
