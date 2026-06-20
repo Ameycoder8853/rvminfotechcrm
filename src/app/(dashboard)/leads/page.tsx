@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import StatusBadge from "@/components/shared/status-badge";
-import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download, Shield } from "lucide-react";
+import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download, Shield, User, Mail, Building2, Phone, Globe, MapPin, Check } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import Modal from "@/components/shared/modal";
 import { usePermission } from "@/hooks/use-permission";
@@ -18,6 +18,10 @@ interface Lead {
   assignedTo?: { _id: string; firstName: string; lastName: string };
   priority: string;
   createdAt: string;
+  email?: string;
+  phone?: string;
+  webAddress?: string;
+  address?: string;
 }
 
 const kanbanColumns = [
@@ -136,6 +140,10 @@ export default function LeadsPage() {
       status: "new",
       source: "website",
       priority: "medium",
+      email: "",
+      phone: "",
+      webAddress: "",
+      address: "",
     });
     setIsModalOpen(true);
   };
@@ -229,6 +237,10 @@ export default function LeadsPage() {
           status: row.status || row["Status"] || "new",
           source: row.source || row["Source"] || "website",
           priority: row.priority || row["Priority"] || "medium",
+          email: row.email || row["Email"] || row["Email Address"] || "",
+          phone: row.phone || row["Phone"] || row["Phone Number"] || "",
+          webAddress: row.webAddress || row["Web Address"] || row["Website"] || "",
+          address: row.address || row["Address"] || "",
         }));
 
         if (normalized.length === 0) return alert("No valid rows found in CSV!");
@@ -261,7 +273,7 @@ export default function LeadsPage() {
   const handleCSVExport = () => {
     if (filteredLeads.length === 0) return alert("No lead records to export!");
 
-    const headers = ["Title", "Company", "Value", "Status", "Source", "Priority", "Assigned To"];
+    const headers = ["Title", "Company", "Value", "Status", "Source", "Priority", "Email", "Phone", "Web Address", "Address", "Assigned To"];
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
@@ -274,6 +286,10 @@ export default function LeadsPage() {
             `"${l.status || "new"}"`,
             `"${l.source || "website"}"`,
             `"${l.priority || "medium"}"`,
+            `"${l.email || ""}"`,
+            `"${l.phone || ""}"`,
+            `"${l.webAddress || ""}"`,
+            `"${l.address || ""}"`,
             `"${l.assignedTo ? `${l.assignedTo.firstName} ${l.assignedTo.lastName}` : "Unassigned"}"`,
           ].join(",")
         ),
@@ -511,74 +527,178 @@ export default function LeadsPage() {
         title={currentLead?._id ? "Edit Lead" : "Add New Lead"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Personal Information Section */}
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <User size={16} className="text-accent" />
+              <span>Personal Information</span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Full Name <span className="text-danger">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <User className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input 
+                    required
+                    value={currentLead?.title || ""}
+                    onChange={(e) => setCurrentLead({ ...currentLead, title: e.target.value })}
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    placeholder="Enter full name"
+                  />
+                  {currentLead?.title && (
+                    <Check className="absolute right-3.5 text-success" size={16} />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Email Address <span className="text-danger">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input 
+                    required
+                    type="email"
+                    value={currentLead?.email || ""}
+                    onChange={(e) => setCurrentLead({ ...currentLead, email: e.target.value })}
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    placeholder="Enter email address"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Company Information Section */}
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <Building2 size={16} className="text-accent" />
+              <span>Company Information</span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Company Name
+                </label>
+                <div className="relative flex items-center">
+                  <Building2 className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input 
+                    value={currentLead?.company || ""}
+                    onChange={(e) => setCurrentLead({ ...currentLead, company: e.target.value })}
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    placeholder="Enter company name"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Phone Number
+                </label>
+                <div className="relative flex items-center">
+                  <Phone className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input 
+                    type="tel"
+                    value={currentLead?.phone || ""}
+                    onChange={(e) => setCurrentLead({ ...currentLead, phone: e.target.value })}
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Web Address */}
           <div>
-            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Title</label>
-            <input 
-              required
-              value={currentLead?.title || ""}
-              onChange={(e) => setCurrentLead({ ...currentLead, title: e.target.value })}
-              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
-              placeholder="e.g. Server Upgrade"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Company</label>
+            <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+              Web Address <span className="text-danger">*</span>
+            </label>
+            <div className="relative flex items-center">
+              <Globe className="absolute left-3.5 text-foreground-muted" size={16} />
               <input 
-                value={currentLead?.company || ""}
-                onChange={(e) => setCurrentLead({ ...currentLead, company: e.target.value })}
-                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
-                placeholder="Client name"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Value (₹)</label>
-              <input 
-                type="number"
-                value={currentLead?.value || 0}
-                onChange={(e) => setCurrentLead({ ...currentLead, value: Number(e.target.value) })}
-                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                required
+                type="url"
+                value={currentLead?.webAddress || ""}
+                onChange={(e) => setCurrentLead({ ...currentLead, webAddress: e.target.value })}
+                className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                placeholder="https://example.com"
               />
             </div>
           </div>
+
+          {/* Address */}
+          <div>
+            <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+              Address <span className="text-danger">*</span>
+            </label>
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-3.5 text-foreground-muted" size={16} />
+              <textarea 
+                required
+                rows={3}
+                value={currentLead?.address || ""}
+                onChange={(e) => setCurrentLead({ ...currentLead, address: e.target.value })}
+                className="w-full bg-background-secondary border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors resize-none"
+                placeholder="Enter complete address"
+              />
+            </div>
+          </div>
+
+          {/* Status & Source Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Status</label>
+              <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                Status
+              </label>
               <select 
                 value={currentLead?.status || "new"}
                 onChange={(e) => setCurrentLead({ ...currentLead, status: e.target.value })}
-                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors cursor-pointer"
               >
                 {kanbanColumns.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Assigned To</label>
+              <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                Source
+              </label>
               <select 
-                value={(currentLead?.assignedTo as any)?._id || (currentLead?.assignedTo as any) || ""}
-                onChange={(e) => setCurrentLead({ ...currentLead, assignedTo: e.target.value as any })}
-                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
+                value={currentLead?.source || "website"}
+                onChange={(e) => setCurrentLead({ ...currentLead, source: e.target.value })}
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors cursor-pointer"
               >
-                <option value="">Unassigned</option>
-                {users.map(u => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}
+                <option value="website">Website</option>
+                <option value="referral">Referral</option>
+                <option value="cold_call">Cold Call</option>
+                <option value="social_media">Social Media</option>
+                <option value="exhibition">Exhibition</option>
+                <option value="other">Other</option>
               </select>
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4">
+
+          {/* Footer Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border/50 mt-6">
             <button 
               type="button" 
               onClick={() => setIsModalOpen(false)}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all"
+              className="px-6 py-2.5 bg-background-secondary border border-border text-foreground hover:bg-surface-hover rounded-xl text-sm font-semibold transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20 transition-all flex items-center gap-2"
+              className="px-8 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold shadow-lg shadow-accent/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-              <span>{currentLead?._id ? "Update Lead" : "Save Lead"}</span>
+              <span>{currentLead?._id ? "Update Lead" : "Create Lead"}</span>
             </button>
           </div>
         </form>

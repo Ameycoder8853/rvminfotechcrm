@@ -15,6 +15,10 @@ export interface ILead extends Document {
   status: string;
   priority: string;
   value: number;
+  email?: string;
+  phone?: string;
+  webAddress?: string;
+  address?: string;
   notes: ILeadNote[];
   followUpDate?: Date;
   createdBy: Types.ObjectId;
@@ -53,6 +57,10 @@ const LeadSchema = new Schema<ILead>({
       default: "medium",
     },
     value: { type: Number, default: 0 },
+    email: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    webAddress: { type: String, default: "" },
+    address: { type: String, default: "" },
     notes: [LeadNoteSchema],
     followUpDate: { type: Date },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
