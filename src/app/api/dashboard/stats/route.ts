@@ -47,7 +47,18 @@ export async function GET(req: NextRequest) {
     let expenseFilter: any = {};
     let attendanceFilter: any = {};
 
-    if (!isSuperAdmin) {
+    const impersonateOrgId = req.cookies.get("rvm_impersonate_org_id")?.value;
+
+    if (isSuperAdmin) {
+      if (impersonateOrgId) {
+        const targetOrgId = new mongoose.Types.ObjectId(impersonateOrgId);
+        leadFilter = { orgId: targetOrgId };
+        ticketFilter = { orgId: targetOrgId };
+        orderFilter = { orgId: targetOrgId };
+        expenseFilter = { orgId: targetOrgId };
+        attendanceFilter = { orgId: targetOrgId };
+      }
+    } else {
       if (populatedUser.orgId) {
         const orgUsers = await User.find({ orgId: populatedUser.orgId }).select("_id");
         const orgUserIds = orgUsers.map(u => u._id);

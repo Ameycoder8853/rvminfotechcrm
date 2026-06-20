@@ -54,6 +54,15 @@ interface UserProfile {
   avatar?: string;
 }
 
+// Safely normalizes ObjectId and populated organization references to plain strings
+const getOrgIdStr = (orgId: any): string => {
+  if (!orgId) return "";
+  if (typeof orgId === "object") {
+    return (orgId._id || orgId).toString();
+  }
+  return orgId.toString();
+};
+
 export default function SuperAdminPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -286,7 +295,7 @@ export default function SuperAdminPage() {
         role: currentUserEdit.roleTier === "admin" || currentUserEdit.roleTier === "super_admin" ? "admin" : currentUserEdit.role,
         orgId: selectedOrgId || null,
         teamId: selectedTeamId || null,
-        parentManager: selectedParentId || null,
+        parentManager: currentUserEdit.roleTier === "junior" ? (selectedParentId || null) : null,
       };
 
       if (isEnrollMode) {
@@ -372,7 +381,7 @@ export default function SuperAdminPage() {
   const handleOpenTeamModal = (team: Team | null = null, defaultOrgId: string = "") => {
     if (team) {
       setCurrentTeamEdit(team);
-      setSelectedOrgId(typeof team.orgId === "object" ? team.orgId._id : team.orgId);
+      setSelectedOrgId(getOrgIdStr(team.orgId));
     } else {
       setCurrentTeamEdit({
         name: "",
@@ -451,15 +460,30 @@ export default function SuperAdminPage() {
     }));
   };
 
+  const expandAllOrgs = () => {
+    setExpandedOrgs({});
+  };
+
+  const collapseAllOrgs = () => {
+    const next: Record<string, boolean> = {};
+    organizations.forEach((o) => {
+      next[o._id] = true;
+    });
+    setExpandedOrgs(next);
+  };
+
   const getTeamsForOrg = (orgId: string) => {
-    const orgTeams = teams.filter((t) => (typeof t.orgId === "object" ? t.orgId._id : t.orgId) === orgId);
+    const orgTeams = teams.filter((t) => getOrgIdStr(t.orgId) === orgId);
     if (!searchQuery) return orgTeams;
     const query = searchQuery.toLowerCase();
     return orgTeams.filter((t) => t.name.toLowerCase().includes(query) || (t.description || "").toLowerCase().includes(query));
   };
 
   const getUsersForOrg = (orgId: string | null) => {
-    const orgUsers = users.filter((u) => (u.orgId?._id || null) === orgId);
+    const orgUsers = users.filter((u) => {
+      const userOrgId = u.orgId ? getOrgIdStr(u.orgId) : null;
+      return userOrgId === orgId;
+    });
     if (!searchQuery) return orgUsers;
     const query = searchQuery.toLowerCase();
     return orgUsers.filter((u) => {
@@ -490,11 +514,11 @@ export default function SuperAdminPage() {
 
   // Dynamic dropdown lists matching selected organization context in Modals
   const availableTeams = selectedOrgId 
-    ? teams.filter(t => (typeof t.orgId === "object" ? t.orgId._id : t.orgId) === selectedOrgId)
+    ? teams.filter(t => getOrgIdStr(t.orgId) === selectedOrgId)
     : [];
 
   const availableSeniors = selectedOrgId
-    ? users.filter(u => u.orgId?._id === selectedOrgId && (u.roleTier === "senior" || u.roleTier === "admin"))
+    ? users.filter(u => u.orgId && getOrgIdStr(u.orgId) === selectedOrgId && (u.roleTier === "senior" || u.roleTier === "admin"))
     : [];
 
   if (!mounted) return null;
@@ -549,16 +573,33 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {/* Search Filter bar */}
-      <div className="relative flex items-center max-w-md w-full bg-surface border border-border rounded-xl">
-        <Search className="absolute left-3.5 text-foreground-muted w-4 h-4" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search companies, slugs, teams, and user profiles..."
-          className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-accent text-foreground placeholder-foreground-muted"
-        />
+      {/* Search and Expand/Collapse Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative flex items-center max-w-md w-full bg-surface border border-border rounded-xl">
+          <Search className="absolute left-3.5 text-foreground-muted w-4 h-4" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search companies, slugs, teams, and user profiles..."
+            className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-accent text-foreground placeholder-foreground-muted"
+          />
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={expandAllOrgs}
+            className="px-3.5 py-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-xs font-bold transition-all text-foreground cursor-pointer"
+          >
+            Expand All
+          </button>
+          <button
+            onClick={collapseAllOrgs}
+            className="px-3.5 py-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-xs font-bold transition-all text-foreground cursor-pointer"
+          >
+            Collapse All
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -624,7 +665,7 @@ export default function SuperAdminPage() {
                     </div>
 
                     {/* Org Action Buttons */}
-                    <div className="flex items-center gap-2 sm:self-center" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex flex-wrap items-center gap-2 sm:self-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleImpersonate(org._id, org.name)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -662,11 +703,11 @@ export default function SuperAdminPage() {
 
                   {/* Collapsible Content */}
                   {!isCollapsed && (
-                    <div className="p-6 bg-background-secondary/10 space-y-6">
+                    <div className="p-4 sm:p-6 bg-background-secondary/10 space-y-6">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         
                         {/* TEAMS NESTED SECTION */}
-                        <div className="bg-surface border border-border rounded-xl p-5 space-y-4 shadow-sm">
+                        <div className="bg-surface border border-border rounded-xl p-4 sm:p-5 space-y-4 shadow-sm">
                           <div className="flex items-center justify-between border-b border-border pb-3">
                             <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
                               <Shield size={15} className="text-foreground-secondary" />
@@ -687,9 +728,9 @@ export default function SuperAdminPage() {
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                               {orgTeams.map((team) => (
                                 <div key={team._id} className="p-3 bg-background border border-border/80 rounded-xl hover:border-border transition-all flex items-start justify-between gap-3 group">
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 flex-1">
                                     <h5 className="font-bold text-xs text-foreground truncate">{team.name}</h5>
-                                    <p className="text-[11px] text-foreground-secondary leading-normal line-clamp-1 mt-0.5">{team.description || "No description provided."}</p>
+                                    <p className="text-[11px] text-foreground-secondary leading-normal line-clamp-2 mt-0.5">{team.description || "No description provided."}</p>
                                     <div className="flex flex-wrap gap-x-2.5 gap-y-1 mt-2 text-[9px] font-extrabold uppercase text-accent tracking-wider">
                                       <span>Leads: {team.permissions.leads}</span>
                                       <span className="text-border">•</span>
@@ -700,16 +741,17 @@ export default function SuperAdminPage() {
                                       <span>Tkt: {team.permissions.tickets}</span>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {/* Action buttons are always visible on mobile/tablet, and hover-triggered on desktop */}
+                                  <div className="flex items-center gap-1 shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                     <button
                                       onClick={() => handleOpenTeamModal(team)}
-                                      className="p-1 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
+                                      className="p-1.5 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
                                     >
                                       <Edit size={11} />
                                     </button>
                                     <button
                                       onClick={() => handleDeleteTeam(team._id, team.name)}
-                                      className="p-1 hover:bg-red-500/10 rounded text-red-500 transition-all cursor-pointer"
+                                      className="p-1.5 hover:bg-red-500/10 rounded text-red-500 transition-all cursor-pointer"
                                     >
                                       <Trash2 size={11} />
                                     </button>
@@ -721,7 +763,7 @@ export default function SuperAdminPage() {
                         </div>
 
                         {/* USERS NESTED SECTION */}
-                        <div className="bg-surface border border-border rounded-xl p-5 space-y-4 shadow-sm">
+                        <div className="bg-surface border border-border rounded-xl p-4 sm:p-5 space-y-4 shadow-sm">
                           <div className="flex items-center justify-between border-b border-border pb-3">
                             <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
                               <Users size={15} className="text-foreground-secondary" />
@@ -742,9 +784,10 @@ export default function SuperAdminPage() {
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                               {orgUsers.map((user) => {
                                 const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "U";
+                                const teamName = user.teamId && typeof user.teamId === "object" ? user.teamId.name : "";
                                 return (
                                   <div key={user._id} className="p-3 bg-background border border-border/80 rounded-xl hover:border-border transition-all flex items-center justify-between gap-3 group">
-                                    <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                       {user.avatar ? (
                                         <img src={user.avatar} alt={user.firstName} className="w-8 h-8 rounded-lg object-cover border border-border shrink-0" />
                                       ) : (
@@ -752,10 +795,10 @@ export default function SuperAdminPage() {
                                           {initials}
                                         </div>
                                       )}
-                                      <div className="min-w-0">
+                                      <div className="min-w-0 flex-1">
                                         <h5 className="font-bold text-xs text-foreground truncate">{user.firstName} {user.lastName}</h5>
                                         <p className="text-[10px] text-foreground-secondary truncate leading-none mt-0.5">{user.email}</p>
-                                        <div className="flex items-center gap-2 mt-1.5">
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                                           {user.roleTier === "admin" ? (
                                             <span className="inline-flex items-center px-1.5 py-0.2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 rounded text-[8px] font-bold uppercase">Admin</span>
                                           ) : user.roleTier === "senior" ? (
@@ -765,33 +808,34 @@ export default function SuperAdminPage() {
                                           ) : (
                                             <span className="inline-flex items-center px-1.5 py-0.2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/15 rounded text-[8px] font-bold uppercase">No Access</span>
                                           )}
-                                          {user.teamId && (
+                                          {teamName && (
                                             <span className="text-[9px] text-foreground-muted font-medium truncate">
-                                              Team: <span className="font-semibold text-foreground-secondary">{user.teamId.name}</span>
+                                              Team: <span className="font-semibold text-foreground-secondary">{teamName}</span>
                                             </span>
                                           )}
                                         </div>
                                       </div>
                                     </div>
                                     
-                                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {/* Action buttons are always visible on mobile/tablet, and hover-triggered on desktop */}
+                                    <div className="flex items-center gap-1 shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                       <button
                                         onClick={() => handleOpenUserModal(user)}
-                                        className="p-1 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
+                                        className="p-1.5 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
                                         title="Edit profile & permissions"
                                       >
                                         <Edit size={11} />
                                       </button>
                                       <button
                                         onClick={() => handleToggleUserStatus(user._id, user.isActive)}
-                                        className="p-1 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
+                                        className="p-1.5 hover:bg-surface border border-transparent hover:border-border rounded text-foreground-secondary hover:text-foreground transition-all cursor-pointer"
                                         title={user.isActive ? "Suspend User" : "Activate User"}
                                       >
                                         {user.isActive ? <Lock size={11} className="text-red-400" /> : <Unlock size={11} className="text-green-400" />}
                                       </button>
                                       <button
                                         onClick={() => handleDeleteUser(user._id, user.email)}
-                                        className="p-1 hover:bg-red-500/10 rounded text-red-500 transition-all cursor-pointer"
+                                        className="p-1.5 hover:bg-red-500/10 rounded text-red-500 transition-all cursor-pointer"
                                         title="Permanently Delete User"
                                       >
                                         <Trash2 size={11} />
@@ -821,7 +865,7 @@ export default function SuperAdminPage() {
 
           {/* GLOBAL / UNASSIGNED SYSTEM USERS SECTION */}
           {globalUnassignedUsers.length > 0 && (
-            <div className="bg-surface border border-border rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm">
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <h3 className="font-bold text-base text-foreground flex items-center gap-2">
                   <Shield size={18} className="text-purple-400" />
@@ -1126,22 +1170,24 @@ export default function SuperAdminPage() {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-foreground-secondary mb-1.5 block">Senior Supervisor / Manager</label>
-                    <select
-                      value={selectedParentId}
-                      onChange={(e) => setSelectedParentId(e.target.value)}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
-                    >
-                      <option value="">No Supervisor (Reports directly to Admin)</option>
-                      {availableSeniors
-                        .filter(u => u._id !== currentUserEdit?._id)
-                        .map(u => (
-                          <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({u.roleTier})</option>
-                        ))
-                      }
-                    </select>
-                  </div>
+                  {currentUserEdit?.roleTier === "junior" && (
+                    <div>
+                      <label className="text-xs font-bold text-foreground-secondary mb-1.5 block">Senior Supervisor / Manager</label>
+                      <select
+                        value={selectedParentId}
+                        onChange={(e) => setSelectedParentId(e.target.value)}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:border-accent outline-none cursor-pointer font-semibold"
+                      >
+                        <option value="">No Supervisor (Reports directly to Admin)</option>
+                        {availableSeniors
+                          .filter(u => u._id !== currentUserEdit?._id)
+                          .map(u => (
+                            <option key={u._id} value={u._id}>{u.firstName} {u.lastName} ({u.roleTier})</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
