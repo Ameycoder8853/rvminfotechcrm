@@ -726,7 +726,7 @@ export default function SuperAdminPage() {
                           {orgTeams.length === 0 ? (
                             <p className="text-xs text-foreground-muted py-6 text-center">No teams registered under this organization.</p>
                           ) : (
-                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            <div className="space-y-3 max-h-75 overflow-y-auto pr-1">
                               {orgTeams.map((team) => (
                                 <div key={team._id} className="p-3 bg-background border border-border/80 rounded-xl hover:border-border transition-all flex items-start justify-between gap-3 group">
                                   <div className="min-w-0 flex-1">
@@ -782,7 +782,7 @@ export default function SuperAdminPage() {
                           {orgUsers.length === 0 ? (
                             <p className="text-xs text-foreground-muted py-6 text-center">No users enrolled under this organization.</p>
                           ) : (
-                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            <div className="space-y-3 max-h-75 overflow-y-auto pr-1">
                               {orgUsers.map((user) => {
                                 const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "U";
                                 const teamName = user.teamId && typeof user.teamId === "object" ? user.teamId.name : "";
