@@ -582,7 +582,8 @@ export default function SuperAdminPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search companies, slugs, teams, and user profiles..."
-            className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-accent text-foreground placeholder-foreground-muted"
+            className="w-full pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-accent text-foreground placeholder-foreground-muted border-none shadow-none"
+            style={{ backgroundColor: "transparent" }}
           />
         </div>
         
