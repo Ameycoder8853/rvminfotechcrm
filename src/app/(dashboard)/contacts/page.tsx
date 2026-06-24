@@ -35,6 +35,8 @@ import {
 import Modal from "@/components/shared/modal";
 import { usePermission } from "@/hooks/use-permission";
 import StatusBadge from "@/components/shared/status-badge";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Contact {
   _id: string;
@@ -76,6 +78,7 @@ interface Contact {
 type ViewMode = "list" | "new" | "edit";
 
 export default function ContactsPage() {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -178,7 +181,7 @@ export default function ContactsPage() {
     const params = new URLSearchParams(window.location.search);
     const action = params.get("action");
     if (action === "add") {
-      handleOpenNewForm();
+      router.push("/contacts/new");
       const url = new URL(window.location.href);
       url.searchParams.delete("action");
       window.history.replaceState({}, "", url.pathname + url.search);
@@ -470,13 +473,13 @@ export default function ContactsPage() {
               />
               {canWrite && (
                 <>
-                  <button 
-                    onClick={handleOpenNewForm}
+                  <Link 
+                    href="/contacts/new"
                     className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
                   >
                     <Plus size={16} className="stroke-[3]" />
                     <span>Add Contact</span>
-                  </button>
+                  </Link>
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-2 px-3 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-semibold transition-colors cursor-pointer"
@@ -700,11 +703,11 @@ export default function ContactsPage() {
         </>
       )}
 
-      {/* -------------------- VIEW MODE: ADD NEW / EDIT CONTACT (MODAL LAYOUT) -------------------- */}
+      {/* -------------------- VIEW MODE: EDIT CONTACT (MODAL LAYOUT) -------------------- */}
       <Modal
-        isOpen={viewMode === "new" || viewMode === "edit"}
+        isOpen={viewMode === "edit"}
         onClose={() => setViewMode("list")}
-        title={viewMode === "new" ? "Add New Contact" : "Edit Contact Details"}
+        title="Edit Contact Details"
         className="max-w-3xl"
       >
         <form onSubmit={handleSubmit} className="space-y-5 max-h-[75vh] overflow-y-auto pr-2 scrollbar-thin">
