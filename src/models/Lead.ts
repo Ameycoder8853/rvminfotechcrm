@@ -40,7 +40,7 @@ const LeadSchema = new Schema<ILead>({
     title: { type: String, required: true },
     source: {
       type: String,
-      enum: ["website", "referral", "cold_call", "social_media", "exhibition", "other"],
+      enum: ["website", "referral", "cold_call", "social_media", "email_campaign", "trade_show", "partner", "direct_mail", "other"],
       default: "other",
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
@@ -48,7 +48,7 @@ const LeadSchema = new Schema<ILead>({
     company: { type: String, default: "" },
     status: {
       type: String,
-      enum: ["new", "contacted", "qualified", "proposal", "negotiation", "won", "lost"],
+      enum: ["new", "contacted", "qualified", "proposal", "won", "lost"],
       default: "new",
     },
     priority: {

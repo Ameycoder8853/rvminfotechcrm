@@ -9,7 +9,6 @@ export type LeadStatus =
   | "contacted"
   | "qualified"
   | "proposal"
-  | "negotiation"
   | "won"
   | "lost";
 
@@ -18,7 +17,10 @@ export type LeadSource =
   | "referral"
   | "cold_call"
   | "social_media"
-  | "exhibition"
+  | "email_campaign"
+  | "trade_show"
+  | "partner"
+  | "direct_mail"
   | "other";
 
 export type Priority = "low" | "medium" | "high" | "urgent";

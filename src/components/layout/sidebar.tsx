@@ -67,7 +67,8 @@ const navigationSections: NavSection[] = [
         icon: <Phone size={18} />,
         subItems: [
           { title: "Lead List", href: "/leads" },
-          { title: "Add Lead", href: "/leads?action=add" },
+          { title: "Sales Calls", href: "/comms" },
+          { title: "Enquiries", href: "/enquiries" },
         ],
       },
       {

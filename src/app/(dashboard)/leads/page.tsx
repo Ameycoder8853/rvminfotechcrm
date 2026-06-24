@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import StatusBadge from "@/components/shared/status-badge";
-import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download, Shield, User, Mail, Building2, Phone, Globe, MapPin, Check } from "lucide-react";
+import { Plus, Search, Filter, MoreVertical, Eye, Edit, Trash2, GripVertical, Loader2, Upload, Download, Shield, User, Mail, Building2, Phone, Globe, MapPin, Check, PhoneCall, Activity, Share2, Users, HelpCircle, Briefcase, Handshake, Megaphone } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import Modal from "@/components/shared/modal";
 import { usePermission } from "@/hooks/use-permission";
@@ -29,7 +29,6 @@ const kanbanColumns = [
   { key: "contacted", label: "Contacted", color: "#f59e0b" },
   { key: "qualified", label: "Qualified", color: "#6366f1" },
   { key: "proposal", label: "Proposal", color: "#a855f7" },
-  { key: "negotiation", label: "Negotiation", color: "#ec4899" },
   { key: "won", label: "Won", color: "#22c55e" },
   { key: "lost", label: "Lost", color: "#ef4444" },
 ];
@@ -37,8 +36,11 @@ const kanbanColumns = [
 type ViewMode = "table" | "kanban";
 
 export default function LeadsPage() {
-  const [view, setView] = useState<ViewMode>("kanban");
+  const [view, setView] = useState<ViewMode>("table");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -49,6 +51,25 @@ export default function LeadsPage() {
   const [currentLead, setCurrentLead] = useState<Partial<Lead> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper functions for date and time formatting
+  const formatLeadDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const formatLeadTime = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    } catch {
+      return "N/A";
+    }
+  };
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -99,11 +120,17 @@ export default function LeadsPage() {
     }
   }, [mounted]);
 
-  const filteredLeads = leads.filter(
-    (l) =>
+  const filteredLeads = leads.filter((l) => {
+    const matchesSearch =
       l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.company?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      (l.company && l.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (l.email && l.email.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+    const matchesStatus = statusFilter === "all" || l.status === statusFilter;
+    const matchesSource = sourceFilter === "all" || l.source === sourceFilter;
+    
+    return !!(matchesSearch && matchesStatus && matchesSource);
+  });
 
   const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -350,14 +377,22 @@ export default function LeadsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Lead Management</h1>
-          <p className="text-sm text-foreground-secondary mt-1">
-            Track and manage your sales pipeline with real data
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
         <div className="flex items-center gap-3">
+          <PhoneCall size={28} className="text-accent" />
+          <h1 className="text-2xl font-bold text-foreground">
+            Leads <span className="text-foreground-secondary">({filteredLeads.length})</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsAnalyticsOpen(true)}
+            className="flex items-center gap-2 text-sm font-semibold text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
+          >
+            <Activity size={16} />
+            <span>Source Analytics</span>
+          </button>
+          
           {canWrite && (
             <>
               <input
@@ -369,55 +404,116 @@ export default function LeadsPage() {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center gap-2 px-3.5 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                 title="Import from CSV"
               >
-                <Upload size={16} />
+                <Upload size={15} />
                 <span className="hidden md:inline">Import CSV</span>
               </button>
             </>
           )}
+          
           <button
             onClick={handleCSVExport}
-            className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-colors cursor-pointer"
             title="Export to CSV"
           >
-            <Download size={16} />
+            <Download size={15} />
             <span className="hidden md:inline">Export CSV</span>
           </button>
+
           {canWrite && (
             <button 
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-accent/20 active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-accent/20 active:scale-95 cursor-pointer"
             >
-              <Plus size={18} />
+              <Plus size={16} />
               <span>Add Lead</span>
             </button>
           )}
+
+          <div className="flex items-center bg-surface border border-border rounded-xl p-1 text-xs">
+            <button 
+              onClick={() => setView("table")} 
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${view === "table" ? "bg-accent text-white" : "text-foreground-secondary hover:text-foreground"}`}
+            >
+              Table
+            </button>
+            <button 
+              onClick={() => setView("kanban")} 
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${view === "kanban" ? "bg-accent text-white" : "text-foreground-secondary hover:text-foreground"}`}
+            >
+              Kanban
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 flex-1 sm:w-72">
-            <Search size={16} className="text-foreground-muted" />
-            <input
-              type="text"
-              placeholder="Search leads..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full"
-            />
-          </div>
-          <button className="p-2.5 bg-surface border border-border rounded-lg text-foreground-secondary hover:text-foreground hover:border-border-hover transition-colors">
-            <Filter size={16} />
-          </button>
+      {/* Advanced Filters */}
+      <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <Filter size={16} className="text-foreground-secondary" />
+          <span>Advanced Filters</span>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Search Input */}
+          <div>
+            <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+              Search Leads
+            </label>
+            <div className="relative flex items-center">
+              <Search className="absolute left-3.5 text-foreground-muted" size={16} />
+              <input
+                type="text"
+                placeholder="Name, email, company..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+              />
+            </div>
+          </div>
 
-        <div className="flex items-center bg-surface border border-border rounded-lg p-1">
-          <button onClick={() => setView("table")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${view === "table" ? "bg-accent text-white" : "text-foreground-secondary hover:text-foreground"}`}>Table</button>
-          <button onClick={() => setView("kanban")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${view === "kanban" ? "bg-accent text-white" : "text-foreground-secondary hover:text-foreground"}`}>Kanban</button>
+          {/* Status Filter */}
+          <div>
+            <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+              Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer transition-colors"
+            >
+              <option value="all">All Statuses</option>
+              {kanbanColumns.map((col) => (
+                <option key={col.key} value={col.key}>
+                  {col.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Source Filter */}
+          <div>
+            <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+              Source
+            </label>
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer transition-colors"
+            >
+              <option value="all">All Sources</option>
+              <option value="website">Website</option>
+              <option value="referral">Referral</option>
+              <option value="cold_call">Cold Call</option>
+              <option value="social_media">Social Media</option>
+              <option value="email_campaign">Email Campaign</option>
+              <option value="trade_show">Trade Show</option>
+              <option value="partner">Partner</option>
+              <option value="direct_mail">Direct Mail</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -429,37 +525,150 @@ export default function LeadsPage() {
       ) : (
         <>
           {view === "table" && (
-            <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+              {/* Table Card Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-background-secondary/20">
+                <span className="font-bold text-foreground text-sm">Lead Details</span>
+                <span className="text-xs text-foreground-secondary font-medium">
+                  Showing <strong className="text-foreground">{filteredLeads.length}</strong> leads
+                </span>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-background-secondary/50">
-                      <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Lead</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted hidden md:table-cell">Company</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Value</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Status</th>
-                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground-muted hidden lg:table-cell text-right">Actions</th>
+                    <tr className="border-b border-border bg-background-secondary/30">
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Contact</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Company</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Status</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Source</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Created</th>
+                      <th className="text-center px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filteredLeads.map((lead) => (
-                      <tr key={lead._id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors">
-                        <td className="px-4 py-3 font-medium text-foreground">{lead.title}</td>
-                        <td className="px-4 py-3 text-foreground-secondary hidden md:table-cell">{lead.company}</td>
-                        <td className="px-4 py-3 font-semibold text-foreground">₹{lead.value.toLocaleString()}</td>
-                        <td className="px-4 py-3"><StatusBadge status={lead.status} /></td>
-                        <td className="px-4 py-3 text-right">
-                          {canWrite ? (
-                            <div className="flex items-center justify-end gap-1">
-                              <button onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} className="p-1.5 rounded-md text-foreground-muted hover:text-foreground hover:bg-surface-active transition-colors"><Edit size={15} /></button>
-                              <button onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} className="p-1.5 rounded-md text-foreground-muted hover:text-danger hover:bg-danger-muted transition-colors"><Trash2 size={15} /></button>
-                            </div>
-                          ) : (
-                            <span className="text-foreground-muted text-xs">—</span>
-                          )}
+                  <tbody className="divide-y divide-border/60">
+                    {filteredLeads.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-10 text-center text-sm text-foreground-secondary">
+                          No leads found matching your criteria.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      filteredLeads.map((lead) => {
+                        const renderSourceIcon = (src: string) => {
+                          const iconClass = "text-foreground-muted shrink-0";
+                          switch (src) {
+                            case "website":
+                              return <Globe size={14} className={iconClass} />;
+                            case "cold_call":
+                              return <Phone size={14} className={iconClass} />;
+                            case "referral":
+                              return <Users size={14} className={iconClass} />;
+                            case "social_media":
+                              return <Share2 size={14} className={iconClass} />;
+                            case "email_campaign":
+                              return <Mail size={14} className={iconClass} />;
+                            case "trade_show":
+                              return <Megaphone size={14} className={iconClass} />;
+                            case "partner":
+                              return <Handshake size={14} className={iconClass} />;
+                            case "direct_mail":
+                              return <Mail size={14} className={iconClass} />;
+                            default:
+                              return <HelpCircle size={14} className={iconClass} />;
+                          }
+                        };
+
+                        const displaySource = (lead.source || "other").replace(/_/g, " ");
+
+                        return (
+                          <tr key={lead._id} className="hover:bg-surface-hover/40 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="space-y-1">
+                                <div className="font-bold text-foreground text-sm">{lead.title}</div>
+                                {lead.email && (
+                                  <div className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                                    <Mail size={12} className="text-foreground-muted" />
+                                    <span>{lead.email}</span>
+                                  </div>
+                                )}
+                                {lead.phone && (
+                                  <div className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                                    <Phone size={12} className="text-foreground-muted" />
+                                    <span>{lead.phone}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-accent-muted/20 border border-accent/15 flex items-center justify-center text-accent">
+                                  <Briefcase size={14} />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <div className="font-bold text-foreground text-sm">
+                                    {lead.company || "—"}
+                                  </div>
+                                  {lead.company && (
+                                    <div className="text-[10px] font-semibold text-foreground-secondary uppercase tracking-wider">
+                                      Corporate Client
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <StatusBadge status={lead.status} />
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2 text-xs text-foreground font-semibold capitalize">
+                                {renderSourceIcon(lead.source)}
+                                <span>{displaySource}</span>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="space-y-0.5 text-xs">
+                                <div className="font-bold text-foreground">
+                                  {formatLeadDate(lead.createdAt)}
+                                </div>
+                                <div className="text-foreground-secondary font-medium">
+                                  {formatLeadTime(lead.createdAt)}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-center gap-2.5">
+                                {canWrite ? (
+                                  <>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleOpenModal(lead); }} 
+                                      className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-muted/25 hover:bg-accent-muted/50 border border-accent/15 text-accent transition-all cursor-pointer"
+                                      title="Edit Lead"
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleDelete(lead._id); }} 
+                                      className="w-8 h-8 rounded-full flex items-center justify-center bg-danger-muted/25 hover:bg-danger-muted/50 border border-danger/15 text-danger transition-all cursor-pointer"
+                                      title="Delete Lead"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span className="text-foreground-muted text-xs">—</span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -545,7 +754,7 @@ export default function LeadsPage() {
                     required
                     value={currentLead?.title || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, title: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 !pr-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter full name"
                   />
                   {currentLead?.title && (
@@ -565,7 +774,7 @@ export default function LeadsPage() {
                     type="email"
                     value={currentLead?.email || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, email: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter email address"
                   />
                 </div>
@@ -590,7 +799,7 @@ export default function LeadsPage() {
                   <input 
                     value={currentLead?.company || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, company: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter company name"
                   />
                 </div>
@@ -606,7 +815,7 @@ export default function LeadsPage() {
                     type="tel"
                     value={currentLead?.phone || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, phone: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter phone number"
                   />
                 </div>
@@ -626,7 +835,7 @@ export default function LeadsPage() {
                 type="url"
                 value={currentLead?.webAddress || ""}
                 onChange={(e) => setCurrentLead({ ...currentLead, webAddress: e.target.value })}
-                className="w-full bg-background-secondary border border-border rounded-xl pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                 placeholder="https://example.com"
               />
             </div>
@@ -644,7 +853,7 @@ export default function LeadsPage() {
                 rows={3}
                 value={currentLead?.address || ""}
                 onChange={(e) => setCurrentLead({ ...currentLead, address: e.target.value })}
-                className="w-full bg-background-secondary border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors resize-none"
+                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors resize-none"
                 placeholder="Enter complete address"
               />
             </div>
@@ -677,7 +886,10 @@ export default function LeadsPage() {
                 <option value="referral">Referral</option>
                 <option value="cold_call">Cold Call</option>
                 <option value="social_media">Social Media</option>
-                <option value="exhibition">Exhibition</option>
+                <option value="email_campaign">Email Campaign</option>
+                <option value="trade_show">Trade Show</option>
+                <option value="partner">Partner</option>
+                <option value="direct_mail">Direct Mail</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -702,6 +914,47 @@ export default function LeadsPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Source Analytics Modal */}
+      <Modal
+        isOpen={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
+        title="Source Analytics"
+      >
+        <div className="space-y-6">
+          <p className="text-xs text-foreground-secondary leading-relaxed">
+            Breakdown of active leads grouped by their acquisition channel.
+          </p>
+          <div className="space-y-4">
+            {Object.entries(
+              leads.reduce((acc, lead) => {
+                const src = lead.source || "other";
+                acc[src] = (acc[src] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>)
+            ).map(([source, count]) => {
+              const total = leads.length || 1;
+              const percentage = Math.round((count / total) * 100);
+              const displayLabel = source.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              
+              return (
+                <div key={source} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-foreground">{displayLabel}</span>
+                    <span className="text-foreground-secondary font-medium">{count} ({percentage}%)</span>
+                  </div>
+                  <div className="w-full h-2 bg-background-secondary rounded-full overflow-hidden border border-border">
+                    <div 
+                      className="h-full bg-accent rounded-full transition-all duration-500" 
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </Modal>
     </div>
   );
