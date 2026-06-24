@@ -24,10 +24,17 @@ import {
   Calendar,
   XCircle,
   Save,
-  Shield
+  Shield,
+  Filter,
+  Briefcase,
+  HelpCircle,
+  Share2,
+  Megaphone,
+  Handshake
 } from "lucide-react";
 import Modal from "@/components/shared/modal";
 import { usePermission } from "@/hooks/use-permission";
+import StatusBadge from "@/components/shared/status-badge";
 
 interface Contact {
   _id: string;
@@ -63,6 +70,7 @@ interface Contact {
   remarks?: string;
   additionalNotes?: string;
   assignedTo?: { _id: string; firstName: string; lastName: string };
+  createdAt?: string;
 }
 
 type ViewMode = "list" | "new" | "edit";
@@ -75,12 +83,61 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
+  const [sourceFilter, setSourceFilter] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
  
   // Form states
   const [currentContact, setCurrentContact] = useState<Partial<Contact>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { hasAccess, canWrite, loading: permLoading } = usePermission("customers");
+
+  // Helper functions for date and time formatting
+  const formatContactDate = (dateStr?: string) => {
+    if (!dateStr) return "N/A";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const formatContactTime = (dateStr?: string) => {
+    if (!dateStr) return "N/A";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const renderSourceIcon = (src: string) => {
+    const iconClass = "text-foreground-muted shrink-0";
+    const normalizedSrc = (src || "").toLowerCase();
+    switch (normalizedSrc) {
+      case "website":
+        return <Globe size={14} className={iconClass} />;
+      case "cold_call":
+      case "cold call":
+        return <Phone size={14} className={iconClass} />;
+      case "referral":
+        return <Users size={14} className={iconClass} />;
+      case "social media":
+      case "social_media":
+        return <Share2 size={14} className={iconClass} />;
+      case "email_campaign":
+      case "email campaign":
+        return <Mail size={14} className={iconClass} />;
+      case "trade_show":
+      case "trade show":
+        return <Megaphone size={14} className={iconClass} />;
+      case "partner":
+        return <Handshake size={14} className={iconClass} />;
+      default:
+        return <HelpCircle size={14} className={iconClass} />;
+    }
+  };
 
   const fetchContacts = useCallback(async () => {
     try {
@@ -143,8 +200,9 @@ export default function ContactsPage() {
       c.phone?.toLowerCase().includes(query);
       
     const matchesStatus = statusFilter === "" || c.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesSource = sourceFilter === "" || c.source?.toLowerCase() === sourceFilter.toLowerCase();
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesSource;
   });
 
   const handleOpenNewForm = () => {
@@ -395,15 +453,12 @@ export default function ContactsPage() {
       {/* -------------------- VIEW MODE: LIST -------------------- */}
       {viewMode === "list" && (
         <>
-          {/* Top Header Block */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
-                <Users size={22} className="stroke-[2.5]" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground tracking-tight">Contact Management</h1>
-              </div>
+              <Users size={28} className="text-accent" />
+              <h1 className="text-2xl font-bold text-foreground">
+                Contacts <span className="text-foreground-secondary">({filtered.length})</span>
+              </h1>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -441,29 +496,65 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          {/* Search & Filter Bar */}
-          <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3 shadow-sm gap-4">
-            <div className="flex items-center gap-3 flex-1">
-              <Search size={18} className="text-foreground-muted shrink-0 ml-1" />
-              <input
-                type="text"
-                placeholder="Search by name, email, phone or company.."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none outline-none text-sm text-foreground placeholder-foreground-muted w-full font-medium"
-              />
+          {/* Advanced Filters */}
+          <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <Filter size={16} className="text-foreground-secondary" />
+              <span>Advanced Filters</span>
             </div>
-            <div className="relative shrink-0 flex items-center border-l border-border pl-4 gap-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-transparent outline-none border-none text-sm font-semibold text-foreground-secondary pr-8 cursor-pointer relative"
-              >
-                <option value="" className="bg-surface">All Contacts</option>
-                <option value="lead" className="bg-surface">Lead</option>
-                <option value="customer" className="bg-surface">Customer</option>
-              </select>
-              <ChevronDown size={14} className="text-foreground-muted absolute right-1 pointer-events-none" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Search Contacts */}
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Search Contacts
+                </label>
+                <div className="relative flex items-center">
+                  <Search className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input
+                    type="text"
+                    placeholder="Name, email, phone, company..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer transition-colors"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="lead">Lead</option>
+                  <option value="customer">Customer</option>
+                </select>
+              </div>
+
+              {/* Source Filter */}
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Source
+                </label>
+                <select
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none cursor-pointer transition-colors"
+                >
+                  <option value="">All Sources</option>
+                  <option value="website">Website</option>
+                  <option value="event">Event</option>
+                  <option value="social media">Social Media</option>
+                  <option value="referral">Referral</option>
+                  <option value="cold_call">Cold Call</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -474,104 +565,132 @@ export default function ContactsPage() {
               <p className="text-sm text-foreground-secondary font-medium">Loading contact database...</p>
             </div>
           ) : (
-            <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+              {/* Table Card Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-background-secondary/20">
+                <span className="font-bold text-foreground text-sm">Contact Details</span>
+                <span className="text-xs text-foreground-secondary font-medium">
+                  Showing <strong className="text-foreground">{filtered.length}</strong> contacts
+                </span>
+              </div>
+
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-background-secondary/50">
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Name</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Contact Info</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Company</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Status</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Source</th>
-                      <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-foreground-muted text-right pr-8">Actions</th>
+                    <tr className="border-b border-border bg-background-secondary/30">
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Contact</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Company</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Status</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Source</th>
+                      <th className="text-left px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Created</th>
+                      <th className="text-center px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-foreground-muted">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/50">
-                    {filtered.map((c) => (
-                      <tr key={c._id} className="hover:bg-surface-hover/45 transition-colors">
-                        {/* Name Column */}
-                        <td className="px-6 py-4.5 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-accent-muted flex items-center justify-center text-xs font-bold text-accent shrink-0 border border-accent/15">
-                              {getInitials(c.firstName, c.lastName)}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-foreground text-[14px]">
-                                {c.firstName} {c.lastName}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Contact Info Column */}
-                        <td className="px-6 py-4.5 whitespace-nowrap">
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground-secondary">
-                              <Mail size={13} className="text-foreground-muted shrink-0" />
-                              <span>{c.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs font-semibold text-foreground-secondary">
-                              <Phone size={13} className="text-foreground-muted shrink-0" />
-                              <span>{c.phone}</span>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Company Column */}
-                        <td className="px-6 py-4.5 whitespace-nowrap">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-foreground-secondary">
-                            <Building size={13} className="text-foreground-muted shrink-0" />
-                            <span>{c.company || "—"}</span>
-                          </div>
-                        </td>
-
-                        {/* Status Badge Column */}
-                        <td className="px-6 py-4.5 whitespace-nowrap">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-muted text-warning border border-warning/20">
-                            {c.status}
-                          </span>
-                        </td>
-
-                        {/* Source Column */}
-                        <td className="px-6 py-4.5 whitespace-nowrap">
-                          <span className="text-xs font-bold text-foreground-secondary capitalize">
-                            {c.source || "website"}
-                          </span>
-                        </td>
-
-                        {/* Actions Column */}
-                        <td className="px-6 py-4.5 whitespace-nowrap text-right pr-8">
-                          {canWrite ? (
-                            <div className="flex items-center justify-end gap-3.5">
-                              <button 
-                                onClick={() => handleOpenEditForm(c)}
-                                className="p-1 rounded text-accent hover:bg-accent-muted transition-colors cursor-pointer"
-                                title="Edit Contact"
-                              >
-                                <Edit size={15} className="stroke-[2.5]" />
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(c._id)}
-                                className="p-1 rounded text-danger hover:bg-danger-muted transition-colors cursor-pointer"
-                                title="Delete"
-                              >
-                                <Trash2 size={15} className="stroke-[2.5]" />
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-foreground-muted text-xs mr-2">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-
-                    {filtered.length === 0 && (
+                  <tbody className="divide-y divide-border/60">
+                    {filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-20 bg-background-secondary/10">
-                          <p className="text-sm font-medium text-foreground-muted">No contacts found</p>
+                        <td colSpan={6} className="px-6 py-10 text-center text-sm text-foreground-secondary">
+                          No contacts found matching your criteria.
                         </td>
                       </tr>
+                    ) : (
+                      filtered.map((c) => {
+                        const displaySource = (c.source || "other").replace(/_/g, " ");
+
+                        return (
+                          <tr key={c._id} className="hover:bg-surface-hover/40 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-accent-muted flex items-center justify-center text-xs font-bold text-accent shrink-0 border border-accent/15">
+                                  {getInitials(c.firstName, c.lastName)}
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="font-bold text-foreground text-sm">
+                                    {c.firstName} {c.lastName}
+                                  </div>
+                                  {c.email && (
+                                    <div className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                                      <Mail size={12} className="text-foreground-muted" />
+                                      <span>{c.email}</span>
+                                    </div>
+                                  )}
+                                  {c.phone && (
+                                    <div className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                                      <Phone size={12} className="text-foreground-muted" />
+                                      <span>{c.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-accent-muted/20 border border-accent/15 flex items-center justify-center text-accent">
+                                  <Briefcase size={14} />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <div className="font-bold text-foreground text-sm">
+                                    {c.company || "—"}
+                                  </div>
+                                  {c.company && (
+                                    <div className="text-[10px] font-semibold text-foreground-secondary uppercase tracking-wider">
+                                      Corporate Client
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <StatusBadge status={(c.status || "Lead").toLowerCase()} />
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2 text-xs text-foreground font-semibold capitalize">
+                                {renderSourceIcon(c.source)}
+                                <span>{displaySource}</span>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="space-y-0.5 text-xs">
+                                <div className="font-bold text-foreground">
+                                  {formatContactDate(c.createdAt)}
+                                </div>
+                                <div className="text-foreground-secondary font-medium">
+                                  {formatContactTime(c.createdAt)}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-center gap-2.5">
+                                {canWrite ? (
+                                  <>
+                                    <button 
+                                      onClick={() => handleOpenEditForm(c)}
+                                      className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-muted/25 hover:bg-accent-muted/50 border border-accent/15 text-accent transition-all cursor-pointer"
+                                      title="Edit Contact"
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDelete(c._id)}
+                                      className="w-8 h-8 rounded-full flex items-center justify-center bg-danger-muted/25 hover:bg-danger-muted/50 border border-danger/15 text-danger transition-all cursor-pointer"
+                                      title="Delete Contact"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span className="text-foreground-muted text-xs">—</span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -581,355 +700,362 @@ export default function ContactsPage() {
         </>
       )}
 
-      {/* -------------------- VIEW MODE: ADD NEW / EDIT CONTACT (PAGE LAYOUT) -------------------- */}
-      {(viewMode === "new" || viewMode === "edit") && (
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-border pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center text-accent">
-                <Users size={22} className="stroke-[2.5]" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                {viewMode === "new" ? "Add New Contact" : "Edit Contact Details"}
-              </h1>
-            </div>
-            <button
-              type="button"
-              onClick={() => setViewMode("list")}
-              className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary rounded-lg text-sm font-semibold transition-colors cursor-pointer"
-            >
-              <ArrowLeft size={16} />
-              <span>Back to Contacts</span>
-            </button>
-          </div>
-
+      {/* -------------------- VIEW MODE: ADD NEW / EDIT CONTACT (MODAL LAYOUT) -------------------- */}
+      <Modal
+        isOpen={viewMode === "new" || viewMode === "edit"}
+        onClose={() => setViewMode("list")}
+        title={viewMode === "new" ? "Add New Contact" : "Edit Contact Details"}
+        className="max-w-3xl"
+      >
+        <form onSubmit={handleSubmit} className="space-y-5 max-h-[75vh] overflow-y-auto pr-2 scrollbar-thin">
           {/* Section 1: Contact Information */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
-                <User size={16} />
-              </div>
-              <h3 className="font-bold text-foreground text-base">Contact Information</h3>
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <User size={16} className="text-accent" />
+              <span>Contact Information</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Name *</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  First Name <span className="text-danger">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <User className="absolute left-3.5 text-foreground-muted" size={16} />
                   <input
                     required
-                    placeholder="First Name"
+                    placeholder="Enter first name"
                     value={currentContact.firstName || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, firstName: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  />
-                  <input
-                    required
-                    placeholder="Last Name"
-                    value={currentContact.lastName || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, lastName: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Gender</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Last Name <span className="text-danger">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <User className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input
+                    required
+                    placeholder="Enter last name"
+                    value={currentContact.lastName || ""}
+                    onChange={(e) => setCurrentContact({ ...currentContact, lastName: e.target.value })}
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Gender</label>
                 <select
                   value={currentContact.gender || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, gender: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="" className="bg-surface">Select Gender</option>
-                  <option value="Male" className="bg-surface">Male</option>
-                  <option value="Female" className="bg-surface">Female</option>
-                  <option value="Other" className="bg-surface">Other</option>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Mobile *</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Mobile <span className="text-danger">*</span>
+                </label>
                 <div className="relative flex items-center">
+                  <Phone className="absolute left-3.5 text-foreground-muted" size={16} />
                   <input
                     required
-                    placeholder="+1 (555) 987-6543"
+                    placeholder="Enter mobile number"
                     value={currentContact.phone || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, phone: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium pr-10"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
-                  <Phone size={15} className="absolute right-3.5 text-foreground-muted" />
                 </div>
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Email *</label>
-                <input
-                  required
-                  type="email"
-                  placeholder="name@example.com"
-                  value={currentContact.email || ""}
-                  onChange={(e) => setCurrentContact({ ...currentContact, email: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                />
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">
+                  Email Address <span className="text-danger">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-3.5 text-foreground-muted" size={16} />
+                  <input
+                    required
+                    type="email"
+                    placeholder="Enter email address"
+                    value={currentContact.email || ""}
+                    onChange={(e) => setCurrentContact({ ...currentContact, email: e.target.value })}
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                  />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Location</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">State/Province</label>
                 <select
                   value={currentContact.state || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, state: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="" className="bg-surface">Select State/Province</option>
-                  <option value="Delhi" className="bg-surface">Delhi</option>
-                  <option value="Maharashtra" className="bg-surface">Maharashtra</option>
-                  <option value="Karnataka" className="bg-surface">Karnataka</option>
-                  <option value="Haryana" className="bg-surface">Haryana</option>
-                  <option value="Uttar Pradesh" className="bg-surface">Uttar Pradesh</option>
+                  <option value="">Select State</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Haryana">Haryana</option>
+                  <option value="Uttar Pradesh">Uttar Pradesh</option>
                 </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">District</label>
                 <input
-                  placeholder="District"
+                  placeholder="Enter district"
                   value={currentContact.district || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, district: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                 />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Sub Location</label>
                 <input
-                  placeholder="Sub Location"
+                  placeholder="Enter sub location"
                   value={currentContact.subLocation || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, subLocation: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 2: Business Information */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
-                <Building size={16} />
-              </div>
-              <h3 className="font-bold text-foreground text-base">Business Information</h3>
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <Building size={16} className="text-accent" />
+              <span>Business Information</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Department/Designation</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <select
-                    value={currentContact.department || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, department: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  >
-                    <option value="" className="bg-surface">Select Dept</option>
-                    <option value="Coding" className="bg-surface">Coding</option>
-                    <option value="Marketing" className="bg-surface">Marketing</option>
-                    <option value="Sales" className="bg-surface">Sales</option>
-                    <option value="Technical" className="bg-surface">Technical</option>
-                    <option value="HR" className="bg-surface">HR</option>
-                  </select>
-                  <select
-                    value={currentContact.designation || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, designation: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  >
-                    <option value="" className="bg-surface">Select Desig</option>
-                    <option value="Senior Lead" className="bg-surface">Senior Lead</option>
-                    <option value="Manager" className="bg-surface">Manager</option>
-                    <option value="Specialist" className="bg-surface">Specialist</option>
-                    <option value="Junior Rep" className="bg-surface">Junior Rep</option>
-                  </select>
-                </div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Department</label>
+                <select
+                  value={currentContact.department || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, department: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
+                >
+                  <option value="">Select Dept</option>
+                  <option value="Coding">Coding</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Sales">Sales</option>
+                  <option value="Technical">Technical</option>
+                  <option value="HR">HR</option>
+                </select>
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Company</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Designation</label>
+                <select
+                  value={currentContact.designation || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, designation: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
+                >
+                  <option value="">Select Desig</option>
+                  <option value="Senior Lead">Senior Lead</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Specialist">Specialist</option>
+                  <option value="Junior Rep">Junior Rep</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Company</label>
                 <div className="relative flex items-center">
+                  <Briefcase className="absolute left-3.5 text-foreground-muted" size={16} />
                   <input
                     placeholder="Company name"
                     value={currentContact.company || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, company: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium pr-10"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
-                  <Search size={14} className="absolute right-3.5 text-foreground-muted cursor-pointer" />
                 </div>
-                <span className="text-[10px] text-foreground-muted mt-1.5 block">Search for existing companies</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Work Address</label>
+            <div>
+              <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Work Address</label>
+              <div className="relative">
+                <MapPin className="absolute left-3.5 top-3 text-foreground-muted" size={16} />
                 <textarea
-                  placeholder="Enter work address"
-                  rows={3}
+                  placeholder="Enter office work address"
+                  rows={2}
                   value={currentContact.workAddress || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, workAddress: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl !pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors resize-none"
                 />
               </div>
+            </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1 block">Work Phone</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Work Phone</label>
+                <div className="relative flex items-center">
+                  <Phone className="absolute left-3.5 text-foreground-muted" size={16} />
                   <input
                     placeholder="Office phone number"
                     value={currentContact.workPhone || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, workPhone: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1 block">Work Pin Code</label>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Work Pin Code</label>
+                <div className="relative flex items-center">
+                  <MapPin className="absolute left-3.5 text-foreground-muted" size={16} />
                   <input
                     placeholder="Postal code"
                     value={currentContact.workPinCode || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, workPinCode: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Website URL</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Website URL</label>
                 <div className="relative flex items-center">
+                  <Globe className="absolute left-3.5 text-foreground-muted" size={16} />
                   <input
                     placeholder="https://example.com"
                     value={currentContact.websiteUrl || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, websiteUrl: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium pr-10"
+                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
-                  <Globe size={15} className="absolute right-3.5 text-foreground-muted" />
                 </div>
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Select Product</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Select Product</label>
                 <select
                   value={currentContact.product || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, product: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="" className="bg-surface">Select product for future</option>
-                  <option value="Software License" className="bg-surface">Software License</option>
-                  <option value="Hardware Rack Integration" className="bg-surface">Hardware Rack Integration</option>
-                  <option value="AMC Plan Annual" className="bg-surface">AMC Plan Annual</option>
-                  <option value="Networking Switch Setup" className="bg-surface">Networking Switch Setup</option>
+                  <option value="">Select product</option>
+                  <option value="Software License">Software License</option>
+                  <option value="Hardware Rack Integration">Hardware Rack Integration</option>
+                  <option value="AMC Plan Annual">AMC Plan Annual</option>
+                  <option value="Networking Switch Setup">Networking Switch Setup</option>
                 </select>
               </div>
             </div>
           </div>
 
           {/* Section 3: Other Details */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
-                <Tag size={16} />
-              </div>
-              <h3 className="font-bold text-foreground text-base">Other Details</h3>
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <Tag size={16} className="text-accent" />
+              <span>Other Details</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Category / Sub Category</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input
-                    placeholder="Category"
-                    value={currentContact.category || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, category: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  />
-                  <input
-                    placeholder="Sub Category"
-                    value={currentContact.subCategory || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, subCategory: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  />
-                </div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Category</label>
+                <input
+                  placeholder="Category"
+                  value={currentContact.category || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, category: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Source/Reference</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <select
-                    value={currentContact.source || "website"}
-                    onChange={(e) => setCurrentContact({ ...currentContact, source: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  >
-                    <option value="website" className="bg-surface">Website</option>
-                    <option value="event" className="bg-surface">Event</option>
-                    <option value="social media" className="bg-surface">Social Media</option>
-                    <option value="referral" className="bg-surface">Referral</option>
-                    <option value="cold_call" className="bg-surface">Cold Call</option>
-                    <option value="other" className="bg-surface">Other</option>
-                  </select>
-                  <input
-                    placeholder="Reference"
-                    value={currentContact.reference || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, reference: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                  />
-                </div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Sub Category</label>
+                <input
+                  placeholder="Sub Category"
+                  value={currentContact.subCategory || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, subCategory: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Classification</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Source</label>
+                <select
+                  value={currentContact.source || "website"}
+                  onChange={(e) => setCurrentContact({ ...currentContact, source: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
+                >
+                  <option value="website">Website</option>
+                  <option value="event">Event</option>
+                  <option value="social media">Social Media</option>
+                  <option value="referral">Referral</option>
+                  <option value="cold_call">Cold Call</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Reference</label>
+                <input
+                  placeholder="Enter reference details"
+                  value={currentContact.reference || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, reference: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Classification</label>
                 <input
                   placeholder="Classification"
                   value={currentContact.classification || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, classification: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Group</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Group</label>
                 <input
                   placeholder="Group"
                   value={currentContact.group || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, group: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                 />
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Zone</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Zone</label>
                 <input
                   placeholder="Zone"
                   value={currentContact.zone || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, zone: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                 />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Contact Type</label>
-                <select
-                  value={currentContact.contactType || ""}
-                  onChange={(e) => setCurrentContact({ ...currentContact, contactType: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                >
-                  <option value="" className="bg-surface">Select Contact Type</option>
-                  <option value="Client" className="bg-surface">Client</option>
-                  <option value="Partner" className="bg-surface">Partner</option>
-                  <option value="Vendor" className="bg-surface">Vendor</option>
-                  <option value="Other" className="bg-surface">Other</option>
-                </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">DOB</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Contact Type</label>
+                <select
+                  value={currentContact.contactType || ""}
+                  onChange={(e) => setCurrentContact({ ...currentContact, contactType: e.target.value })}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
+                >
+                  <option value="">Select Contact Type</option>
+                  <option value="Client">Client</option>
+                  <option value="Partner">Partner</option>
+                  <option value="Vendor">Vendor</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">DOB</label>
                 <input
                   type="date"
                   value={currentContact.dob || ""}
@@ -937,45 +1063,42 @@ export default function ContactsPage() {
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium text-left"
                 />
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Status</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Status</label>
                 <select
                   value={currentContact.status || "Lead"}
                   onChange={(e) => setCurrentContact({ ...currentContact, status: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="Lead" className="bg-surface">Lead</option>
-                  <option value="Customer" className="bg-surface">Customer</option>
+                  <option value="Lead">Lead</option>
+                  <option value="Customer">Customer</option>
                 </select>
               </div>
+            </div>
 
-              <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Assigned To</label>
-                <select
-                  value={currentContact.assignedTo as any || ""}
-                  onChange={(e) => setCurrentContact({ ...currentContact, assignedTo: e.target.value as any })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                >
-                  <option value="" className="bg-surface">Unassigned</option>
-                  {users.map(u => <option key={u._id} value={u._id} className="bg-surface">{u.firstName} {u.lastName}</option>)}
-                </select>
-              </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Assigned To</label>
+              <select
+                value={currentContact.assignedTo as any || ""}
+                onChange={(e) => setCurrentContact({ ...currentContact, assignedTo: e.target.value as any })}
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
+              >
+                <option value="">Unassigned</option>
+                {users.map(u => <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>)}
+              </select>
             </div>
           </div>
 
           {/* Section 4: Add Diary Plan */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center text-accent">
-                <Calendar size={16} />
-              </div>
-              <h3 className="font-bold text-foreground text-base">Add Diary Plan</h3>
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <Calendar size={16} className="text-accent" />
+              <span>Add Diary Plan</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Plan Date (dd-mm-yyyy)</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Plan Date</label>
                 <input
                   type="date"
                   value={currentContact.planDate || ""}
@@ -983,56 +1106,54 @@ export default function ContactsPage() {
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium text-left"
                 />
               </div>
-
               <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Plan Action Type</label>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Plan Action Type</label>
                 <select
                   value={currentContact.planActionType || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, planActionType: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="" className="bg-surface">Select Action Type</option>
-                  <option value="Call" className="bg-surface">Call</option>
-                  <option value="Meeting" className="bg-surface">Meeting</option>
-                  <option value="Email" className="bg-surface">Email</option>
-                  <option value="Follow Up" className="bg-surface">Follow Up</option>
-                  <option value="Task" className="bg-surface">Task</option>
+                  <option value="">Select Action Type</option>
+                  <option value="Call">Call</option>
+                  <option value="Meeting">Meeting</option>
+                  <option value="Email">Email</option>
+                  <option value="Follow Up">Follow Up</option>
+                  <option value="Task">Task</option>
                 </select>
               </div>
+            </div>
 
-              <div>
-                <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-2 block">Remarks</label>
-                <input
-                  placeholder="Add remarks for this plan"
-                  value={currentContact.remarks || ""}
-                  onChange={(e) => setCurrentContact({ ...currentContact, remarks: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
-                />
-              </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Remarks</label>
+              <input
+                placeholder="Remarks for this plan"
+                value={currentContact.remarks || ""}
+                onChange={(e) => setCurrentContact({ ...currentContact, remarks: e.target.value })}
+                className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+              />
             </div>
           </div>
 
           {/* Section 5: Additional Notes */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-            <h3 className="font-bold text-foreground text-base">Additional Notes</h3>
+          <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-2">
+            <label className="text-xs font-semibold text-foreground-secondary mb-1 block">Additional Notes</label>
             <textarea
-              placeholder="Add any additional information about this contact"
-              rows={3}
+              placeholder="Add any additional notes..."
+              rows={2}
               value={currentContact.additionalNotes || ""}
               onChange={(e) => setCurrentContact({ ...currentContact, additionalNotes: e.target.value })}
-              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium"
+              className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors resize-none"
             />
           </div>
 
           {/* Form Action Controls */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border/50 mt-6">
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className="flex items-center gap-2 px-6 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              className="px-6 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-all cursor-pointer"
             >
-              <XCircle size={15} />
-              <span>Cancel</span>
+              Cancel
             </button>
             <button
               type="submit"
@@ -1048,7 +1169,7 @@ export default function ContactsPage() {
             </button>
           </div>
         </form>
-      )}
+      </Modal>
     </div>
   );
 }

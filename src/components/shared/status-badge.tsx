@@ -8,6 +8,10 @@ interface StatusBadgeProps {
 }
 
 const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
+  // Contacts / Customers
+  lead: { bg: "var(--warning-muted)", text: "var(--warning)", dot: "var(--warning)" },
+  customer: { bg: "var(--success-muted)", text: "var(--success)", dot: "var(--success)" },
+
   // Leads
   new: { bg: "var(--info-muted)", text: "var(--info)", dot: "var(--info)" },
   contacted: { bg: "var(--warning-muted)", text: "var(--warning)", dot: "var(--warning)" },
