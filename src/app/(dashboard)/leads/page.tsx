@@ -753,7 +753,7 @@ export default function LeadsPage() {
                   <input 
                     required
                     value={currentLead?.title || ""}
-                    onChange={(e) => setCurrentLead({ ...currentLead, title: e.target.value })}
+                    onChange={(e) => setCurrentLead({ ...currentLead, title: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 !pr-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter full name"
                   />
@@ -773,7 +773,7 @@ export default function LeadsPage() {
                     required
                     type="email"
                     value={currentLead?.email || ""}
-                    onChange={(e) => setCurrentLead({ ...currentLead, email: e.target.value })}
+                    onChange={(e) => setCurrentLead({ ...currentLead, email: e.target.value.trim() })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter email address"
                   />
@@ -814,7 +814,7 @@ export default function LeadsPage() {
                   <input 
                     type="tel"
                     value={currentLead?.phone || ""}
-                    onChange={(e) => setCurrentLead({ ...currentLead, phone: e.target.value })}
+                    onChange={(e) => setCurrentLead({ ...currentLead, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter phone number"
                   />

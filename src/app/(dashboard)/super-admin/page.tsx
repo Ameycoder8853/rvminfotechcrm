@@ -1047,7 +1047,7 @@ export default function SuperAdminPage() {
               <input
                 required
                 value={currentUserEdit?.firstName || ""}
-                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, firstName: e.target.value })}
+                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="John"
               />
@@ -1057,7 +1057,7 @@ export default function SuperAdminPage() {
               <input
                 required
                 value={currentUserEdit?.lastName || ""}
-                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, lastName: e.target.value })}
+                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="Doe"
               />
@@ -1072,7 +1072,7 @@ export default function SuperAdminPage() {
                 type="email"
                 disabled={!isEnrollMode}
                 value={currentUserEdit?.email || ""}
-                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, email: e.target.value })}
+                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, email: e.target.value.trim() })}
                 className="w-full bg-background disabled:bg-surface-active border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="john.doe@company.com"
               />
@@ -1081,7 +1081,7 @@ export default function SuperAdminPage() {
               <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Phone Number</label>
               <input
                 value={currentUserEdit?.phone || ""}
-                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, phone: e.target.value })}
+                onChange={(e) => setCurrentUserEdit({ ...currentUserEdit!, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold"
                 placeholder="e.g. +1 555-0199"
               />

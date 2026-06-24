@@ -615,7 +615,7 @@ export default function TeamsPage() {
                         <input
                           required
                           value={seniorForm.firstName}
-                          onChange={(e) => setSeniorForm({ ...seniorForm, firstName: e.target.value })}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                           className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                           placeholder="e.g. Robert"
                         />
@@ -625,7 +625,7 @@ export default function TeamsPage() {
                         <input
                           required
                           value={seniorForm.lastName}
-                          onChange={(e) => setSeniorForm({ ...seniorForm, lastName: e.target.value })}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                           className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                           placeholder="e.g. Downey"
                         />
@@ -639,7 +639,7 @@ export default function TeamsPage() {
                           required
                           type="email"
                           value={seniorForm.email}
-                          onChange={(e) => setSeniorForm({ ...seniorForm, email: e.target.value })}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, email: e.target.value.trim() })}
                           className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                           placeholder="robert.d@company.com"
                         />
@@ -649,7 +649,7 @@ export default function TeamsPage() {
                         <input
                           required
                           value={seniorForm.phone}
-                          onChange={(e) => setSeniorForm({ ...seniorForm, phone: e.target.value })}
+                          onChange={(e) => setSeniorForm({ ...seniorForm, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
                           className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                           placeholder="e.g. +1 555-0199"
                         />
@@ -708,7 +708,7 @@ export default function TeamsPage() {
                   <input
                     required
                     value={currentUserEdit?.firstName || ""}
-                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, firstName: e.target.value })}
+                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                     placeholder="John"
                   />
@@ -718,7 +718,7 @@ export default function TeamsPage() {
                   <input
                     required
                     value={currentUserEdit?.lastName || ""}
-                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, lastName: e.target.value })}
+                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                     placeholder="Doe"
                   />
@@ -732,7 +732,7 @@ export default function TeamsPage() {
                     required
                     type="email"
                     value={currentUserEdit?.email || ""}
-                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, email: e.target.value })}
+                    onChange={(e) => setCurrentUserEdit({ ...currentUserEdit, email: e.target.value.trim() })}
                     className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                     placeholder="john.doe@company.com"
                   />
@@ -742,7 +742,7 @@ export default function TeamsPage() {
                   <input
                     required
                     value={enrollPhone}
-                    onChange={(e) => setEnrollPhone(e.target.value)}
+                    onChange={(e) => setEnrollPhone(e.target.value.replace(/[^0-9+\-\s()]/g, ""))}
                     className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                     placeholder="e.g. +1 555-0199"
                   />
@@ -775,7 +775,7 @@ export default function TeamsPage() {
                 <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Contact Number (Phone)</label>
                 <input
                   value={enrollPhone}
-                  onChange={(e) => setEnrollPhone(e.target.value)}
+                  onChange={(e) => setEnrollPhone(e.target.value.replace(/[^0-9+\-\s()]/g, ""))}
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none"
                   placeholder="e.g. +1 555-0199"
                 />

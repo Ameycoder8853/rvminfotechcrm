@@ -628,7 +628,7 @@ export default function EnquiriesPage() {
                   <input
                     required
                     value={currentEnquiry?.name || ""}
-                    onChange={(e) => setCurrentEnquiry({ ...currentEnquiry, name: e.target.value })}
+                    onChange={(e) => setCurrentEnquiry({ ...currentEnquiry, name: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 !pr-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter customer name"
                   />
@@ -648,7 +648,7 @@ export default function EnquiriesPage() {
                     required
                     type="email"
                     value={currentEnquiry?.email || ""}
-                    onChange={(e) => setCurrentEnquiry({ ...currentEnquiry, email: e.target.value })}
+                    onChange={(e) => setCurrentEnquiry({ ...currentEnquiry, email: e.target.value.trim() })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter email address"
                   />
@@ -666,7 +666,7 @@ export default function EnquiriesPage() {
                   required
                   type="tel"
                   value={currentEnquiry?.phone || ""}
-                  onChange={(e) => setCurrentEnquiry({ ...currentEnquiry, phone: e.target.value })}
+                  onChange={(e) => setCurrentEnquiry({ ...currentEnquiry, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
                   className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                   placeholder="Enter phone number"
                 />

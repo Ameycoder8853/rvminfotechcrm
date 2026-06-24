@@ -726,7 +726,7 @@ export default function ContactsPage() {
                     required
                     placeholder="Enter first name"
                     value={currentContact.firstName || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, firstName: e.target.value })}
+                    onChange={(e) => setCurrentContact({ ...currentContact, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
@@ -741,7 +741,7 @@ export default function ContactsPage() {
                     required
                     placeholder="Enter last name"
                     value={currentContact.lastName || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, lastName: e.target.value })}
+                    onChange={(e) => setCurrentContact({ ...currentContact, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
@@ -772,7 +772,7 @@ export default function ContactsPage() {
                     required
                     placeholder="Enter mobile number"
                     value={currentContact.phone || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, phone: e.target.value })}
+                    onChange={(e) => setCurrentContact({ ...currentContact, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
@@ -788,7 +788,7 @@ export default function ContactsPage() {
                     type="email"
                     placeholder="Enter email address"
                     value={currentContact.email || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, email: e.target.value })}
+                    onChange={(e) => setCurrentContact({ ...currentContact, email: e.target.value.trim() })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
@@ -905,7 +905,7 @@ export default function ContactsPage() {
                   <input
                     placeholder="Office phone number"
                     value={currentContact.workPhone || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, workPhone: e.target.value })}
+                    onChange={(e) => setCurrentContact({ ...currentContact, workPhone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
@@ -917,7 +917,7 @@ export default function ContactsPage() {
                   <input
                     placeholder="Postal code"
                     value={currentContact.workPinCode || ""}
-                    onChange={(e) => setCurrentContact({ ...currentContact, workPinCode: e.target.value })}
+                    onChange={(e) => setCurrentContact({ ...currentContact, workPinCode: e.target.value.replace(/[^0-9]/g, "") })}
                     className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>

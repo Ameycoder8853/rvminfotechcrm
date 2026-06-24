@@ -159,8 +159,15 @@ const navigationSections: NavSection[] = [
       },
       {
         title: "Settings",
-        href: "/settings",
         icon: <Settings size={18} />,
+        subItems: [
+          { title: "Profile Settings", href: "/settings" },
+          { title: "System Settings", href: "/settings/system" },
+          { title: "Product Master", href: "/settings/products" },
+          { title: "Employee Master", href: "/settings/employees" },
+          { title: "Customer Master", href: "/settings/customers" },
+          { title: "Dashboard Customization", href: "/settings/dashboard-customization" },
+        ],
       },
     ]
   }
