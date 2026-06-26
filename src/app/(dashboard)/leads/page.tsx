@@ -473,7 +473,7 @@ export default function LeadsPage() {
                 placeholder="Name, email, company..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
               />
             </div>
           </div>
@@ -759,7 +759,7 @@ export default function LeadsPage() {
                     required
                     value={currentLead?.title || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, title: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 !pr-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! pr-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter full name"
                   />
                   {currentLead?.title && (
@@ -779,7 +779,7 @@ export default function LeadsPage() {
                     type="email"
                     value={currentLead?.email || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, email: e.target.value.trim() })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter email address"
                   />
                 </div>
@@ -804,7 +804,7 @@ export default function LeadsPage() {
                   <input 
                     value={currentLead?.company || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, company: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter company name"
                   />
                 </div>
@@ -820,7 +820,7 @@ export default function LeadsPage() {
                     type="tel"
                     value={currentLead?.phone || ""}
                     onChange={(e) => setCurrentLead({ ...currentLead, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                     placeholder="Enter phone number"
                   />
                 </div>
@@ -840,7 +840,7 @@ export default function LeadsPage() {
                 type="url"
                 value={currentLead?.webAddress || ""}
                 onChange={(e) => setCurrentLead({ ...currentLead, webAddress: e.target.value })}
-                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                 placeholder="https://example.com"
               />
             </div>
@@ -858,7 +858,7 @@ export default function LeadsPage() {
                 rows={3}
                 value={currentLead?.address || ""}
                 onChange={(e) => setCurrentLead({ ...currentLead, address: e.target.value })}
-                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors resize-none"
+                className="w-full bg-background-secondary border border-border rounded-xl pl-10! pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors resize-none"
                 placeholder="Enter complete address"
               />
             </div>

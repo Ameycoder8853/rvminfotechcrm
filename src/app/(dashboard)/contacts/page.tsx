@@ -486,7 +486,7 @@ export default function ContactsPage() {
                     href="/contacts/new"
                     className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
                   >
-                    <Plus size={16} className="stroke-[3]" />
+                    <Plus size={16} className="stroke-3" />
                     <span>Add Contact</span>
                   </Link>
                   <button
@@ -527,7 +527,7 @@ export default function ContactsPage() {
                     placeholder="Name, email, phone, company..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -744,7 +744,7 @@ export default function ContactsPage() {
                     placeholder="Enter first name"
                     value={currentContact.firstName || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -759,7 +759,7 @@ export default function ContactsPage() {
                     placeholder="Enter last name"
                     value={currentContact.lastName || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -790,7 +790,7 @@ export default function ContactsPage() {
                     placeholder="Enter mobile number"
                     value={currentContact.phone || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -806,7 +806,7 @@ export default function ContactsPage() {
                     placeholder="Enter email address"
                     value={currentContact.email || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, email: e.target.value.trim() })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -894,7 +894,7 @@ export default function ContactsPage() {
                     placeholder="Company name"
                     value={currentContact.company || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, company: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -909,7 +909,7 @@ export default function ContactsPage() {
                   rows={2}
                   value={currentContact.workAddress || ""}
                   onChange={(e) => setCurrentContact({ ...currentContact, workAddress: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl !pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors resize-none"
+                  className="w-full bg-background-secondary border border-border rounded-xl pl-10! pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors resize-none"
                 />
               </div>
             </div>
@@ -923,7 +923,7 @@ export default function ContactsPage() {
                     placeholder="Office phone number"
                     value={currentContact.workPhone || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, workPhone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -935,7 +935,7 @@ export default function ContactsPage() {
                     placeholder="Postal code"
                     value={currentContact.workPinCode || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, workPinCode: e.target.value.replace(/[^0-9]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -950,7 +950,7 @@ export default function ContactsPage() {
                     placeholder="https://example.com"
                     value={currentContact.websiteUrl || ""}
                     onChange={(e) => setCurrentContact({ ...currentContact, websiteUrl: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -1298,7 +1298,7 @@ export default function ContactsPage() {
 
               <div className="text-xs">
                 <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Work Address</span>
-                <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground min-h-[50px] flex items-start gap-2">
+                <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground min-h-12.5 flex items-start gap-2">
                   <MapPin size={13} className="text-foreground-muted mt-1 shrink-0" />
                   <span>{selectedContact.workAddress || "—"}</span>
                 </div>
@@ -1453,7 +1453,7 @@ export default function ContactsPage() {
             {/* Section 5: Additional Notes */}
             <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-2 text-xs">
               <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Additional Notes</span>
-              <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground min-h-[60px]">
+              <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground min-h-15">
                 {selectedContact.additionalNotes || "—"}
               </div>
             </div>
