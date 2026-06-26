@@ -94,6 +94,15 @@ export default function ContactsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { hasAccess, canWrite, loading: permLoading } = usePermission("customers");
 
+  // View Details Modal States
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+
+  const handleOpenViewModal = (contact: Contact) => {
+    setSelectedContact(contact);
+    setIsViewModalOpen(true);
+  };
+
   // Helper functions for date and time formatting
   const formatContactDate = (dateStr?: string) => {
     if (!dateStr) return "N/A";
@@ -475,26 +484,26 @@ export default function ContactsPage() {
                 <>
                   <Link 
                     href="/contacts/new"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
                   >
                     <Plus size={16} className="stroke-[3]" />
                     <span>Add Contact</span>
                   </Link>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-semibold transition-colors cursor-pointer"
+                    className="flex items-center gap-2 px-3.5 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                   >
                     <Upload size={15} />
-                    <span>Import</span>
+                    <span>Import CSV</span>
                   </button>
                 </>
               )}
               <button
                 onClick={handleCSVExport}
-                className="flex items-center gap-2 px-3 py-2.5 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-lg text-sm font-semibold transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-3.5 py-2 bg-surface hover:bg-surface-hover border border-border text-foreground-secondary hover:text-foreground rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               >
                 <Download size={15} />
-                <span>Export</span>
+                <span>Export CSV</span>
               </button>
             </div>
           </div>
@@ -668,26 +677,31 @@ export default function ContactsPage() {
                             </td>
 
                             <td className="px-6 py-4">
-                              <div className="flex items-center justify-center gap-2.5">
-                                {canWrite ? (
+                              <div className="flex items-center justify-center gap-3">
+                                <button 
+                                  onClick={() => handleOpenViewModal(c)}
+                                  className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors p-1 cursor-pointer"
+                                  title="View Contact Details"
+                                >
+                                  <Eye size={18} />
+                                </button>
+                                {canWrite && (
                                   <>
                                     <button 
                                       onClick={() => handleOpenEditForm(c)}
-                                      className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-muted/25 hover:bg-accent-muted/50 border border-accent/15 text-accent transition-all cursor-pointer"
+                                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors p-1 cursor-pointer"
                                       title="Edit Contact"
                                     >
-                                      <Edit size={14} />
+                                      <Edit size={18} />
                                     </button>
                                     <button 
                                       onClick={() => handleDelete(c._id)}
-                                      className="w-8 h-8 rounded-full flex items-center justify-center bg-danger-muted/25 hover:bg-danger-muted/50 border border-danger/15 text-danger transition-all cursor-pointer"
+                                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors p-1 cursor-pointer"
                                       title="Delete Contact"
                                     >
-                                      <Trash2 size={14} />
+                                      <Trash2 size={18} />
                                     </button>
                                   </>
-                                ) : (
-                                  <span className="text-foreground-muted text-xs">—</span>
                                 )}
                               </div>
                             </td>
@@ -1172,6 +1186,289 @@ export default function ContactsPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* -------------------- DETAIL VIEW MODAL -------------------- */}
+      <Modal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        title={selectedContact ? `Contact Details - ${selectedContact.firstName} ${selectedContact.lastName}` : "Contact Details"}
+        className="max-w-3xl"
+      >
+        {selectedContact && (
+          <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-2 scrollbar-thin">
+            {/* Section 1: Contact Information */}
+            <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4 animate-scale-up">
+              <div className="flex items-center justify-between border-b border-border/40 pb-2 mb-2">
+                <div className="flex items-center gap-2 text-foreground font-bold text-sm">
+                  <User size={16} className="text-accent" />
+                  <span>Contact Information</span>
+                </div>
+                <StatusBadge status={(selectedContact.status || "Lead").toLowerCase()} />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">First Name</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.firstName || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Last Name</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.lastName || "—"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Gender</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.gender || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Mobile</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground flex items-center gap-2">
+                    <Phone size={13} className="text-foreground-muted" />
+                    <span>{selectedContact.phone || "—"}</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Email Address</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground flex items-center gap-2">
+                    <Mail size={13} className="text-foreground-muted" />
+                    <span>{selectedContact.email || "—"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">State/Province</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.state || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">District</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.district || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Sub Location</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.subLocation || "—"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Business Information */}
+            <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+              <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2 mb-2">
+                <Building size={16} className="text-accent" />
+                <span>Business Information</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Department</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.department || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Designation</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.designation || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Company</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground flex items-center gap-2">
+                    <Briefcase size={13} className="text-foreground-muted" />
+                    <span>{selectedContact.company || "—"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-xs">
+                <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Work Address</span>
+                <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground min-h-[50px] flex items-start gap-2">
+                  <MapPin size={13} className="text-foreground-muted mt-1 shrink-0" />
+                  <span>{selectedContact.workAddress || "—"}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Work Phone</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground flex items-center gap-2">
+                    <Phone size={13} className="text-foreground-muted" />
+                    <span>{selectedContact.workPhone || "—"}</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Work Pin Code</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground flex items-center gap-2">
+                    <MapPin size={13} className="text-foreground-muted" />
+                    <span>{selectedContact.workPinCode || "—"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Website URL</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground flex items-center gap-2">
+                    <Globe size={13} className="text-foreground-muted" />
+                    <a href={selectedContact.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline break-all">
+                      {selectedContact.websiteUrl || "—"}
+                    </a>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Select Product</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.product || "—"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3: Other Details */}
+            <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+              <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2 mb-2">
+                <Tag size={16} className="text-accent" />
+                <span>Other Details</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Category</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.category || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Sub Category</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.subCategory || "—"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Source</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground capitalize">
+                    {selectedContact.source || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Reference</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.reference || "—"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Classification</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.classification || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Group</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.group || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Zone</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.zone || "—"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Contact Type</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.contactType || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">DOB</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.dob || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Assigned To</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.assignedTo ? `${(selectedContact.assignedTo as any).firstName || ""} ${(selectedContact.assignedTo as any).lastName || ""}`.trim() : "Unassigned"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 4: Diary Plan */}
+            <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-4">
+              <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2 mb-2">
+                <Calendar size={16} className="text-accent" />
+                <span>Diary Plan</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Plan Date</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.planDate || "—"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Plan Action Type</span>
+                  <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                    {selectedContact.planActionType || "—"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-xs">
+                <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Remarks</span>
+                <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground">
+                  {selectedContact.remarks || "—"}
+                </div>
+              </div>
+            </div>
+
+            {/* Section 5: Additional Notes */}
+            <div className="p-4 bg-background-tertiary/35 border border-border/55 rounded-xl space-y-2 text-xs">
+              <span className="text-foreground-secondary font-bold uppercase tracking-wider block mb-1">Additional Notes</span>
+              <div className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 font-medium text-foreground min-h-[60px]">
+                {selectedContact.additionalNotes || "—"}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-border/55">
+              <button
+                type="button"
+                onClick={() => setIsViewModalOpen(false)}
+                className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-md shadow-accent/20"
+              >
+                Close View
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

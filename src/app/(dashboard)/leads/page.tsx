@@ -117,6 +117,11 @@ export default function LeadsPage() {
       const url = new URL(window.location.href);
       url.searchParams.delete("action");
       window.history.replaceState({}, "", url.pathname + url.search);
+    } else if (action === "import") {
+      fileInputRef.current?.click();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("action");
+      window.history.replaceState({}, "", url.pathname + url.search);
     }
   }, [mounted]);
 

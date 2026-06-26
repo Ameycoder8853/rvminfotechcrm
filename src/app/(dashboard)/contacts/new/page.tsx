@@ -207,7 +207,7 @@ export default function AddContactPage() {
                     placeholder="Enter first name"
                     value={formData.firstName || ""}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -222,7 +222,7 @@ export default function AddContactPage() {
                     placeholder="Enter last name"
                     value={formData.lastName || ""}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -253,7 +253,7 @@ export default function AddContactPage() {
                     placeholder="Enter mobile number"
                     value={formData.phone || ""}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function AddContactPage() {
                     placeholder="Enter email address"
                     value={formData.email || ""}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function AddContactPage() {
                     placeholder="Company name"
                     value={formData.company || ""}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -372,7 +372,7 @@ export default function AddContactPage() {
                   rows={2}
                   value={formData.workAddress || ""}
                   onChange={(e) => setFormData({ ...formData, workAddress: e.target.value })}
-                  className="w-full bg-background-secondary border border-border rounded-xl !pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors resize-none"
+                  className="w-full bg-background-secondary border border-border rounded-xl pl-10! pr-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors resize-none"
                 />
               </div>
             </div>
@@ -386,7 +386,7 @@ export default function AddContactPage() {
                     placeholder="Office phone number"
                     value={formData.workPhone || ""}
                     onChange={(e) => setFormData({ ...formData, workPhone: e.target.value.replace(/[^0-9+\-\s()]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -398,7 +398,7 @@ export default function AddContactPage() {
                     placeholder="Postal code"
                     value={formData.workPinCode || ""}
                     onChange={(e) => setFormData({ ...formData, workPinCode: e.target.value.replace(/[^0-9]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>
@@ -413,7 +413,7 @@ export default function AddContactPage() {
                     placeholder="https://example.com"
                     value={formData.websiteUrl || ""}
                     onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
                   />
                 </div>
               </div>

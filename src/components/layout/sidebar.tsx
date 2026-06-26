@@ -58,8 +58,7 @@ const navigationSections: NavSection[] = [
         icon: <Users size={18} />,
         subItems: [
           { title: "Contact List", href: "/contacts" },
-          { title: "Add Contact", href: "/contacts?action=add" },
-          { title: "Import/Export", href: "/contacts?action=import" },
+          { title: "Add Contact", href: "/contacts/new" },
         ],
       },
       {
