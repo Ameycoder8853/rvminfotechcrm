@@ -646,7 +646,7 @@ export default function SettingsPage() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none"
               />
             </div>
             <button
@@ -775,7 +775,7 @@ export default function SettingsPage() {
               <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider block">Prerequisite Settings</span>
             </div>
             
-            <div className="flex flex-col gap-1 max-h-[500px] overflow-y-auto pr-1">
+            <div className="flex flex-col gap-1 max-h-125 overflow-y-auto pr-1">
               {getPrerequisitesList().map((item) => (
                 <button
                   key={item.id}
@@ -867,7 +867,7 @@ export default function SettingsPage() {
                       placeholder="Search specializations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none"
                     />
                   </div>
                   <select
@@ -1198,7 +1198,7 @@ export default function SettingsPage() {
                     placeholder="e.g. Frontend Development"
                     value={formData.name || ""}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value.replace(/[^a-zA-Z0-9\s'-]/g, "") })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
@@ -1209,7 +1209,7 @@ export default function SettingsPage() {
                   placeholder="Describe focus area and required skill details..."
                   value={formData.description || ""}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full min-h-[80px] bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium resize-y"
+                  className="w-full min-h-20 bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium resize-y"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1249,7 +1249,7 @@ export default function SettingsPage() {
                       placeholder="e.g. 5 years"
                       value={formData.experience || ""}
                       onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1276,7 +1276,7 @@ export default function SettingsPage() {
                       placeholder="e.g. 95000"
                       value={formData.salary || ""}
                       onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1290,7 +1290,7 @@ export default function SettingsPage() {
                       placeholder="e.g. 245"
                       value={formData.professionals || ""}
                       onChange={(e) => setFormData({ ...formData, professionals: e.target.value })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1335,7 +1335,7 @@ export default function SettingsPage() {
                     placeholder="e.g. Master of Science"
                     value={formData.name || ""}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
@@ -1377,7 +1377,7 @@ export default function SettingsPage() {
                       placeholder="e.g. Computer Science"
                       value={formData.field || ""}
                       onChange={(e) => setFormData({ ...formData, field: e.target.value })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1390,7 +1390,7 @@ export default function SettingsPage() {
                       placeholder="e.g. 4 years"
                       value={formData.duration || ""}
                       onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1411,7 +1411,7 @@ export default function SettingsPage() {
                       placeholder="First name"
                       value={formData.firstName || ""}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1424,7 +1424,7 @@ export default function SettingsPage() {
                       placeholder="Last name"
                       value={formData.lastName || ""}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value.replace(/[^a-zA-Z\s'-]/g, "") })}
-                      className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                      className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                     />
                   </div>
                 </div>
@@ -1439,7 +1439,7 @@ export default function SettingsPage() {
                     placeholder="email@example.com"
                     value={formData.email || ""}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
@@ -1510,7 +1510,7 @@ export default function SettingsPage() {
                     placeholder="Enter parameter label"
                     value={formData.name || ""}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-background-secondary border border-border rounded-xl !pl-10 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                    className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
                   />
                 </div>
               </div>
