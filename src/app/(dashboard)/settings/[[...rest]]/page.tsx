@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { UserProfile } from "@clerk/nextjs";
 import {
   Settings,
+  Package,
   Briefcase,
   User,
   Users,
@@ -544,17 +545,6 @@ export default function SettingsPage() {
       {/* -------------------- MAIN TABS CONTAINER -------------------- */}
       <div className="border-b border-border bg-surface dark:bg-background-secondary p-1 rounded-xl flex flex-wrap gap-1 max-w-fit shadow-sm">
         <button
-          onClick={() => handleTabChange("profile")}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-            activeTab === "profile" 
-              ? "bg-accent text-white shadow-md shadow-accent/15" 
-              : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50"
-          }`}
-        >
-          <User size={16} />
-          <span>Profile Settings</span>
-        </button>
-        <button
           onClick={() => handleTabChange("system")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
             activeTab === "system" 
@@ -563,7 +553,7 @@ export default function SettingsPage() {
           }`}
         >
           <Settings size={16} />
-          <span>System Settings</span>
+          <span>System</span>
         </button>
         <button
           onClick={() => handleTabChange("products")}
@@ -573,8 +563,8 @@ export default function SettingsPage() {
               : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50"
           }`}
         >
-          <Briefcase size={16} />
-          <span>Product Master</span>
+          <Package size={16} />
+          <span>Product</span>
         </button>
         <button
           onClick={() => handleTabChange("employees")}
@@ -584,8 +574,8 @@ export default function SettingsPage() {
               : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50"
           }`}
         >
-          <User size={16} />
-          <span>Employee Master</span>
+          <Briefcase size={16} />
+          <span>Employee</span>
         </button>
         <button
           onClick={() => handleTabChange("customers")}
@@ -596,18 +586,7 @@ export default function SettingsPage() {
           }`}
         >
           <Users size={16} />
-          <span>Customer Master</span>
-        </button>
-        <button
-          onClick={() => handleTabChange("dashboard-customization")}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-            activeTab === "dashboard-customization" 
-              ? "bg-accent text-white shadow-md shadow-accent/15" 
-              : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50"
-          }`}
-        >
-          <Sparkles size={16} />
-          <span>Dashboard Customization</span>
+          <span>Customer</span>
         </button>
       </div>
 
@@ -791,7 +770,7 @@ export default function SettingsPage() {
             <div>
               <h2 className="text-sm font-bold text-foreground capitalize tracking-wide flex items-center gap-2 mb-1">
                 <Sliders size={15} className="text-accent" />
-                {activeTab === "customers" ? "Customer Master" : activeTab === "employees" ? "Employee Master" : "System Settings"}
+                {activeTab === "customers" ? "Customer" : activeTab === "employees" ? "Employee" : "System"}
               </h2>
               <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider block">Prerequisite Settings</span>
             </div>

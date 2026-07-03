@@ -651,8 +651,12 @@ export default function AddContactPage() {
                   <option value="Call">Call</option>
                   <option value="Meeting">Meeting</option>
                   <option value="Email">Email</option>
-                  <option value="Follow Up">Follow Up</option>
-                  <option value="Task">Task</option>
+                  <option value="Follow-up">Follow-up</option>
+                  <option value="Demo">Demo</option>
+                  <option value="Presentation">Presentation</option>
+                  <option value="Proposal">Proposal</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
             </div>
