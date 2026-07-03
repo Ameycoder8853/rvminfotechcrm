@@ -161,10 +161,10 @@ const navigationSections: NavSection[] = [
         title: "Dashboard Customization",
         icon: <LayoutGrid size={18} />,
         subItems: [
-          { title: "Dashboard Manager", href: "/settings/dashboard-customization" },
-          { title: "Create Custom Dashboard", href: "/settings/dashboard-customization?action=create" },
-          { title: "Dashboard Templates", href: "/settings/dashboard-customization?action=templates" },
-          { title: "My Custom Dashboards", href: "/settings/dashboard-customization?action=my-dashboards" },
+          { title: "Dashboard Manager", href: "/dashboard-customization" },
+          { title: "Create Custom Dashboard", href: "/dashboard-customization?action=create" },
+          { title: "Dashboard Templates", href: "/dashboard-customization?action=templates" },
+          { title: "My Custom Dashboards", href: "/dashboard-customization?action=my-dashboards" },
         ],
       },
       {

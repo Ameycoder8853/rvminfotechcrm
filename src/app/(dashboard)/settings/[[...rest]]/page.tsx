@@ -247,7 +247,6 @@ export default function SettingsPage() {
     if (pathname.includes("/settings/products")) return "products";
     if (pathname.includes("/settings/employees")) return "employees";
     if (pathname.includes("/settings/customers")) return "customers";
-    if (pathname.includes("/settings/dashboard-customization")) return "dashboard-customization";
     return "profile";
   };
   const activeTab = getActiveTab();
@@ -719,133 +718,8 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* -------------------- DASHBOARD CUSTOMIZATION VIEW -------------------- */}
-      {activeTab === "dashboard-customization" && (
-        <div className="space-y-6 opacity-0 animate-fade-in">
-          {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-6 shadow-sm">
-            <div>
-              <h2 className="text-xl font-bold text-foreground mb-1">
-                Dashboard Manager
-              </h2>
-              <p className="text-xs text-foreground-secondary">
-                Manage your customized CRM dashboards. Create, edit, and switch between different configurations.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-background border border-border hover:bg-surface-hover text-foreground-secondary hover:text-foreground rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer">
-                <Layers size={14} />
-                <span>Use Template</span>
-              </button>
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-colors">
-                <Plus size={14} />
-                <span>Create Custom Dashboard</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Metrics Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Metric 1 */}
-            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                1
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Total Dashboards</div>
-                <div className="text-sm font-bold text-foreground">1</div>
-              </div>
-            </div>
-
-            {/* Metric 2 */}
-            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
-                <CheckCircle2 size={20} />
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Active Dashboard</div>
-                <div className="text-sm font-bold text-foreground">
-                  {currentUser?.orgId?.name ? `${currentUser.orgId.name} CRM` : "RV CRM"}
-                </div>
-              </div>
-            </div>
-
-            {/* Metric 3 */}
-            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-600/10 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">
-                7
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Total Services</div>
-                <div className="text-sm font-bold text-foreground">7</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Your Dashboards Section */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-foreground border-b border-border pb-3">
-              Your Dashboards
-            </h3>
-            
-            {/* Dashboard List Item */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-background-secondary border border-border rounded-xl">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-sm font-bold text-foreground">
-                    {currentUser?.orgId?.name ? `${currentUser.orgId.name} CRM` : "RV CRM"}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 uppercase tracking-wide">
-                    Active
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs text-foreground-secondary">
-                  <div>
-                    <span className="font-medium text-foreground-muted">Company:</span>{" "}
-                    <span className="font-semibold text-foreground">{currentUser?.orgId?.name || "RV Softech"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground-muted">Created:</span>{" "}
-                    <span>Aug 22, 2025</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground-muted">Services:</span>{" "}
-                    <span className="font-semibold text-foreground">7</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground-muted">Period:</span>{" "}
-                    <span>Aug 23, 2025 - Aug 24, 2025</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 self-end sm:self-center">
-                <button className="p-2 text-yellow-500 hover:bg-surface-hover rounded-lg transition-colors cursor-pointer">
-                  <Star size={16} fill="currentColor" />
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer">
-                  <Eye size={13} />
-                  <span>View</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer">
-                  <Edit size={13} />
-                  <span>Edit</span>
-                </button>
-                <button className="p-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg transition-colors cursor-pointer" title="Duplicate">
-                  <Copy size={13} />
-                </button>
-                <button className="p-2 bg-danger/10 hover:bg-danger/25 text-danger rounded-lg transition-colors cursor-pointer" title="Delete">
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* -------------------- DYNAMIC MASTER SETTINGS VIEW -------------------- */}
-      {activeTab !== "profile" && activeTab !== "products" && activeTab !== "dashboard-customization" && (
+      {activeTab !== "profile" && activeTab !== "products" && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start mt-2 opacity-0 animate-fade-in">
           
           {/* Left Column: Prerequisite settings menu */}
