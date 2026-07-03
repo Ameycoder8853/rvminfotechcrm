@@ -15,8 +15,47 @@ import {
   Sliders,
   Sparkles,
   ArrowLeft,
-  Check
+  Check,
+  Users,
+  Phone,
+  Calendar,
+  FileText,
+  ShoppingCart,
+  Shield,
+  Clock,
+  Home,
+  AlertCircle,
+  Briefcase,
+  CreditCard,
+  Archive,
+  Megaphone
 } from "lucide-react";
+
+interface Service {
+  id: string;
+  title: string;
+  category: string;
+  categoryBadge: string;
+  desc: string;
+}
+
+const allServices: Service[] = [
+  { id: "contacts", title: "Contact Management", category: "CRM & Sales", categoryBadge: "Sales", desc: "Manage company contacts & relations" },
+  { id: "leads", title: "Lead Management", category: "CRM & Sales", categoryBadge: "Sales", desc: "Track lead pipelines & qualifications" },
+  { id: "diary", title: "Tasks & Planner", category: "CRM & Sales", categoryBadge: "Productivity", desc: "Planner board and calendar diaries" },
+  { id: "quotes", title: "Quotations", category: "CRM & Sales", categoryBadge: "Sales", desc: "Generate proposal quotes & PDF templates" },
+  { id: "orders", title: "Orders", category: "CRM & Sales", categoryBadge: "Sales", desc: "Track sales orders, payments & billing" },
+  { id: "amc", title: "AMC", category: "Operations", categoryBadge: "Service", desc: "Annual Maintenance Contracts monitoring" },
+  { id: "tickets", title: "Complaints", category: "Operations", categoryBadge: "Service", desc: "Handle customer complaints" },
+  { id: "installations", title: "Installation", category: "Operations", categoryBadge: "Service", desc: "Manage installation services" },
+  { id: "inventory", title: "Inventory", category: "Operations", categoryBadge: "Operations", desc: "Manage stock and inventory" },
+  { id: "expenses", title: "Expenses", category: "Admin & Internal", categoryBadge: "Finance", desc: "Track and manage expenses" },
+  { id: "marketing", title: "Marketing", category: "Admin & Internal", categoryBadge: "Marketing", desc: "Marketing campaigns and analytics" },
+  { id: "teams", title: "Team", category: "Admin & Internal", categoryBadge: "HR", desc: "Team management and collaboration" },
+  { id: "attendance", title: "Attendance", category: "Admin & Internal", categoryBadge: "HR", desc: "Track employee attendance" },
+  { id: "invoices", title: "Invoices", category: "Operations", categoryBadge: "Finance", desc: "Raise invoices and billing statements" },
+  { id: "add_task", title: "Add Task", category: "CRM & Sales", categoryBadge: "Productivity", desc: "Add single planner task item directly" }
+];
 
 export default function DashboardCustomizationPage() {
   const searchParams = useSearchParams();
@@ -25,6 +64,17 @@ export default function DashboardCustomizationPage() {
 
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Form states
+  const [formCompany, setFormCompany] = useState("");
+  const [formDashboardName, setFormDashboardName] = useState("");
+  const [formStartDate, setFormStartDate] = useState("");
+  const [formEndDate, setFormEndDate] = useState("");
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([
+    "contacts", "leads", "diary", "quotes", "orders"
+  ]);
+  const [searchServiceQuery, setSearchServiceQuery] = useState("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("All");
 
   // Fetch current user details
   useEffect(() => {
@@ -44,6 +94,27 @@ export default function DashboardCustomizationPage() {
     fetchUser();
   }, []);
 
+  // Update default company and dashboard names once user loads
+  useEffect(() => {
+    if (currentUser) {
+      const company = currentUser?.orgId?.name || "Startup";
+      setFormCompany(company);
+      setFormDashboardName(`${company} Essentials`);
+    }
+  }, [currentUser]);
+
+  // Set default dates
+  useEffect(() => {
+    const today = new Date();
+    const formattedToday = today.toISOString().split("T")[0]; // YYYY-MM-DD
+    setFormStartDate(formattedToday);
+
+    const nextYear = new Date();
+    nextYear.setFullYear(today.getFullYear() + 1);
+    const formattedNextYear = nextYear.toISOString().split("T")[0];
+    setFormEndDate(formattedNextYear);
+  }, []);
+
   const companyName = currentUser?.orgId?.name || "RV Softech";
   const dashboardTitle = currentUser?.orgId?.name ? `${currentUser.orgId.name} CRM` : "RV CRM";
 
@@ -53,6 +124,43 @@ export default function DashboardCustomizationPage() {
       router.push("/dashboard-customization");
     } else {
       router.push(`/dashboard-customization?action=${act}`);
+    }
+  };
+
+  const toggleServiceSelection = (id: string) => {
+    if (selectedServiceIds.includes(id)) {
+      setSelectedServiceIds(selectedServiceIds.filter(srvId => srvId !== id));
+    } else {
+      setSelectedServiceIds([...selectedServiceIds, id]);
+    }
+  };
+
+  // Filter services
+  const filteredServices = allServices.filter(srv => {
+    const matchesSearch = srv.title.toLowerCase().includes(searchServiceQuery.toLowerCase()) ||
+                          srv.desc.toLowerCase().includes(searchServiceQuery.toLowerCase());
+    const matchesCategory = selectedCategoryFilter === "All" || srv.category === selectedCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  const renderServiceIcon = (id: string) => {
+    const iconClass = "text-foreground-muted";
+    switch (id) {
+      case "contacts": return <Users size={22} className={iconClass} />;
+      case "leads": return <Phone size={22} className={iconClass} />;
+      case "diary": return <Calendar size={22} className={iconClass} />;
+      case "quotes": return <FileText size={22} className={iconClass} />;
+      case "orders": return <ShoppingCart size={22} className={iconClass} />;
+      case "amc": return <Shield size={22} className={iconClass} />;
+      case "tickets": return <AlertCircle size={22} className={iconClass} />;
+      case "installations": return <Briefcase size={22} className={iconClass} />;
+      case "inventory": return <Archive size={22} className={iconClass} />;
+      case "expenses": return <CreditCard size={22} className={iconClass} />;
+      case "marketing": return <Megaphone size={22} className={iconClass} />;
+      case "teams": return <Users size={22} className={iconClass} />;
+      case "attendance": return <Clock size={22} className={iconClass} />;
+      case "invoices": return <Sliders size={22} className={iconClass} />;
+      default: return <Plus size={22} className={iconClass} />;
     }
   };
 
@@ -203,81 +311,218 @@ export default function DashboardCustomizationPage() {
       {/* -------------------- 2. CREATE CUSTOM DASHBOARD VIEW -------------------- */}
       {action === "create" && (
         <div className="space-y-6">
+          {/* Header */}
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigateTo("manager")}
-              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground transition-colors cursor-pointer"
+              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
             >
               <ArrowLeft size={16} />
             </button>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Create Custom Dashboard</h2>
-              <p className="text-xs text-foreground-secondary">Configure a custom layout structure, colors, and active panels</p>
+              <h2 className="text-xl font-bold text-foreground">Create New Dashboard</h2>
+              <p className="text-xs text-foreground-secondary">Configure your company details and select the services you want to include.</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Left: General configuration */}
-            <div className="md:col-span-2 space-y-6">
-              {/* Form Settings */}
-              <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-                <h3 className="text-sm font-bold text-foreground border-b border-border pb-2">Active Dashboard Widgets</h3>
-                <div className="space-y-3">
-                  {[
-                    { name: "Sales Conversion Funnel", desc: "Stages analytics funnel chart" },
-                    { name: "Lead Pipeline Statistics", desc: "Interactive cards row" },
-                    { name: "Ticket Resolution Progress", desc: "Backlog metrics tracker" },
-                    { name: "Recent Comms Activity Log", desc: "Feed list of communications" },
-                    { name: "Executive Finance Panel", desc: "Billing & AMC milestones" }
-                  ].map((widget, i) => (
-                    <label key={i} className="flex items-center justify-between p-3 bg-background-secondary border border-border rounded-xl cursor-pointer hover:border-accent/40 transition-colors">
-                      <div>
-                        <div className="text-xs font-bold text-foreground">{widget.name}</div>
-                        <div className="text-[10px] text-foreground-secondary">{widget.desc}</div>
-                      </div>
-                      <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-border text-accent focus:ring-accent accent-accent cursor-pointer" />
-                    </label>
-                  ))}
-                </div>
+          {/* Company Details Form */}
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-foreground border-b border-border pb-2">Company Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Company Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Startup"
+                  value={formCompany}
+                  onChange={(e) => setFormCompany(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Dashboard Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Startup Essentials"
+                  value={formDashboardName}
+                  onChange={(e) => setFormDashboardName(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
               </div>
             </div>
 
-            {/* Right: Layout configuration */}
-            <div className="md:col-span-1 space-y-6">
-              <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-                <h3 className="text-sm font-bold text-foreground border-b border-border pb-2">Layout Density & Grid</h3>
-                <div>
-                  <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Primary Layout Structure</label>
-                  <select className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium cursor-pointer">
-                    <option>3-Column Balanced Dashboard (Recommended)</option>
-                    <option>2-Column Left Weighted Sidebar Grid</option>
-                    <option>Single Column Full Scroll Layout</option>
-                    <option>Compact Metrics Focus Layout</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Theme Color Accent Glow</label>
-                  <div className="flex gap-2.5 mt-1">
-                    {["#6366f1", "#d946ef", "#06b6d4", "#10b981", "#f59e0b"].map((c, i) => (
-                      <button key={i} className={`w-8 h-8 rounded-full border border-white/20 shadow-lg cursor-pointer ${i === 0 ? "ring-2 ring-accent ring-offset-2" : ""}`} style={{ backgroundColor: c }} />
-                    ))}
-                  </div>
-                </div>
-                <div className="pt-4 border-t border-border/50 flex gap-3 justify-end">
-                  <button 
-                    onClick={() => navigateTo("manager")}
-                    className="px-4 py-2 bg-background hover:bg-surface-hover border border-border text-foreground rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={() => navigateTo("manager")}
-                    className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all cursor-pointer"
-                  >
-                    Save Layout
-                  </button>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Start Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formStartDate}
+                  onChange={(e) => setFormStartDate(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
               </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">End Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formEndDate}
+                  onChange={(e) => setFormEndDate(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Form Metrics Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Metric 1 */}
+            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
+                <CheckCircle2 size={20} />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Selected Services</div>
+                <div className="text-sm font-bold text-foreground">{selectedServiceIds.length}</div>
+              </div>
+            </div>
+
+            {/* Metric 2 */}
+            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <Home size={20} />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Available Services</div>
+                <div className="text-sm font-bold text-foreground">{allServices.length}</div>
+              </div>
+            </div>
+
+            {/* Metric 3 */}
+            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <Megaphone size={20} />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Categories</div>
+                <div className="text-sm font-bold text-foreground">9</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Select Services Area */}
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-foreground border-b border-border pb-2">Select Services</h3>
+            
+            {/* Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search services..."
+                  value={searchServiceQuery}
+                  onChange={(e) => setSearchServiceQuery(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:border-accent outline-none font-medium"
+                />
+              </div>
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:border-accent outline-none font-semibold cursor-pointer"
+              >
+                <option value="All">All Categories</option>
+                <option value="CRM & Sales">CRM & Sales</option>
+                <option value="Operations">Operations</option>
+                <option value="Admin & Internal">Admin & Internal</option>
+              </select>
+            </div>
+
+            {/* Services Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+              {filteredServices.map(srv => {
+                const isSelected = selectedServiceIds.includes(srv.id);
+                return (
+                  <div 
+                    key={srv.id}
+                    onClick={() => toggleServiceSelection(srv.id)}
+                    className={`flex flex-col justify-between h-44 border rounded-2xl p-5 cursor-pointer relative select-none transition-all duration-200 ${
+                      isSelected 
+                        ? "border-accent bg-accent-muted/15" 
+                        : "border-border bg-background-secondary hover:border-accent/40"
+                    }`}
+                  >
+                    {/* Header: Icon + Toggle Button */}
+                    <div className="flex justify-between items-start">
+                      <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center shadow-sm">
+                        {renderServiceIcon(srv.id)}
+                      </div>
+                      <button 
+                        type="button"
+                        className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
+                          isSelected 
+                            ? "bg-accent border-accent text-white" 
+                            : "border-border text-foreground-muted hover:border-accent/40 hover:text-foreground"
+                        }`}
+                      >
+                        {isSelected ? <Check size={12} strokeWidth={3} /> : <Plus size={12} />}
+                      </button>
+                    </div>
+
+                    {/* Title & Desc */}
+                    <div className="mt-4">
+                      <div className="text-xs font-bold text-foreground line-clamp-1">{srv.title}</div>
+                      <div className="text-[10px] text-foreground-secondary line-clamp-1 mt-0.5">{srv.desc}</div>
+                    </div>
+
+                    {/* Badge */}
+                    <div className="mt-3">
+                      <span className="inline-block px-2 py-0.5 rounded bg-background border border-border text-[9px] font-semibold text-foreground-secondary">
+                        {srv.categoryBadge}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Clear All / Select All Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-4 pb-2 border-t border-border/40">
+              <button 
+                type="button"
+                onClick={() => setSelectedServiceIds([])}
+                className="px-4 py-2 border border-border bg-background hover:bg-surface-hover text-foreground-secondary hover:text-foreground rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+              >
+                Clear All
+              </button>
+              <button 
+                type="button"
+                onClick={() => setSelectedServiceIds(allServices.map(s => s.id))}
+                className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+              >
+                Select All
+              </button>
+            </div>
+
+            {/* Form Footer */}
+            <div className="pt-4 border-t border-border/50 flex gap-3 justify-end">
+              <button 
+                type="button"
+                onClick={() => navigateTo("manager")}
+                className="px-4 py-2.5 bg-background hover:bg-surface-hover border border-border text-foreground rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={() => navigateTo("manager")}
+                className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                <Layers size={14} />
+                <span>Create Dashboard</span>
+              </button>
             </div>
           </div>
         </div>
@@ -289,7 +534,7 @@ export default function DashboardCustomizationPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigateTo("manager")}
-              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground transition-colors cursor-pointer"
+              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
             >
               <ArrowLeft size={16} />
             </button>
@@ -332,7 +577,7 @@ export default function DashboardCustomizationPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigateTo("manager")}
-              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground transition-colors cursor-pointer"
+              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
             >
               <ArrowLeft size={16} />
             </button>

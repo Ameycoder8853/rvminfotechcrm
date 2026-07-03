@@ -458,7 +458,7 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
                       <button
                         onClick={() => toggleExpand(item.title)}
                         className={cn(
-                          "flex items-center justify-between w-full px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 group cursor-pointer",
+                          "flex items-center justify-between w-full px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 group cursor-pointer text-left",
                           isMainActive
                             ? "text-accent bg-accent-muted"
                             : "text-foreground-secondary hover:text-foreground hover:bg-sidebar-hover"
