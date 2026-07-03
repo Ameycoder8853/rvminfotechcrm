@@ -9,6 +9,9 @@ import {
   Briefcase,
   User,
   Users,
+  Copy,
+  Star,
+  CheckCircle2,
   Check,
   Edit,
   Trash2,
@@ -248,6 +251,23 @@ export default function SettingsPage() {
     return "profile";
   };
   const activeTab = getActiveTab();
+
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/users/me");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setCurrentUser(json.data);
+        }
+      } catch (err) {
+        console.error("Failed to load user details in settings:", err);
+      }
+    }
+    fetchUser();
+  }, []);
 
   // Left sidebar active prerequisite item
   const [activePrereq, setActivePrereq] = useState("specializations");
@@ -702,58 +722,121 @@ export default function SettingsPage() {
       {/* -------------------- DASHBOARD CUSTOMIZATION VIEW -------------------- */}
       {activeTab === "dashboard-customization" && (
         <div className="space-y-6 opacity-0 animate-fade-in">
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-1">
-              <Sparkles size={20} className="text-accent animate-pulse" />
-              CRM Dashboard Layout Config
-            </h2>
-            <p className="text-xs text-foreground-secondary">Toggle panels, charts, activity widgets and choose primary grids</p>
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-6 shadow-sm">
+            <div>
+              <h2 className="text-xl font-bold text-foreground mb-1">
+                Dashboard Manager
+              </h2>
+              <p className="text-xs text-foreground-secondary">
+                Manage your customized CRM dashboards. Create, edit, and switch between different configurations.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-2 px-4 py-2.5 bg-background border border-border hover:bg-surface-hover text-foreground-secondary hover:text-foreground rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer">
+                <Layers size={14} />
+                <span>Use Template</span>
+              </button>
+              <button className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-colors">
+                <Plus size={14} />
+                <span>Create Custom Dashboard</span>
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-foreground border-b border-border pb-2">Active Dashboard Widgets</h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Sales Conversion Funnel", desc: "Stages analytics funnel chart" },
-                  { name: "Lead Pipeline Statistics", desc: "Interactive cards row" },
-                  { name: "Ticket Resolution Progress", desc: "Backlog metrics tracker" },
-                  { name: "Recent Comms Activity Log", desc: "Feed list of communications" },
-                  { name: "Executive Finance Panel", desc: "Billing & AMC milestones" }
-                ].map((widget, i) => (
-                  <label key={i} className="flex items-center justify-between p-3 bg-background-secondary border border-border rounded-xl cursor-pointer hover:border-accent/40 transition-colors">
-                    <div>
-                      <div className="text-xs font-bold text-foreground">{widget.name}</div>
-                      <div className="text-[10px] text-foreground-secondary">{widget.desc}</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-border text-accent focus:ring-accent accent-accent" />
-                  </label>
-                ))}
+          {/* Metrics Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Metric 1 */}
+            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                1
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Total Dashboards</div>
+                <div className="text-sm font-bold text-foreground">1</div>
               </div>
             </div>
 
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-foreground border-b border-border pb-2">Layout Density & Grid</h3>
-              <div>
-                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Primary Layout Structure</label>
-                <select className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-xs text-foreground focus:border-accent">
-                  <option>3-Column Balanced Dashboard (Recommended)</option>
-                  <option>2-Column Left Weighted Sidebar Grid</option>
-                  <option>Single Column Full Scroll Layout</option>
-                  <option>Compact Metrics Focus Layout</option>
-                </select>
+            {/* Metric 2 */}
+            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
+                <CheckCircle2 size={20} />
               </div>
               <div>
-                <label className="text-xs font-semibold text-foreground-secondary mb-1.5 block">Theme Color Accent Glow</label>
-                <div className="flex gap-2.5 mt-1">
-                  {["#6366f1", "#d946ef", "#06b6d4", "#10b981", "#f59e0b"].map((c, i) => (
-                    <button key={i} className={`w-8 h-8 rounded-full border border-white/20 shadow-lg cursor-pointer ${i === 0 ? "ring-2 ring-accent ring-offset-2" : ""}`} style={{ backgroundColor: c }} />
-                  ))}
+                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Active Dashboard</div>
+                <div className="text-sm font-bold text-foreground">
+                  {currentUser?.orgId?.name ? `${currentUser.orgId.name} CRM` : "RV CRM"}
                 </div>
               </div>
-              <div className="pt-4 border-t border-border/50 flex justify-end">
-                <button className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all cursor-pointer">
-                  Save Layout Config
+            </div>
+
+            {/* Metric 3 */}
+            <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-600/10 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">
+                7
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Total Services</div>
+                <div className="text-sm font-bold text-foreground">7</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Your Dashboards Section */}
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-foreground border-b border-border pb-3">
+              Your Dashboards
+            </h3>
+            
+            {/* Dashboard List Item */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-background-secondary border border-border rounded-xl">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm font-bold text-foreground">
+                    {currentUser?.orgId?.name ? `${currentUser.orgId.name} CRM` : "RV CRM"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 uppercase tracking-wide">
+                    Active
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs text-foreground-secondary">
+                  <div>
+                    <span className="font-medium text-foreground-muted">Company:</span>{" "}
+                    <span className="font-semibold text-foreground">{currentUser?.orgId?.name || "RV Softech"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground-muted">Created:</span>{" "}
+                    <span>Aug 22, 2025</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground-muted">Services:</span>{" "}
+                    <span className="font-semibold text-foreground">7</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground-muted">Period:</span>{" "}
+                    <span>Aug 23, 2025 - Aug 24, 2025</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                <button className="p-2 text-yellow-500 hover:bg-surface-hover rounded-lg transition-colors cursor-pointer">
+                  <Star size={16} fill="currentColor" />
+                </button>
+                <button className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer">
+                  <Eye size={13} />
+                  <span>View</span>
+                </button>
+                <button className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer">
+                  <Edit size={13} />
+                  <span>Edit</span>
+                </button>
+                <button className="p-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg transition-colors cursor-pointer" title="Duplicate">
+                  <Copy size={13} />
+                </button>
+                <button className="p-2 bg-danger/10 hover:bg-danger/25 text-danger rounded-lg transition-colors cursor-pointer" title="Delete">
+                  <Trash2 size={13} />
                 </button>
               </div>
             </div>

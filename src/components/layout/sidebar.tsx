@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
+  LayoutGrid,
   Users,
   Target,
   FileText,
@@ -157,6 +158,16 @@ const navigationSections: NavSection[] = [
         icon: <Clock size={18} />,
       },
       {
+        title: "Dashboard Customization",
+        icon: <LayoutGrid size={18} />,
+        subItems: [
+          { title: "Dashboard Manager", href: "/settings/dashboard-customization" },
+          { title: "Create Custom Dashboard", href: "/settings/dashboard-customization?action=create" },
+          { title: "Dashboard Templates", href: "/settings/dashboard-customization?action=templates" },
+          { title: "My Custom Dashboards", href: "/settings/dashboard-customization?action=my-dashboards" },
+        ],
+      },
+      {
         title: "Settings",
         icon: <Settings size={18} />,
         subItems: [
@@ -165,7 +176,6 @@ const navigationSections: NavSection[] = [
           { title: "Product Master", href: "/settings/products" },
           { title: "Employee Master", href: "/settings/employees" },
           { title: "Customer Master", href: "/settings/customers" },
-          { title: "Dashboard Customization", href: "/settings/dashboard-customization" },
         ],
       },
     ]
@@ -288,13 +298,16 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
     return navigationSections
       .map((section) => {
         const filteredItems = section.items.filter((item) => {
-          // 1. Super admin / Admin has full access to everything
+          // 1. Dashboard Customization is admin only
+          if (item.title === "Dashboard Customization" && !isAdmin) return false;
+
+          // 2. Super admin / Admin has full access to everything
           if (isAdmin) return true;
 
-          // 2. Hide "Team" for Junior representatives
+          // 3. Hide "Team" for Junior representatives
           if (item.title === "Team" && !isSenior) return false;
 
-          // 3. Filter other items based on team module permissions
+          // 4. Filter other items based on team module permissions
           if (item.title === "Lead Management" && leadsPerm === "none") return false;
           if (item.title === "Contact Management" && customersPerm === "none") return false;
           if (item.title === "Complaints" && ticketsPerm === "none") return false;

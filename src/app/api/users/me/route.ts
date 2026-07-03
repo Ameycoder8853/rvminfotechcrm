@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const populatedUser = await User.findById(dbUser._id).populate("teamId").lean();
+    const populatedUser = await User.findById(dbUser._id).populate("teamId").populate("orgId").lean();
     return NextResponse.json({ success: true, data: populatedUser });
   } catch (error: any) {
     console.error("GET /api/users/me error:", error);
