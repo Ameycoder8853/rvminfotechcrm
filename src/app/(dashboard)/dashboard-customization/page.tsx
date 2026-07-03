@@ -28,7 +28,11 @@ import {
   Briefcase,
   CreditCard,
   Archive,
-  Megaphone
+  Megaphone,
+  X,
+  FileSpreadsheet,
+  AlertTriangle,
+  UserCheck
 } from "lucide-react";
 
 interface Service {
@@ -37,6 +41,33 @@ interface Service {
   category: string;
   categoryBadge: string;
   desc: string;
+}
+
+interface Template {
+  id: string;
+  title: string;
+  subtitle: string;
+  desc: string;
+  icon: string;
+  iconBg: string;
+  buttonBg: string;
+  buttonHoverBg: string;
+  features: string[];
+  moduleCount: number;
+  modules: string[];
+  moreModulesCount: number;
+}
+
+interface DashboardConfig {
+  id: string;
+  name: string;
+  companyName: string;
+  startDate: string;
+  endDate: string;
+  services: string[];
+  isActive: boolean;
+  isStarred: boolean;
+  createdAt: string;
 }
 
 const allServices: Service[] = [
@@ -57,13 +88,104 @@ const allServices: Service[] = [
   { id: "add_task", title: "Add Task", category: "CRM & Sales", categoryBadge: "Productivity", desc: "Add single planner task item directly" }
 ];
 
+const templates: Template[] = [
+  {
+    id: "sales",
+    title: "Sales-Focused Dashboard",
+    subtitle: "Sales Organization",
+    desc: "Perfect for sales teams focusing on leads, contacts, and orders",
+    icon: "sales",
+    iconBg: "bg-blue-600",
+    buttonBg: "bg-blue-600",
+    buttonHoverBg: "hover:bg-blue-700",
+    features: ["Lead tracking", "Contact management", "Order processing", "Quote generation"],
+    moduleCount: 5,
+    modules: ["Contact Management", "Lead Management", "Orders", "Quotations"],
+    moreModulesCount: 1
+  },
+  {
+    id: "service",
+    title: "Service Management Dashboard",
+    subtitle: "Service Company",
+    desc: "Ideal for service companies managing AMC, complaints, and installations",
+    icon: "service",
+    iconBg: "bg-emerald-500",
+    buttonBg: "bg-emerald-500",
+    buttonHoverBg: "hover:bg-emerald-600",
+    features: ["AMC management", "Complaint tracking", "Installation scheduling", "Service planning"],
+    moduleCount: 5,
+    modules: ["AMC", "Complaints", "Installation", "Contact Management"],
+    moreModulesCount: 1
+  },
+  {
+    id: "comprehensive",
+    title: "Comprehensive Business Dashboard",
+    subtitle: "Enterprise",
+    desc: "Full-featured dashboard for businesses needing all modules",
+    icon: "comprehensive",
+    iconBg: "bg-purple-600",
+    buttonBg: "bg-purple-600",
+    buttonHoverBg: "hover:bg-purple-700",
+    features: ["All modules", "Complete CRM", "Team management", "Financial tracking"],
+    moduleCount: 13,
+    modules: ["Contact Management", "Lead Management", "Tasks & Planner", "Orders"],
+    moreModulesCount: 9
+  },
+  {
+    id: "startup",
+    title: "Startup Essentials",
+    subtitle: "Startup",
+    desc: "Essential modules for startups and small businesses",
+    icon: "startup",
+    iconBg: "bg-amber-600",
+    buttonBg: "bg-amber-600",
+    buttonHoverBg: "hover:bg-amber-700",
+    features: ["Basic CRM", "Lead management", "Task planning", "Expense tracking"],
+    moduleCount: 5,
+    modules: ["Contact Management", "Lead Management", "Tasks & Planner", "Orders"],
+    moreModulesCount: 1
+  },
+  {
+    id: "inventory",
+    title: "Inventory & Operations",
+    subtitle: "Manufacturing/Retail",
+    desc: "Focused on inventory management and operational efficiency",
+    icon: "inventory",
+    iconBg: "bg-indigo-500",
+    buttonBg: "bg-indigo-500",
+    buttonHoverBg: "hover:bg-indigo-600",
+    features: ["Inventory control", "Order management", "Cost tracking", "Team coordination"],
+    moduleCount: 6,
+    modules: ["Inventory", "Orders", "Quotations", "Expenses"],
+    moreModulesCount: 2
+  },
+  {
+    id: "marketing",
+    title: "Marketing Agency Dashboard",
+    subtitle: "Marketing Agency",
+    desc: "Tailored for marketing agencies and campaign management",
+    icon: "marketing",
+    iconBg: "bg-pink-500",
+    buttonBg: "bg-pink-500",
+    buttonHoverBg: "hover:bg-pink-600",
+    features: ["Campaign management", "Client tracking", "Team collaboration", "Budget control"],
+    moduleCount: 6,
+    modules: ["Marketing", "Contact Management", "Lead Management", "Tasks & Planner"],
+    moreModulesCount: 2
+  }
+];
+
 export default function DashboardCustomizationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const action = searchParams.get("action") || "manager";
+  const idParam = searchParams.get("id");
 
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Dashboards list state
+  const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
 
   // Form states
   const [formCompany, setFormCompany] = useState("");
@@ -94,36 +216,205 @@ export default function DashboardCustomizationPage() {
     fetchUser();
   }, []);
 
-  // Update default company and dashboard names once user loads
+  // Initialize dashboards from localStorage or defaults
   useEffect(() => {
-    if (currentUser) {
+    if (loading) return;
+    const stored = localStorage.getItem("crm_custom_dashboards");
+    if (stored) {
+      try {
+        setDashboards(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse stored dashboards:", e);
+      }
+    } else {
+      const company = currentUser?.orgId?.name || "RV Softech";
+      const initialDashboards: DashboardConfig[] = [
+        {
+          id: "default-rvm",
+          name: `${company} CRM`,
+          companyName: company,
+          startDate: "2025-08-23",
+          endDate: "2025-08-24",
+          services: ["contacts", "leads", "diary", "quotes", "orders", "amc", "tickets"],
+          isActive: true,
+          isStarred: true,
+          createdAt: "Aug 22, 2025"
+        }
+      ];
+      setDashboards(initialDashboards);
+      localStorage.setItem("crm_custom_dashboards", JSON.stringify(initialDashboards));
+    }
+  }, [currentUser, loading]);
+
+  // Set default values for create form
+  useEffect(() => {
+    if (action === "create") {
       const company = currentUser?.orgId?.name || "Startup";
       setFormCompany(company);
       setFormDashboardName(`${company} Essentials`);
+      
+      const today = new Date();
+      setFormStartDate(today.toISOString().split("T")[0]);
+
+      const nextYear = new Date();
+      nextYear.setFullYear(today.getFullYear() + 1);
+      setFormEndDate(nextYear.toISOString().split("T")[0]);
+      
+      setSelectedServiceIds(["contacts", "leads", "diary", "quotes", "orders"]);
     }
-  }, [currentUser]);
+  }, [action, currentUser]);
 
-  // Set default dates
+  // Load dashboard for editing
   useEffect(() => {
-    const today = new Date();
-    const formattedToday = today.toISOString().split("T")[0]; // YYYY-MM-DD
-    setFormStartDate(formattedToday);
+    if ((action === "edit" || action === "view") && idParam && dashboards.length > 0) {
+      const target = dashboards.find(d => d.id === idParam);
+      if (target) {
+        setFormCompany(target.companyName);
+        setFormDashboardName(target.name);
+        setFormStartDate(target.startDate);
+        setFormEndDate(target.endDate);
+        setSelectedServiceIds(target.services);
+      }
+    }
+  }, [action, idParam, dashboards]);
 
-    const nextYear = new Date();
-    nextYear.setFullYear(today.getFullYear() + 1);
-    const formattedNextYear = nextYear.toISOString().split("T")[0];
-    setFormEndDate(formattedNextYear);
-  }, []);
+  const activeDashboard = dashboards.find(db => db.isActive) || dashboards[0];
 
-  const companyName = currentUser?.orgId?.name || "RV Softech";
-  const dashboardTitle = currentUser?.orgId?.name ? `${currentUser.orgId.name} CRM` : "RV CRM";
+  const saveDashboards = (newList: DashboardConfig[]) => {
+    setDashboards(newList);
+    localStorage.setItem("crm_custom_dashboards", JSON.stringify(newList));
+  };
 
-  // Navigation handlers
-  const navigateTo = (act: string) => {
+  // Switch Active Status
+  const toggleActive = (id: string) => {
+    const updated = dashboards.map(db => ({
+      ...db,
+      isActive: db.id === id
+    }));
+    saveDashboards(updated);
+  };
+
+  // Toggle Star Status
+  const toggleStar = (id: string) => {
+    const updated = dashboards.map(db => {
+      if (db.id === id) {
+        return { ...db, isStarred: !db.isStarred };
+      }
+      return db;
+    });
+    saveDashboards(updated);
+  };
+
+  // Duplicate / Clone
+  const cloneDashboard = (id: string) => {
+    const source = dashboards.find(db => db.id === id);
+    if (!source) return;
+    const newDb: DashboardConfig = {
+      ...source,
+      id: "db-" + Math.random().toString(36).substr(2, 9),
+      name: `${source.name} (Copy)`,
+      isActive: false,
+      isStarred: false,
+      createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    };
+    saveDashboards([...dashboards, newDb]);
+  };
+
+  // Delete
+  const deleteDashboard = (id: string) => {
+    if (dashboards.length <= 1) {
+      alert("You must keep at least one dashboard config.");
+      return;
+    }
+    const target = dashboards.find(db => db.id === id);
+    const updated = dashboards.filter(db => db.id !== id);
+    if (target?.isActive && updated.length > 0) {
+      updated[0].isActive = true;
+    }
+    saveDashboards(updated);
+  };
+
+  // Save new / Edit changes
+  const handleSaveDashboard = () => {
+    if (!formCompany || !formDashboardName) {
+      alert("Company Name and Dashboard Name are required.");
+      return;
+    }
+
+    if (action === "create") {
+      const newDb: DashboardConfig = {
+        id: "db-" + Math.random().toString(36).substr(2, 9),
+        name: formDashboardName,
+        companyName: formCompany,
+        startDate: formStartDate,
+        endDate: formEndDate,
+        services: selectedServiceIds,
+        isActive: dashboards.length === 0,
+        isStarred: false,
+        createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      };
+      saveDashboards([...dashboards, newDb]);
+    } else if (action === "edit" && idParam) {
+      const updated = dashboards.map(db => {
+        if (db.id === idParam) {
+          return {
+            ...db,
+            name: formDashboardName,
+            companyName: formCompany,
+            startDate: formStartDate,
+            endDate: formEndDate,
+            services: selectedServiceIds
+          };
+        }
+        return db;
+      });
+      saveDashboards(updated);
+    }
+    navigateTo("manager");
+  };
+
+  // Template usage
+  const handleUseTemplate = (tmpl: Template) => {
+    let templateServices: string[] = [];
+    if (tmpl.id === "sales") {
+      templateServices = ["contacts", "leads", "diary", "quotes", "orders"];
+    } else if (tmpl.id === "service") {
+      templateServices = ["amc", "tickets", "installations", "contacts"];
+    } else if (tmpl.id === "comprehensive") {
+      templateServices = allServices.map(s => s.id);
+    } else if (tmpl.id === "startup") {
+      templateServices = ["contacts", "leads", "diary", "orders", "expenses"];
+    } else if (tmpl.id === "inventory") {
+      templateServices = ["inventory", "orders", "quotes", "expenses", "invoices"];
+    } else if (tmpl.id === "marketing") {
+      templateServices = ["marketing", "contacts", "leads", "diary", "teams", "attendance"];
+    }
+
+    const company = currentUser?.orgId?.name || "Startup";
+    const newDb: DashboardConfig = {
+      id: "db-" + Math.random().toString(36).substr(2, 9),
+      name: `${company} ${tmpl.title.split("-")[0].split(" ")[0]}`,
+      companyName: company,
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+      services: templateServices,
+      isActive: true,
+      isStarred: false,
+      createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    };
+
+    const updated = dashboards.map(d => ({ ...d, isActive: false }));
+    saveDashboards([...updated, newDb]);
+    navigateTo("manager");
+  };
+
+  // Navigation helper
+  const navigateTo = (act: string, idVal?: string) => {
     if (act === "manager") {
       router.push("/dashboard-customization");
     } else {
-      router.push(`/dashboard-customization?action=${act}`);
+      const idQuery = idVal ? `&id=${idVal}` : "";
+      router.push(`/dashboard-customization?action=${act}${idQuery}`);
     }
   };
 
@@ -161,6 +452,18 @@ export default function DashboardCustomizationPage() {
       case "attendance": return <Clock size={22} className={iconClass} />;
       case "invoices": return <Sliders size={22} className={iconClass} />;
       default: return <Plus size={22} className={iconClass} />;
+    }
+  };
+
+  const renderTemplateIcon = (iconName: string) => {
+    switch (iconName) {
+      case "sales": return <Phone size={20} className="text-white" />;
+      case "service": return <Briefcase size={20} className="text-white" />;
+      case "comprehensive": return <Layers size={20} className="text-white" />;
+      case "startup": return <Sparkles size={20} className="text-white" />;
+      case "inventory": return <Archive size={20} className="text-white" />;
+      case "marketing": return <Megaphone size={20} className="text-white" />;
+      default: return <LayoutGrid size={20} className="text-white" />;
     }
   };
 
@@ -210,11 +513,11 @@ export default function DashboardCustomizationPage() {
             {/* Metric 1 */}
             <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                1
+                {dashboards.length}
               </div>
               <div>
                 <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Total Dashboards</div>
-                <div className="text-sm font-bold text-foreground">1</div>
+                <div className="text-sm font-bold text-foreground">{dashboards.length}</div>
               </div>
             </div>
 
@@ -226,7 +529,7 @@ export default function DashboardCustomizationPage() {
               <div>
                 <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Active Dashboard</div>
                 <div className="text-sm font-bold text-foreground">
-                  {dashboardTitle}
+                  {activeDashboard?.name || "RV CRM"}
                 </div>
               </div>
             </div>
@@ -234,11 +537,11 @@ export default function DashboardCustomizationPage() {
             {/* Metric 3 */}
             <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-purple-600/10 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">
-                7
+                {activeDashboard?.services?.length || 7}
               </div>
               <div>
                 <div className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Total Services</div>
-                <div className="text-sm font-bold text-foreground">7</div>
+                <div className="text-sm font-bold text-foreground">{activeDashboard?.services?.length || 7}</div>
               </div>
             </div>
           </div>
@@ -249,67 +552,101 @@ export default function DashboardCustomizationPage() {
               Your Dashboards
             </h3>
             
-            {/* Dashboard List Item */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-background-secondary border border-border rounded-xl">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-sm font-bold text-foreground">
-                    {dashboardTitle}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 uppercase tracking-wide">
-                    Active
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs text-foreground-secondary">
-                  <div>
-                    <span className="font-medium text-foreground-muted">Company:</span>{" "}
-                    <span className="font-semibold text-foreground">{companyName}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground-muted">Created:</span>{" "}
-                    <span>Aug 22, 2025</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground-muted">Services:</span>{" "}
-                    <span className="font-semibold text-foreground">7</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground-muted">Period:</span>{" "}
-                    <span>Aug 23, 2025 - Aug 24, 2025</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 self-end sm:self-center">
-                <button className="p-2 text-yellow-500 hover:bg-surface-hover rounded-lg transition-colors cursor-pointer">
-                  <Star size={16} fill="currentColor" />
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer">
-                  <Eye size={13} />
-                  <span>View</span>
-                </button>
-                <button 
-                  onClick={() => navigateTo("create")}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            {/* Dashboards List */}
+            <div className="space-y-4">
+              {dashboards.map((db) => (
+                <div 
+                  key={db.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border rounded-xl transition-colors ${
+                    db.isActive ? "bg-accent-muted/5 border-accent" : "bg-background-secondary border-border hover:border-accent/30"
+                  }`}
                 >
-                  <Edit size={13} />
-                  <span>Edit</span>
-                </button>
-                <button className="p-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg transition-colors cursor-pointer" title="Duplicate">
-                  <Copy size={13} />
-                </button>
-                <button className="p-2 bg-danger/10 hover:bg-danger/25 text-danger rounded-lg transition-colors cursor-pointer" title="Delete">
-                  <Trash2 size={13} />
-                </button>
-              </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-sm font-bold text-foreground">
+                        {db.name}
+                      </span>
+                      {db.isActive ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 uppercase tracking-wide">
+                          Active
+                        </span>
+                      ) : (
+                        <button 
+                          onClick={() => toggleActive(db.id)}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-background-secondary hover:bg-surface-hover border border-border text-foreground-secondary uppercase tracking-wide cursor-pointer transition-colors"
+                        >
+                          Activate
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs text-foreground-secondary">
+                      <div>
+                        <span className="font-medium text-foreground-muted">Company:</span>{" "}
+                        <span className="font-semibold text-foreground">{db.companyName}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground-muted">Created:</span>{" "}
+                        <span>{db.createdAt}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground-muted">Services:</span>{" "}
+                        <span className="font-semibold text-foreground">{db.services.length}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground-muted">Period:</span>{" "}
+                        <span>{db.startDate} - {db.endDate}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 self-end sm:self-center">
+                    <button 
+                      onClick={() => toggleStar(db.id)}
+                      className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                        db.isStarred ? "text-yellow-500" : "text-foreground-muted hover:text-foreground hover:bg-surface-hover"
+                      }`}
+                    >
+                      <Star size={16} fill={db.isStarred ? "currentColor" : "none"} />
+                    </button>
+                    <button 
+                      onClick={() => navigateTo("view", db.id)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <Eye size={13} />
+                      <span>View</span>
+                    </button>
+                    <button 
+                      onClick={() => navigateTo("edit", db.id)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <Edit size={13} />
+                      <span>Edit</span>
+                    </button>
+                    <button 
+                      onClick={() => cloneDashboard(db.id)}
+                      className="p-2 bg-background border border-border hover:bg-surface-hover text-foreground-muted hover:text-foreground rounded-lg transition-colors cursor-pointer" 
+                      title="Duplicate"
+                    >
+                      <Copy size={13} />
+                    </button>
+                    <button 
+                      onClick={() => deleteDashboard(db.id)}
+                      className="p-2 bg-danger/10 hover:bg-danger/25 text-danger rounded-lg transition-colors cursor-pointer" 
+                      title="Delete"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
-      {/* -------------------- 2. CREATE CUSTOM DASHBOARD VIEW -------------------- */}
-      {action === "create" && (
+      {/* -------------------- 2. CREATE / EDIT DASHBOARD VIEW -------------------- */}
+      {(action === "create" || action === "edit") && (
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center gap-3">
@@ -320,7 +657,9 @@ export default function DashboardCustomizationPage() {
               <ArrowLeft size={16} />
             </button>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Create New Dashboard</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                {action === "create" ? "Create New Dashboard" : "Edit Dashboard Layout"}
+              </h2>
               <p className="text-xs text-foreground-secondary">Configure your company details and select the services you want to include.</p>
             </div>
           </div>
@@ -517,11 +856,11 @@ export default function DashboardCustomizationPage() {
               </button>
               <button 
                 type="button"
-                onClick={() => navigateTo("manager")}
+                onClick={handleSaveDashboard}
                 className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
               >
                 <Layers size={14} />
-                <span>Create Dashboard</span>
+                <span>{action === "create" ? "Create Dashboard" : "Save Changes"}</span>
               </button>
             </div>
           </div>
@@ -531,81 +870,376 @@ export default function DashboardCustomizationPage() {
       {/* -------------------- 3. DASHBOARD TEMPLATES VIEW -------------------- */}
       {action === "templates" && (
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-6 shadow-sm">
+            <div>
+              <h2 className="text-xl font-bold text-foreground mb-1">Choose a Dashboard Template</h2>
+              <p className="text-xs text-foreground-secondary">Select a pre-configured template to get started quickly</p>
+            </div>
             <button 
               onClick={() => navigateTo("manager")}
-              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
+              className="p-2 hover:bg-surface-hover rounded-xl text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
             >
-              <ArrowLeft size={16} />
+              <X size={20} />
             </button>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Dashboard Templates</h2>
-              <p className="text-xs text-foreground-secondary">Select from pre-configured layouts to jumpstart dashboard layouts</p>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: "Sales Executive Hub", desc: "Visualizes leads, conversion funnels, targets and planner lists.", widgets: 4, type: "Recommended" },
-              { title: "Operations & Ticket Hub", desc: "Tracks ticketing support, resolutions, installations and AMCs.", widgets: 3, type: "Utility" },
-              { title: "Financial & Client Overview", desc: "Focuses on quotes, invoice statuses, expense ratios and summaries.", widgets: 5, type: "Management" }
-            ].map((tmpl, i) => (
-              <div key={i} className="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between h-52 hover:border-accent/40 transition-colors">
+            {templates.map((tmpl) => (
+              <div 
+                key={tmpl.id} 
+                className="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-accent/40 transition-colors"
+              >
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-accent-muted text-accent uppercase tracking-wide">{tmpl.type}</span>
-                    <span className="text-[10px] text-foreground-muted font-medium">{tmpl.widgets} widgets</span>
+                  {/* Icon & Title block */}
+                  <div className="flex gap-4">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0 shadow-md ${tmpl.iconBg}`}>
+                      {renderTemplateIcon(tmpl.icon)}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">{tmpl.title}</h3>
+                      <p className="text-[10px] text-foreground-muted font-medium mt-0.5">{tmpl.subtitle}</p>
+                    </div>
                   </div>
-                  <h3 className="text-sm font-bold text-foreground mb-1.5">{tmpl.title}</h3>
-                  <p className="text-xs text-foreground-secondary line-clamp-3">{tmpl.desc}</p>
+
+                  <p className="text-xs text-foreground-secondary leading-relaxed mt-4 min-h-[32px]">{tmpl.desc}</p>
+                  
+                  {/* Key Features */}
+                  <div className="mt-4 space-y-2">
+                    <div className="text-xs font-bold text-foreground">Key Features:</div>
+                    <ul className="space-y-1.5">
+                      {tmpl.features.map((feat, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-xs text-foreground-secondary">
+                          <Check size={12} className="text-emerald-500" strokeWidth={3} />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Included Modules */}
+                  <div className="mt-5 space-y-2">
+                    <div className="text-xs font-bold text-foreground">Included Modules ({tmpl.moduleCount}):</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {tmpl.modules.map((mod, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded-md bg-background-secondary border border-border text-[9px] font-semibold text-foreground-secondary">
+                          {mod}
+                        </span>
+                      ))}
+                      {tmpl.moreModulesCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-md bg-background-secondary border border-border text-[9px] font-semibold text-foreground-secondary">
+                          +{tmpl.moreModulesCount} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
                 <button 
-                  onClick={() => navigateTo("manager")}
-                  className="w-full text-center py-2 bg-background-secondary border border-border hover:border-accent/30 text-foreground rounded-xl text-xs font-semibold transition-colors cursor-pointer mt-4"
+                  onClick={() => handleUseTemplate(tmpl)}
+                  className={`w-full py-2.5 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer mt-6 block text-center ${tmpl.buttonBg} ${tmpl.buttonHoverBg}`}
                 >
-                  Use Template
+                  Use This Template
                 </button>
               </div>
             ))}
           </div>
+
+          {/* Templates Footer: Need Custom */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-6 shadow-sm mt-8">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Need something custom?</h3>
+              <p className="text-xs text-foreground-secondary">Create a dashboard from scratch with your own selection of modules</p>
+            </div>
+            <button 
+              onClick={() => navigateTo("create")}
+              className="px-5 py-2.5 bg-background border border-border hover:bg-surface-hover text-foreground rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+            >
+              Create Custom Dashboard
+            </button>
+          </div>
         </div>
       )}
 
-      {/* -------------------- 4. MY CUSTOM DASHBOARDS VIEW -------------------- */}
-      {action === "my-dashboards" && (
+      {/* -------------------- 4. VIEW LIVE PREVIEW VIEW -------------------- */}
+      {action === "view" && idParam && (
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigateTo("manager")}
-              className="p-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">My Custom Dashboards</h2>
-              <p className="text-xs text-foreground-secondary">Quick access to all configurations matching {companyName}</p>
+          {/* Header */}
+          <div className="flex items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => navigateTo("manager")}
+                className="p-2 bg-background hover:bg-surface-hover border border-border rounded-xl text-foreground transition-colors cursor-pointer"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h2 className="text-lg font-bold text-foreground">{formDashboardName} Preview</h2>
+                <p className="text-xs text-foreground-secondary">Company: {formCompany} | Period: {formStartDate} - {formEndDate}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-accent-muted/10 text-accent rounded-full text-xs font-semibold">
+                {selectedServiceIds.length} Active Modules
+              </span>
+              <button 
+                onClick={() => navigateTo("edit", idParam)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                <Edit size={13} />
+                <span>Edit Layout</span>
+              </button>
             </div>
           </div>
 
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-background-secondary border border-border rounded-xl">
-              <div className="space-y-1">
-                <div className="text-sm font-bold text-foreground">{dashboardTitle}</div>
-                <div className="text-xs text-foreground-secondary">Active dashboard layout for organizational overview</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-background border border-border hover:bg-surface-hover text-foreground rounded-lg text-xs font-semibold transition-colors cursor-pointer">
-                  <Star size={13} className="text-yellow-500" fill="currentColor" />
-                  <span>Favorited</span>
-                </button>
-                <button 
-                  onClick={() => navigateTo("manager")}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  <span>Go to Manager</span>
-                </button>
-              </div>
-            </div>
+          {/* Grid Layout of Live Widgets */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {selectedServiceIds.map(srvId => {
+              const service = allServices.find(s => s.id === srvId);
+              if (!service) return null;
+
+              return (
+                <div key={srvId} className="bg-surface border border-border rounded-2xl p-5 shadow-sm space-y-4">
+                  {/* Widget Header */}
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 bg-background border border-border rounded-lg text-accent">
+                        {renderServiceIcon(srvId)}
+                      </div>
+                      <h4 className="text-xs font-bold text-foreground">{service.title}</h4>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[8px] font-bold bg-background border border-border text-foreground-muted uppercase tracking-wider">
+                      {service.categoryBadge}
+                    </span>
+                  </div>
+
+                  {/* Widget Body Mock Contents */}
+                  {srvId === "contacts" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between py-1 border-b border-border/50 text-[11px]">
+                        <span className="font-semibold text-foreground">Vikram Rathore</span>
+                        <span className="text-foreground-secondary">vikram@rvsoftech.com</span>
+                      </div>
+                      <div className="flex items-center justify-between py-1 border-b border-border/50 text-[11px]">
+                        <span className="font-semibold text-foreground">Siddharth Jain</span>
+                        <span className="text-foreground-secondary">sid@jaininfra.in</span>
+                      </div>
+                      <div className="flex items-center justify-between py-1 text-[11px]">
+                        <span className="font-semibold text-foreground">Amit Sharma</span>
+                        <span className="text-foreground-secondary">amit@outlook.com</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "leads" && (
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-[10px] font-semibold text-foreground-secondary mb-1">
+                          <span>Prospecting Stage</span>
+                          <span>80%</span>
+                        </div>
+                        <div className="w-full bg-background border border-border h-2 rounded-full overflow-hidden">
+                          <div className="bg-blue-600 h-full rounded-full" style={{ width: "80%" }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[10px] font-semibold text-foreground-secondary mb-1">
+                          <span>Negotiation Stage</span>
+                          <span>45%</span>
+                        </div>
+                        <div className="w-full bg-background border border-border h-2 rounded-full overflow-hidden">
+                          <div className="bg-yellow-500 h-full rounded-full" style={{ width: "45%" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "diary" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="p-2 bg-background border border-border rounded-lg flex items-start gap-2">
+                        <CheckCircle2 size={13} className="text-emerald-500 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-bold text-[11px]">Follow up on AMC renew</div>
+                          <div className="text-[9px] text-foreground-secondary">Due: Tomorrow, 10:00 AM</div>
+                        </div>
+                      </div>
+                      <div className="p-2 bg-background border border-border rounded-lg flex items-start gap-2">
+                        <Clock size={13} className="text-yellow-500 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-bold text-[11px]">RV Group contract review</div>
+                          <div className="text-[9px] text-foreground-secondary">Due: Jul 15, 2026</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "quotes" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between p-2 bg-background border border-border rounded-lg">
+                        <div>
+                          <span className="font-semibold text-foreground">QT-2026-042</span>
+                          <div className="text-[9px] text-foreground-muted">RV Softech</div>
+                        </div>
+                        <span className="text-xs font-bold text-accent">₹45,000</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-background border border-border rounded-lg">
+                        <div>
+                          <span className="font-semibold text-foreground">QT-2026-043</span>
+                          <div className="text-[9px] text-foreground-muted">Jain Builders</div>
+                        </div>
+                        <span className="text-xs font-bold text-accent">₹1,20,000</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "orders" && (
+                    <div className="flex items-center justify-around py-2">
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Booked Value</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">₹3,50,000</div>
+                      </div>
+                      <div className="w-px h-8 bg-border" />
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Active Orders</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">3 pending</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "amc" && (
+                    <div className="space-y-2 text-xs text-foreground-secondary">
+                      <div className="flex justify-between py-1 border-b border-border/50">
+                        <span>Delhi Gymkhana Club</span>
+                        <span className="font-semibold text-foreground text-[10px]">Renew Sep 12</span>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-border/50">
+                        <span>PQR Systems Pvt Ltd</span>
+                        <span className="font-semibold text-foreground text-[10px]">Renew Oct 05</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "tickets" && (
+                    <div className="flex items-center justify-around py-2">
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Open Tickets</div>
+                        <div className="text-sm font-bold text-danger mt-0.5">4 issues</div>
+                      </div>
+                      <div className="w-px h-8 bg-border" />
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Avg Response</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">12 mins</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "installations" && (
+                    <div className="space-y-2 text-xs text-foreground-secondary">
+                      <div className="flex justify-between items-center py-1">
+                        <span>Site Alpha Setup</span>
+                        <span className="px-2 py-0.5 bg-yellow-500/10 text-yellow-600 rounded text-[9px] font-bold">9:00 AM</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <span>Building B Cabling</span>
+                        <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 rounded text-[9px] font-bold">2:00 PM</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "inventory" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between py-1 border-b border-border/50">
+                        <span>Cat-6 Ethernet Cables</span>
+                        <span className="text-red-500 font-bold">20m left</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span>Dual-Port Hub Sensors</span>
+                        <span className="text-red-500 font-bold">5 units left</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "expenses" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between py-1">
+                        <span>Field Travel Allowance</span>
+                        <span className="font-bold text-foreground">₹2,400</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span>Office Stationery Bill</span>
+                        <span className="font-bold text-foreground">₹850</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "marketing" && (
+                    <div className="flex items-center justify-around py-2">
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Click Rate</div>
+                        <div className="text-sm font-bold text-emerald-500 mt-0.5">4.8%</div>
+                      </div>
+                      <div className="w-px h-8 bg-border" />
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Subscribers</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">1,240</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "teams" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-accent-muted/20 text-accent flex items-center justify-center font-bold text-[10px]">RK</div>
+                        <span className="font-semibold text-foreground">Ramesh Kumar</span>
+                        <span className="text-[9px] text-emerald-500 ml-auto font-bold">Field Active</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-accent-muted/20 text-accent flex items-center justify-center font-bold text-[10px]">SS</div>
+                        <span className="font-semibold text-foreground">Suresh Singh</span>
+                        <span className="text-[9px] text-yellow-500 ml-auto font-bold">On Break</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "attendance" && (
+                    <div className="flex items-center justify-around py-2">
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Present Staff</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">14 agents</div>
+                      </div>
+                      <div className="w-px h-8 bg-border" />
+                      <div className="text-center">
+                        <div className="text-[10px] font-medium text-foreground-muted">Late Arrivals</div>
+                        <div className="text-sm font-bold text-yellow-500 mt-0.5">2 late</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "invoices" && (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between py-1">
+                        <span>INV-882 (Pending)</span>
+                        <span className="font-bold text-yellow-600">₹12,500</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span>INV-883 (Settled)</span>
+                        <span className="font-bold text-emerald-600">₹88,000</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {srvId === "add_task" && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button className="py-2 bg-background-secondary hover:bg-surface-hover border border-border text-[10px] font-bold rounded-lg transition-colors cursor-pointer text-center">
+                        + New Lead
+                      </button>
+                      <button className="py-2 bg-background-secondary hover:bg-surface-hover border border-border text-[10px] font-bold rounded-lg transition-colors cursor-pointer text-center">
+                        + New Quote
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -268,6 +268,129 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
+  // Load settings from localStorage or initialize defaults
+  useEffect(() => {
+    const loadState = (key: string, fallback: any, setter: any) => {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        try {
+          setter(JSON.parse(stored));
+        } catch (e) {
+          console.error(`Failed to parse localStorage key ${key}`, e);
+          setter(fallback);
+        }
+      } else {
+        setter(fallback);
+        localStorage.setItem(key, JSON.stringify(fallback));
+      }
+    };
+
+    loadState("settings_specializations", initialSpecializations, setSpecializations);
+    loadState("settings_qualifications", initialQualifications, setQualifications);
+    loadState("settings_taskTypes", initialTaskTypes, setTaskTypes);
+    loadState("settings_products", initialProducts, setProducts);
+    
+    // For employees, load real users from database
+    async function fetchEmployees() {
+      try {
+        const res = await fetch("/api/users");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const mapped = json.data.map((u: any) => ({
+            _id: u._id,
+            firstName: u.firstName || "",
+            lastName: u.lastName || "",
+            email: u.email || "",
+            department: u.department || "Coding",
+            designation: u.designation || "Senior Lead",
+            role: u.roleTier || "Staff",
+            joined: u.createdAt ? u.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
+            status: u.isActive ? "Active" : "Inactive"
+          }));
+          setEmployees(mapped);
+          localStorage.setItem("settings_employees", JSON.stringify(mapped));
+        } else {
+          loadState("settings_employees", initialEmployees, setEmployees);
+        }
+      } catch (err) {
+        console.error("Failed to load real employees, loading fallback:", err);
+        loadState("settings_employees", initialEmployees, setEmployees);
+      }
+    }
+    fetchEmployees();
+
+    loadState("settings_categories", [
+      { _id: "c1", name: "Corporate Client", status: "Active" },
+      { _id: "c2", name: "Government Entity", status: "Active" },
+      { _id: "c3", name: "Retail Customer", status: "Active" }
+    ], setCategories);
+
+    loadState("settings_sources", [
+      { _id: "so1", name: "Google Search", status: "Active" },
+      { _id: "so2", name: "Social Media Campaign", status: "Active" },
+      { _id: "so3", name: "Customer Referral", status: "Active" }
+    ], setSources);
+
+    loadState("settings_locations", [
+      { _id: "l1", name: "Mumbai", status: "Active" },
+      { _id: "l2", name: "Delhi NCR", status: "Active" },
+      { _id: "l3", name: "Bengaluru", status: "Active" }
+    ], setLocations);
+
+    loadState("settings_stages", [
+      { _id: "s1", name: "New Lead", status: "Active" },
+      { _id: "s2", name: "Contacted", status: "Active" },
+      { _id: "s3", name: "Qualified Proposal", status: "Active" }
+    ], setStages);
+
+    loadState("settings_complaints", [
+      { _id: "cp1", name: "Product Delivery Delay", status: "Active" },
+      { _id: "cp2", name: "Software License Issue", status: "Active" }
+    ], setComplaints);
+
+    loadState("settings_transports", [
+      { _id: "tr1", name: "Air Freight", status: "Active" },
+      { _id: "tr2", name: "Local Courier", status: "Active" }
+    ], setTransports);
+
+    loadState("settings_expenseHeads", [
+      { _id: "ex1", name: "Travel Allowance", status: "Active" },
+      { _id: "ex2", name: "Office Supplies", status: "Active" }
+    ], setExpenseHeads);
+
+    loadState("settings_countries", [
+      { _id: "cn1", name: "India", status: "Active" },
+      { _id: "cn2", name: "United States", status: "Active" }
+    ], setCountries);
+
+    loadState("settings_definableMasters", [
+      { _id: "dm1", name: "Custom Project Parameter", status: "Active" }
+    ], setDefinableMasters);
+
+    loadState("settings_definableParameters", [
+      { _id: "dp1", name: "Contract Expiration Period", status: "Active" }
+    ], setDefinableParameters);
+
+    loadState("settings_districts", [
+      { _id: "d1", name: "Pune District", status: "Active" },
+      { _id: "d2", name: "Gurugram", status: "Active" }
+    ], setDistricts);
+
+    loadState("settings_serviceProviders", [
+      { _id: "sp1", name: "Logistics Partner A", status: "Active" },
+      { _id: "sp2", name: "AWS Cloud Support", status: "Active" }
+    ], setServiceProviders);
+
+    loadState("settings_features", [
+      { _id: "f1", name: "Automatic Invoicing", status: "Active" },
+      { _id: "f2", name: "WhatsApp Reminders", status: "Active" }
+    ], setFeatures);
+
+    loadState("settings_competitors", [
+      { _id: "cmp1", name: "Competitor CRM Ltd", status: "Active" }
+    ], setCompetitors);
+  }, []);
+
   // Left sidebar active prerequisite item
   const [activePrereq, setActivePrereq] = useState("specializations");
 
@@ -413,30 +536,108 @@ export default function SettingsPage() {
     if (!confirm("Are you sure you want to delete this setting record?")) return;
 
     if (activePrereq === "specializations") {
-      setSpecializations(specializations.filter(s => s._id !== id));
+      const filtered = specializations.filter(s => s._id !== id);
+      setSpecializations(filtered);
+      localStorage.setItem("settings_specializations", JSON.stringify(filtered));
     } else if (activePrereq === "qualifications") {
-      setQualifications(qualifications.filter(q => q._id !== id));
+      const filtered = qualifications.filter(q => q._id !== id);
+      setQualifications(filtered);
+      localStorage.setItem("settings_qualifications", JSON.stringify(filtered));
     } else if (activePrereq === "products_list") {
-      setProducts(products.filter(p => p._id !== id));
+      const filtered = products.filter(p => p._id !== id);
+      setProducts(filtered);
+      localStorage.setItem("settings_products", JSON.stringify(filtered));
     } else if (activePrereq === "employees_list") {
-      setEmployees(employees.filter(e => e._id !== id));
+      const filtered = employees.filter(e => e._id !== id);
+      setEmployees(filtered);
+      localStorage.setItem("settings_employees", JSON.stringify(filtered));
     } else {
       // Generic state triggers
       switch (activePrereq) {
-        case "categories": setCategories(categories.filter(c => c._id !== id)); break;
-        case "sources": setSources(sources.filter(s => s._id !== id)); break;
-        case "locations": setLocations(locations.filter(l => l._id !== id)); break;
-        case "stages": setStages(stages.filter(s => s._id !== id)); break;
-        case "complaints": setComplaints(complaints.filter(c => c._id !== id)); break;
-        case "transports": setTransports(transports.filter(t => t._id !== id)); break;
-        case "expense_heads": setExpenseHeads(expenseHeads.filter(e => e._id !== id)); break;
-        case "countries": setCountries(countries.filter(c => c._id !== id)); break;
-        case "definable_masters": setDefinableMasters(definableMasters.filter(d => d._id !== id)); break;
-        case "definable_parameters": setDefinableParameters(definableParameters.filter(d => d._id !== id)); break;
-        case "districts": setDistricts(districts.filter(d => d._id !== id)); break;
-        case "service_providers": setServiceProviders(serviceProviders.filter(s => s._id !== id)); break;
-        case "features": setFeatures(features.filter(f => f._id !== id)); break;
-        case "competitors": setCompetitors(competitors.filter(c => c._id !== id)); break;
+        case "categories": {
+          const filtered = categories.filter(c => c._id !== id);
+          setCategories(filtered);
+          localStorage.setItem("settings_categories", JSON.stringify(filtered));
+          break;
+        }
+        case "sources": {
+          const filtered = sources.filter(s => s._id !== id);
+          setSources(filtered);
+          localStorage.setItem("settings_sources", JSON.stringify(filtered));
+          break;
+        }
+        case "locations": {
+          const filtered = locations.filter(l => l._id !== id);
+          setLocations(filtered);
+          localStorage.setItem("settings_locations", JSON.stringify(filtered));
+          break;
+        }
+        case "stages": {
+          const filtered = stages.filter(s => s._id !== id);
+          setStages(filtered);
+          localStorage.setItem("settings_stages", JSON.stringify(filtered));
+          break;
+        }
+        case "complaints": {
+          const filtered = complaints.filter(c => c._id !== id);
+          setComplaints(filtered);
+          localStorage.setItem("settings_complaints", JSON.stringify(filtered));
+          break;
+        }
+        case "transports": {
+          const filtered = transports.filter(t => t._id !== id);
+          setTransports(filtered);
+          localStorage.setItem("settings_transports", JSON.stringify(filtered));
+          break;
+        }
+        case "expense_heads": {
+          const filtered = expenseHeads.filter(e => e._id !== id);
+          setExpenseHeads(filtered);
+          localStorage.setItem("settings_expenseHeads", JSON.stringify(filtered));
+          break;
+        }
+        case "countries": {
+          const filtered = countries.filter(c => c._id !== id);
+          setCountries(filtered);
+          localStorage.setItem("settings_countries", JSON.stringify(filtered));
+          break;
+        }
+        case "definable_masters": {
+          const filtered = definableMasters.filter(d => d._id !== id);
+          setDefinableMasters(filtered);
+          localStorage.setItem("settings_definableMasters", JSON.stringify(filtered));
+          break;
+        }
+        case "definable_parameters": {
+          const filtered = definableParameters.filter(d => d._id !== id);
+          setDefinableParameters(filtered);
+          localStorage.setItem("settings_definableParameters", JSON.stringify(filtered));
+          break;
+        }
+        case "districts": {
+          const filtered = districts.filter(d => d._id !== id);
+          setDistricts(filtered);
+          localStorage.setItem("settings_districts", JSON.stringify(filtered));
+          break;
+        }
+        case "service_providers": {
+          const filtered = serviceProviders.filter(s => s._id !== id);
+          setServiceProviders(filtered);
+          localStorage.setItem("settings_serviceProviders", JSON.stringify(filtered));
+          break;
+        }
+        case "features": {
+          const filtered = features.filter(f => f._id !== id);
+          setFeatures(filtered);
+          localStorage.setItem("settings_features", JSON.stringify(filtered));
+          break;
+        }
+        case "competitors": {
+          const filtered = competitors.filter(c => c._id !== id);
+          setCompetitors(filtered);
+          localStorage.setItem("settings_competitors", JSON.stringify(filtered));
+          break;
+        }
       }
     }
   };
@@ -449,67 +650,223 @@ export default function SettingsPage() {
       if (formMode === "new") {
         const newRecord = { ...formData, _id: `record_${Date.now()}` };
         if (activePrereq === "specializations") {
-          setSpecializations([...specializations, {
+          const updated = [...specializations, {
             ...newRecord,
             salary: Number(formData.salary || 0),
             professionals: Number(formData.professionals || 0)
-          }]);
+          }];
+          setSpecializations(updated);
+          localStorage.setItem("settings_specializations", JSON.stringify(updated));
         } else if (activePrereq === "qualifications") {
-          setQualifications([...qualifications, newRecord]);
+          const updated = [...qualifications, newRecord];
+          setQualifications(updated);
+          localStorage.setItem("settings_qualifications", JSON.stringify(updated));
         } else if (activePrereq === "products_list") {
-          setProducts([...products, { ...newRecord, price: Number(formData.price || 0) }]);
+          const updated = [...products, { ...newRecord, price: Number(formData.price || 0) }];
+          setProducts(updated);
+          localStorage.setItem("settings_products", JSON.stringify(updated));
         } else if (activePrereq === "employees_list") {
-          setEmployees([...employees, { ...newRecord, joined: new Date().toISOString().split("T")[0] }]);
+          const updated = [...employees, { ...newRecord, joined: new Date().toISOString().split("T")[0] }];
+          setEmployees(updated);
+          localStorage.setItem("settings_employees", JSON.stringify(updated));
         } else {
           const genericRecord: GenericSetting = { _id: `record_${Date.now()}`, name: formData.name, status: formData.status };
           switch (activePrereq) {
-            case "categories": setCategories([...categories, genericRecord]); break;
-            case "sources": setSources([...sources, genericRecord]); break;
-            case "locations": setLocations([...locations, genericRecord]); break;
-            case "stages": setStages([...stages, genericRecord]); break;
-            case "complaints": setComplaints([...complaints, genericRecord]); break;
-            case "transports": setTransports([...transports, genericRecord]); break;
-            case "expense_heads": setExpenseHeads([...expenseHeads, genericRecord]); break;
-            case "countries": setCountries([...countries, genericRecord]); break;
-            case "definable_masters": setDefinableMasters([...definableMasters, genericRecord]); break;
-            case "definable_parameters": setDefinableParameters([...definableParameters, genericRecord]); break;
-            case "districts": setDistricts([...districts, genericRecord]); break;
-            case "service_providers": setServiceProviders([...serviceProviders, genericRecord]); break;
-            case "features": setFeatures([...features, genericRecord]); break;
-            case "competitors": setCompetitors([...competitors, genericRecord]); break;
+            case "categories": {
+              const updated = [...categories, genericRecord];
+              setCategories(updated);
+              localStorage.setItem("settings_categories", JSON.stringify(updated));
+              break;
+            }
+            case "sources": {
+              const updated = [...sources, genericRecord];
+              setSources(updated);
+              localStorage.setItem("settings_sources", JSON.stringify(updated));
+              break;
+            }
+            case "locations": {
+              const updated = [...locations, genericRecord];
+              setLocations(updated);
+              localStorage.setItem("settings_locations", JSON.stringify(updated));
+              break;
+            }
+            case "stages": {
+              const updated = [...stages, genericRecord];
+              setStages(updated);
+              localStorage.setItem("settings_stages", JSON.stringify(updated));
+              break;
+            }
+            case "complaints": {
+              const updated = [...complaints, genericRecord];
+              setComplaints(updated);
+              localStorage.setItem("settings_complaints", JSON.stringify(updated));
+              break;
+            }
+            case "transports": {
+              const updated = [...transports, genericRecord];
+              setTransports(updated);
+              localStorage.setItem("settings_transports", JSON.stringify(updated));
+              break;
+            }
+            case "expense_heads": {
+              const updated = [...expenseHeads, genericRecord];
+              setExpenseHeads(updated);
+              localStorage.setItem("settings_expenseHeads", JSON.stringify(updated));
+              break;
+            }
+            case "countries": {
+              const updated = [...countries, genericRecord];
+              setCountries(updated);
+              localStorage.setItem("settings_countries", JSON.stringify(updated));
+              break;
+            }
+            case "definable_masters": {
+              const updated = [...definableMasters, genericRecord];
+              setDefinableMasters(updated);
+              localStorage.setItem("settings_definableMasters", JSON.stringify(updated));
+              break;
+            }
+            case "definable_parameters": {
+              const updated = [...definableParameters, genericRecord];
+              setDefinableParameters(updated);
+              localStorage.setItem("settings_definableParameters", JSON.stringify(updated));
+              break;
+            }
+            case "districts": {
+              const updated = [...districts, genericRecord];
+              setDistricts(updated);
+              localStorage.setItem("settings_districts", JSON.stringify(updated));
+              break;
+            }
+            case "service_providers": {
+              const updated = [...serviceProviders, genericRecord];
+              setServiceProviders(updated);
+              localStorage.setItem("settings_serviceProviders", JSON.stringify(updated));
+              break;
+            }
+            case "features": {
+              const updated = [...features, genericRecord];
+              setFeatures(updated);
+              localStorage.setItem("settings_features", JSON.stringify(updated));
+              break;
+            }
+            case "competitors": {
+              const updated = [...competitors, genericRecord];
+              setCompetitors(updated);
+              localStorage.setItem("settings_competitors", JSON.stringify(updated));
+              break;
+            }
           }
         }
       } else {
         // Edit mode
         if (activePrereq === "specializations") {
-          setSpecializations(specializations.map(s => s._id === formData._id ? {
+          const updated = specializations.map(s => s._id === formData._id ? {
             ...formData,
             salary: Number(formData.salary || 0),
             professionals: Number(formData.professionals || 0)
-          } : s));
+          } : s);
+          setSpecializations(updated);
+          localStorage.setItem("settings_specializations", JSON.stringify(updated));
         } else if (activePrereq === "qualifications") {
-          setQualifications(qualifications.map(q => q._id === formData._id ? formData : q));
+          const updated = qualifications.map(q => q._id === formData._id ? formData : q);
+          setQualifications(updated);
+          localStorage.setItem("settings_qualifications", JSON.stringify(updated));
         } else if (activePrereq === "products_list") {
-          setProducts(products.map(p => p._id === formData._id ? { ...formData, price: Number(formData.price || 0) } : p));
+          const updated = products.map(p => p._id === formData._id ? { ...formData, price: Number(formData.price || 0) } : p);
+          setProducts(updated);
+          localStorage.setItem("settings_products", JSON.stringify(updated));
         } else if (activePrereq === "employees_list") {
-          setEmployees(employees.map(emp => emp._id === formData._id ? formData : emp));
+          const updated = employees.map(emp => emp._id === formData._id ? formData : emp);
+          setEmployees(updated);
+          localStorage.setItem("settings_employees", JSON.stringify(updated));
         } else {
           const updatedGeneric = { _id: formData._id, name: formData.name, status: formData.status };
           switch (activePrereq) {
-            case "categories": setCategories(categories.map(c => c._id === formData._id ? updatedGeneric : c)); break;
-            case "sources": setSources(sources.map(s => s._id === formData._id ? updatedGeneric : s)); break;
-            case "locations": setLocations(locations.map(l => l._id === formData._id ? updatedGeneric : l)); break;
-            case "stages": setStages(stages.map(s => s._id === formData._id ? updatedGeneric : s)); break;
-            case "complaints": setComplaints(complaints.map(c => c._id === formData._id ? updatedGeneric : c)); break;
-            case "transports": setTransports(transports.map(t => t._id === formData._id ? updatedGeneric : t)); break;
-            case "expense_heads": setExpenseHeads(expenseHeads.map(e => e._id === formData._id ? updatedGeneric : e)); break;
-            case "countries": setCountries(countries.map(c => c._id === formData._id ? updatedGeneric : c)); break;
-            case "definable_masters": setDefinableMasters(definableMasters.map(d => d._id === formData._id ? updatedGeneric : d)); break;
-            case "definable_parameters": setDefinableParameters(definableParameters.map(d => d._id === formData._id ? updatedGeneric : d)); break;
-            case "districts": setDistricts(districts.map(d => d._id === formData._id ? updatedGeneric : d)); break;
-            case "service_providers": setServiceProviders(serviceProviders.map(s => s._id === formData._id ? updatedGeneric : s)); break;
-            case "features": setFeatures(features.map(f => f._id === formData._id ? updatedGeneric : f)); break;
-            case "competitors": setCompetitors(competitors.map(c => c._id === formData._id ? updatedGeneric : c)); break;
+            case "categories": {
+              const updated = categories.map(c => c._id === formData._id ? updatedGeneric : c);
+              setCategories(updated);
+              localStorage.setItem("settings_categories", JSON.stringify(updated));
+              break;
+            }
+            case "sources": {
+              const updated = sources.map(s => s._id === formData._id ? updatedGeneric : s);
+              setSources(updated);
+              localStorage.setItem("settings_sources", JSON.stringify(updated));
+              break;
+            }
+            case "locations": {
+              const updated = locations.map(l => l._id === formData._id ? updatedGeneric : l);
+              setLocations(updated);
+              localStorage.setItem("settings_locations", JSON.stringify(updated));
+              break;
+            }
+            case "stages": {
+              const updated = stages.map(s => s._id === formData._id ? updatedGeneric : s);
+              setStages(updated);
+              localStorage.setItem("settings_stages", JSON.stringify(updated));
+              break;
+            }
+            case "complaints": {
+              const updated = complaints.map(c => c._id === formData._id ? updatedGeneric : c);
+              setComplaints(updated);
+              localStorage.setItem("settings_complaints", JSON.stringify(updated));
+              break;
+            }
+            case "transports": {
+              const updated = transports.map(t => t._id === formData._id ? updatedGeneric : t);
+              setTransports(updated);
+              localStorage.setItem("settings_transports", JSON.stringify(updated));
+              break;
+            }
+            case "expense_heads": {
+              const updated = expenseHeads.map(e => e._id === formData._id ? updatedGeneric : e);
+              setExpenseHeads(updated);
+              localStorage.setItem("settings_expenseHeads", JSON.stringify(updated));
+              break;
+            }
+            case "countries": {
+              const updated = countries.map(c => c._id === formData._id ? updatedGeneric : c);
+              setCountries(updated);
+              localStorage.setItem("settings_countries", JSON.stringify(updated));
+              break;
+            }
+            case "definable_masters": {
+              const updated = definableMasters.map(d => d._id === formData._id ? updatedGeneric : d);
+              setDefinableMasters(updated);
+              localStorage.setItem("settings_definableMasters", JSON.stringify(updated));
+              break;
+            }
+            case "definable_parameters": {
+              const updated = definableParameters.map(d => d._id === formData._id ? updatedGeneric : d);
+              setDefinableParameters(updated);
+              localStorage.setItem("settings_definableParameters", JSON.stringify(updated));
+              break;
+            }
+            case "districts": {
+              const updated = districts.map(d => d._id === formData._id ? updatedGeneric : d);
+              setDistricts(updated);
+              localStorage.setItem("settings_districts", JSON.stringify(updated));
+              break;
+            }
+            case "service_providers": {
+              const updated = serviceProviders.map(s => s._id === formData._id ? updatedGeneric : s);
+              setServiceProviders(updated);
+              localStorage.setItem("settings_serviceProviders", JSON.stringify(updated));
+              break;
+            }
+            case "features": {
+              const updated = features.map(f => f._id === formData._id ? updatedGeneric : f);
+              setFeatures(updated);
+              localStorage.setItem("settings_features", JSON.stringify(updated));
+              break;
+            }
+            case "competitors": {
+              const updated = competitors.map(c => c._id === formData._id ? updatedGeneric : c);
+              setCompetitors(updated);
+              localStorage.setItem("settings_competitors", JSON.stringify(updated));
+              break;
+            }
           }
         }
       }
