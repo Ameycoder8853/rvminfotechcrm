@@ -821,11 +821,42 @@ export default function ContactsPage() {
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
                   <option value="">Select State</option>
+                  <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                  <option value="Assam">Assam</option>
+                  <option value="Bihar">Bihar</option>
+                  <option value="Chandigarh">Chandigarh</option>
+                  <option value="Chhattisgarh">Chhattisgarh</option>
+                  <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
                   <option value="Delhi">Delhi</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Karnataka">Karnataka</option>
+                  <option value="Goa">Goa</option>
+                  <option value="Gujarat">Gujarat</option>
                   <option value="Haryana">Haryana</option>
+                  <option value="Himachal Pradesh">Himachal Pradesh</option>
+                  <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                  <option value="Jharkhand">Jharkhand</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Kerala">Kerala</option>
+                  <option value="Ladakh">Ladakh</option>
+                  <option value="Lakshadweep">Lakshadweep</option>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Manipur">Manipur</option>
+                  <option value="Meghalaya">Meghalaya</option>
+                  <option value="Mizoram">Mizoram</option>
+                  <option value="Nagaland">Nagaland</option>
+                  <option value="Odisha">Odisha</option>
+                  <option value="Puducherry">Puducherry</option>
+                  <option value="Punjab">Punjab</option>
+                  <option value="Rajasthan">Rajasthan</option>
+                  <option value="Sikkim">Sikkim</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Tripura">Tripura</option>
                   <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  <option value="Uttarakhand">Uttarakhand</option>
+                  <option value="West Bengal">West Bengal</option>
                 </select>
               </div>
               <div>
@@ -864,12 +895,18 @@ export default function ContactsPage() {
                   onChange={(e) => setCurrentContact({ ...currentContact, department: e.target.value })}
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="">Select Dept</option>
-                  <option value="Coding">Coding</option>
-                  <option value="Marketing">Marketing</option>
+                  <option value="">Select Department</option>
                   <option value="Sales">Sales</option>
-                  <option value="Technical">Technical</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Finance">Finance</option>
+                  <option value="IT">IT</option>
                   <option value="HR">HR</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Customer Support">Customer Support</option>
+                  <option value="Research & Development">Research & Development</option>
+                  <option value="Legal">Legal</option>
+                  <option value="Executive">Executive</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div>
@@ -879,11 +916,20 @@ export default function ContactsPage() {
                   onChange={(e) => setCurrentContact({ ...currentContact, designation: e.target.value })}
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="">Select Desig</option>
-                  <option value="Senior Lead">Senior Lead</option>
+                  <option value="">Select Designation</option>
+                  <option value="CEO">CEO</option>
+                  <option value="CTO">CTO</option>
+                  <option value="CFO">CFO</option>
+                  <option value="Director">Director</option>
                   <option value="Manager">Manager</option>
-                  <option value="Specialist">Specialist</option>
-                  <option value="Junior Rep">Junior Rep</option>
+                  <option value="Team Lead">Team Lead</option>
+                  <option value="Executive">Executive</option>
+                  <option value="Analyst">Analyst</option>
+                  <option value="Coordinator">Coordinator</option>
+                  <option value="Supervisor">Supervisor</option>
+                  <option value="Assistant">Assistant</option>
+                  <option value="Intern">Intern</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div>
@@ -961,11 +1007,14 @@ export default function ContactsPage() {
                   onChange={(e) => setCurrentContact({ ...currentContact, product: e.target.value })}
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
-                  <option value="">Select product</option>
-                  <option value="Software License">Software License</option>
-                  <option value="Hardware Rack Integration">Hardware Rack Integration</option>
-                  <option value="AMC Plan Annual">AMC Plan Annual</option>
-                  <option value="Networking Switch Setup">Networking Switch Setup</option>
+                  <option value="">Select product for future</option>
+                  <option value="CRM Software">CRM Software</option>
+                  <option value="ERP Solution">ERP Solution</option>
+                  <option value="Accounting Tool">Accounting Tool</option>
+                  <option value="Marketing Automation">Marketing Automation</option>
+                  <option value="Project Management">Project Management</option>
+                  <option value="Business Intelligence">Business Intelligence</option>
+                  <option value="Custom Development">Custom Development</option>
                 </select>
               </div>
             </div>
@@ -1007,11 +1056,16 @@ export default function ContactsPage() {
                   onChange={(e) => setCurrentContact({ ...currentContact, source: e.target.value })}
                   className="w-full bg-background-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-medium transition-colors cursor-pointer"
                 >
+                  <option value="">Select Source</option>
                   <option value="website">Website</option>
-                  <option value="event">Event</option>
-                  <option value="social media">Social Media</option>
                   <option value="referral">Referral</option>
+                  <option value="social media">Social Media</option>
+                  <option value="event">Event</option>
                   <option value="cold_call">Cold Call</option>
+                  <option value="email campaign">Email Campaign</option>
+                  <option value="advertisement">Advertisement</option>
+                  <option value="partner">Partner</option>
+                  <option value="exhibition">Exhibition</option>
                   <option value="other">Other</option>
                 </select>
               </div>
