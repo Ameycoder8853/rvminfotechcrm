@@ -192,22 +192,31 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
   const pathname = usePathname();
   const [activeServices, setActiveServices] = useState<string[] | null>(null);
 
-  // Load custom dashboard configuration whenever pathname changes (to react to customization switches)
+  // Load custom dashboard configuration whenever pathname changes (to react to customization switches) or on update events
   useEffect(() => {
-    const stored = localStorage.getItem("crm_custom_dashboards");
-    if (stored) {
-      try {
-        const list = JSON.parse(stored);
-        const active = list.find((d: any) => d.isActive);
-        if (active) {
-          setActiveServices(active.services);
-        } else {
-          setActiveServices(null);
+    const loadConfig = () => {
+      const stored = localStorage.getItem("crm_custom_dashboards");
+      if (stored) {
+        try {
+          const list = JSON.parse(stored);
+          const active = list.find((d: any) => d.isActive);
+          if (active) {
+            setActiveServices(active.services);
+          } else {
+            setActiveServices(null);
+          }
+        } catch (e) {
+          console.error("Failed to parse custom dashboards in sidebar:", e);
         }
-      } catch (e) {
-        console.error("Failed to parse custom dashboards in sidebar:", e);
       }
-    }
+    };
+
+    loadConfig();
+
+    window.addEventListener("dashboardConfigUpdated", loadConfig);
+    return () => {
+      window.removeEventListener("dashboardConfigUpdated", loadConfig);
+    };
   }, [pathname]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [currentUser, setCurrentUser] = useState<any | null>(null);

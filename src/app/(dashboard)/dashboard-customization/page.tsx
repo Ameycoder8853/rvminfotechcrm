@@ -180,6 +180,7 @@ export default function DashboardCustomizationPage() {
   const router = useRouter();
   const action = searchParams.get("action") || "manager";
   const idParam = searchParams.get("id");
+  const templateParam = searchParams.get("template");
 
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -251,7 +252,32 @@ export default function DashboardCustomizationPage() {
     if (action === "create") {
       const company = currentUser?.orgId?.name || "Startup";
       setFormCompany(company);
-      setFormDashboardName(`${company} Essentials`);
+
+      if (templateParam) {
+        const tmpl = templates.find(t => t.id === templateParam);
+        if (tmpl) {
+          setFormDashboardName(tmpl.title);
+          
+          let templateServices: string[] = [];
+          if (tmpl.id === "sales") {
+            templateServices = ["contacts", "leads", "diary", "quotes", "orders"];
+          } else if (tmpl.id === "service") {
+            templateServices = ["amc", "tickets", "installations", "contacts"];
+          } else if (tmpl.id === "comprehensive") {
+            templateServices = allServices.map(s => s.id);
+          } else if (tmpl.id === "startup") {
+            templateServices = ["contacts", "leads", "diary", "orders", "expenses"];
+          } else if (tmpl.id === "inventory") {
+            templateServices = ["inventory", "orders", "quotes", "expenses", "invoices"];
+          } else if (tmpl.id === "marketing") {
+            templateServices = ["marketing", "contacts", "leads", "diary", "teams", "attendance"];
+          }
+          setSelectedServiceIds(templateServices);
+        }
+      } else {
+        setFormDashboardName(`${company} Essentials`);
+        setSelectedServiceIds(["contacts", "leads", "diary", "quotes", "orders"]);
+      }
       
       const today = new Date();
       setFormStartDate(today.toISOString().split("T")[0]);
@@ -259,10 +285,8 @@ export default function DashboardCustomizationPage() {
       const nextYear = new Date();
       nextYear.setFullYear(today.getFullYear() + 1);
       setFormEndDate(nextYear.toISOString().split("T")[0]);
-      
-      setSelectedServiceIds(["contacts", "leads", "diary", "quotes", "orders"]);
     }
-  }, [action, currentUser]);
+  }, [action, currentUser, templateParam]);
 
   // Load dashboard for editing
   useEffect(() => {
@@ -283,6 +307,9 @@ export default function DashboardCustomizationPage() {
   const saveDashboards = (newList: DashboardConfig[]) => {
     setDashboards(newList);
     localStorage.setItem("crm_custom_dashboards", JSON.stringify(newList));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("dashboardConfigUpdated"));
+    }
   };
 
   // Switch Active Status
@@ -375,37 +402,7 @@ export default function DashboardCustomizationPage() {
 
   // Template usage
   const handleUseTemplate = (tmpl: Template) => {
-    let templateServices: string[] = [];
-    if (tmpl.id === "sales") {
-      templateServices = ["contacts", "leads", "diary", "quotes", "orders"];
-    } else if (tmpl.id === "service") {
-      templateServices = ["amc", "tickets", "installations", "contacts"];
-    } else if (tmpl.id === "comprehensive") {
-      templateServices = allServices.map(s => s.id);
-    } else if (tmpl.id === "startup") {
-      templateServices = ["contacts", "leads", "diary", "orders", "expenses"];
-    } else if (tmpl.id === "inventory") {
-      templateServices = ["inventory", "orders", "quotes", "expenses", "invoices"];
-    } else if (tmpl.id === "marketing") {
-      templateServices = ["marketing", "contacts", "leads", "diary", "teams", "attendance"];
-    }
-
-    const company = currentUser?.orgId?.name || "Startup";
-    const newDb: DashboardConfig = {
-      id: "db-" + Math.random().toString(36).substr(2, 9),
-      name: `${company} ${tmpl.title.split("-")[0].split(" ")[0]}`,
-      companyName: company,
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
-      services: templateServices,
-      isActive: true,
-      isStarred: false,
-      createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    };
-
-    const updated = dashboards.map(d => ({ ...d, isActive: false }));
-    saveDashboards([...updated, newDb]);
-    navigateTo("manager");
+    navigateTo("create", tmpl.id);
   };
 
   // Navigation helper
@@ -413,7 +410,9 @@ export default function DashboardCustomizationPage() {
     if (act === "manager") {
       router.push("/dashboard-customization");
     } else {
-      const idQuery = idVal ? `&id=${idVal}` : "";
+      const isTemplate = templates.some(t => t.id === idVal);
+      const key = isTemplate ? "template" : "id";
+      const idQuery = idVal ? `&${key}=${idVal}` : "";
       router.push(`/dashboard-customization?action=${act}${idQuery}`);
     }
   };
@@ -938,7 +937,7 @@ export default function DashboardCustomizationPage() {
                   onClick={() => handleUseTemplate(tmpl)}
                   className={`w-full py-2.5 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer mt-6 block text-center ${tmpl.buttonBg} ${tmpl.buttonHoverBg}`}
                 >
-                  Use This Template
+                  Customize Template
                 </button>
               </div>
             ))}
