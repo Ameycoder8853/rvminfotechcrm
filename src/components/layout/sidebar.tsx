@@ -190,6 +190,25 @@ interface SidebarProps {
 
 export default function Sidebar({ className, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
+  const [activeServices, setActiveServices] = useState<string[] | null>(null);
+
+  // Load custom dashboard configuration whenever pathname changes (to react to customization switches)
+  useEffect(() => {
+    const stored = localStorage.getItem("crm_custom_dashboards");
+    if (stored) {
+      try {
+        const list = JSON.parse(stored);
+        const active = list.find((d: any) => d.isActive);
+        if (active) {
+          setActiveServices(active.services);
+        } else {
+          setActiveServices(null);
+        }
+      } catch (e) {
+        console.error("Failed to parse custom dashboards in sidebar:", e);
+      }
+    }
+  }, [pathname]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [sidebarLoading, setSidebarLoading] = useState(true);
@@ -295,9 +314,34 @@ export default function Sidebar({ className, isCollapsed = false, onToggleCollap
     const invoicesPerm = userPerms?.invoices || teamPerms?.invoices || defaultFallback;
     const ticketsPerm = userPerms?.tickets || teamPerms?.tickets || defaultFallback;
 
+    const getServiceKeyForTitle = (title: string): string | null => {
+      switch (title) {
+        case "Contact Management": return "contacts";
+        case "Lead Management": return "leads";
+        case "Tasks & Planner": return "diary";
+        case "Quotations": return "quotes";
+        case "Orders": return "orders";
+        case "AMC": return "amc";
+        case "Complaints": return "tickets";
+        case "Installation": return "installations";
+        case "Inventory": return "inventory";
+        case "Expenses": return "expenses";
+        case "Marketing": return "marketing";
+        case "Team": return "teams";
+        case "Attendance": return "attendance";
+        default: return null;
+      }
+    };
+
     return navigationSections
       .map((section) => {
         const filteredItems = section.items.filter((item) => {
+          // Check active custom dashboard configuration services list (if set)
+          const serviceKey = getServiceKeyForTitle(item.title);
+          if (serviceKey && activeServices && !activeServices.includes(serviceKey)) {
+            return false; // Hides item if unchecked in customization
+          }
+
           // 1. Dashboard Customization is admin only
           if (item.title === "Dashboard Customization" && !isAdmin) return false;
 

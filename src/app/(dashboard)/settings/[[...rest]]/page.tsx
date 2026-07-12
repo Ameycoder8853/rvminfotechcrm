@@ -1034,7 +1034,7 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-surface border border-border rounded-2xl overflow-x-auto shadow-sm">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-border bg-background-secondary/30 text-[10px] font-bold uppercase tracking-wider text-foreground-muted text-left">
@@ -1089,19 +1089,19 @@ export default function SettingsPage() {
               <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider block">Prerequisite Settings</span>
             </div>
             
-            <div className="flex flex-col gap-1 max-h-125 overflow-y-auto pr-1">
+            <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none whitespace-nowrap lg:whitespace-normal">
               {getPrerequisitesList().map((item) => (
                 <button
                   key={item.id}
                   onClick={() => { setActivePrereq(item.id); setSearchQuery(""); setCategoryFilter(""); setLevelFilter(""); setDemandFilter(""); setStatusFilter(""); }}
-                  className={`flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer group ${
+                  className={`flex items-center justify-between w-auto lg:w-full shrink-0 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer group ${
                     activePrereq === item.id 
                       ? "bg-accent-muted text-accent font-bold" 
                       : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover/40"
                   }`}
                 >
                   <span>{item.label}</span>
-                  <ChevronRight size={13} className={`transition-transform group-hover:translate-x-0.5 ${activePrereq === item.id ? "text-accent" : "text-foreground-muted"}`} />
+                  <ChevronRight size={13} className={`hidden lg:block transition-transform group-hover:translate-x-0.5 ${activePrereq === item.id ? "text-accent" : "text-foreground-muted"}`} />
                 </button>
               ))}
             </div>
@@ -1218,7 +1218,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-surface border border-border rounded-2xl overflow-x-auto shadow-sm">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-border bg-background-secondary/30 text-[10px] font-bold uppercase tracking-wider text-foreground-muted text-left">
@@ -1320,7 +1320,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
 
-                <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-surface border border-border rounded-2xl overflow-x-auto shadow-sm">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-border bg-background-secondary/30 text-[10px] font-bold uppercase tracking-wider text-foreground-muted text-left">
@@ -1395,7 +1395,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
 
-                <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-surface border border-border rounded-2xl overflow-x-auto shadow-sm">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-border bg-background-secondary/30 text-[10px] font-bold uppercase tracking-wider text-foreground-muted text-left">
@@ -1449,7 +1449,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
 
-                <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-surface border border-border rounded-2xl overflow-x-auto shadow-sm">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-border bg-background-secondary/30 text-[10px] font-bold uppercase tracking-wider text-foreground-muted text-left">
