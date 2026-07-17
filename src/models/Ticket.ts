@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IServiceHistoryEntry {
   action: string;
@@ -65,10 +66,6 @@ TicketSchema.index({ ticketNumber: 1 });
 TicketSchema.index({ status: 1, priority: 1 });
 TicketSchema.index({ assignedTech: 1, status: 1 });
 
-if (mongoose.models.Ticket) {
-  delete (mongoose.models as any).Ticket;
-}
-
-const Ticket: Model<ITicket> = mongoose.model<ITicket>("Ticket", TicketSchema);
+const Ticket: Model<ITicket> = tenantModel<ITicket>("Ticket", TicketSchema);
 
 export default Ticket;

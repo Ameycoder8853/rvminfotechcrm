@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface ICallLog extends Document {
   user: Types.ObjectId;
@@ -30,7 +31,6 @@ const CallLogSchema = new Schema<ICallLog>({
   }, { timestamps: true }
 );
 
-const CallLog: Model<ICallLog> =
-  mongoose.models.CallLog || mongoose.model<ICallLog>("CallLog", CallLogSchema);
+const CallLog: Model<ICallLog> = tenantModel<ICallLog>("CallLog", CallLogSchema);
 
 export default CallLog;

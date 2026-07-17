@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IExpense extends Document {
   user: Types.ObjectId;
@@ -42,7 +43,6 @@ const ExpenseSchema = new Schema<IExpense>({
 ExpenseSchema.index({ user: 1, status: 1 });
 ExpenseSchema.index({ status: 1, createdAt: -1 });
 
-const Expense: Model<IExpense> =
-  mongoose.models.Expense || mongoose.model<IExpense>("Expense", ExpenseSchema);
+const Expense: Model<IExpense> = tenantModel<IExpense>("Expense", ExpenseSchema);
 
 export default Expense;

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IQuoteItem {
   description: string;
@@ -62,10 +63,6 @@ const QuoteSchema = new Schema<IQuote>({
 QuoteSchema.index({ quoteNumber: 1 });
 QuoteSchema.index({ customer: 1, status: 1 });
 
-if (mongoose.models.Quote) {
-  delete (mongoose.models as any).Quote;
-}
-
-const Quote: Model<IQuote> = mongoose.model<IQuote>("Quote", QuoteSchema);
+const Quote: Model<IQuote> = tenantModel<IQuote>("Quote", QuoteSchema);
 
 export default Quote;

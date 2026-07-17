@@ -70,10 +70,8 @@ const LeadSchema = new Schema<ILead>({
 LeadSchema.index({ status: 1, assignedTo: 1 });
 LeadSchema.index({ createdAt: -1 });
 
-if (mongoose.models.Lead) {
-  delete (mongoose.models as any).Lead;
-}
+import { tenantModel } from "@/lib/mongodb-tenant";
 
-const Lead: Model<ILead> = mongoose.model<ILead>("Lead", LeadSchema);
+const Lead: Model<ILead> = tenantModel<ILead>("Lead", LeadSchema);
 
 export default Lead;

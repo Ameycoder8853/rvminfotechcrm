@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IProgressPhoto {
   url: string;
@@ -52,10 +53,6 @@ const InstallationSchema = new Schema<IInstallation>({
 InstallationSchema.index({ status: 1, scheduledDate: 1 });
 InstallationSchema.index({ assignedTo: 1, status: 1 });
 
-if (mongoose.models.Installation) {
-  delete (mongoose.models as any).Installation;
-}
-
-const Installation: Model<IInstallation> = mongoose.model<IInstallation>("Installation", InstallationSchema);
+const Installation: Model<IInstallation> = tenantModel<IInstallation>("Installation", InstallationSchema);
 
 export default Installation;

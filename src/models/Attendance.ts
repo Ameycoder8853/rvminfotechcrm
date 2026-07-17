@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IAttendance extends Document {
   user: Types.ObjectId;
@@ -36,8 +37,6 @@ const AttendanceSchema = new Schema<IAttendance>({
 AttendanceSchema.index({ user: 1, timestamp: -1 });
 AttendanceSchema.index({ type: 1, timestamp: -1 });
 
-const Attendance: Model<IAttendance> =
-  mongoose.models.Attendance ||
-  mongoose.model<IAttendance>("Attendance", AttendanceSchema);
+const Attendance: Model<IAttendance> = tenantModel<IAttendance>("Attendance", AttendanceSchema);
 
 export default Attendance;

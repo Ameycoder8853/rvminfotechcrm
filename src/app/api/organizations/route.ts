@@ -50,9 +50,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
     }
 
-    const { name, slug } = await req.json();
+    const { name, slug, dbConnectionString } = await req.json();
     if (!name || !slug) {
-      return NextResponse.json({ error: "Missing required fields (name, slug)" }, { status: 400 });
+       return NextResponse.json({ error: "Missing required fields (name, slug)" }, { status: 400 });
     }
 
     // Slug check
@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
     const newOrg = await Organization.create({
       name,
       slug: formattedSlug,
-      status: "active"
+      status: "active",
+      dbConnectionString: dbConnectionString || ""
     });
 
     return NextResponse.json({ success: true, data: newOrg }, { status: 201 });

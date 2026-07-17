@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IDiaryEntry extends Document {
   user: Types.ObjectId;
@@ -40,8 +41,6 @@ const DiaryEntrySchema = new Schema<IDiaryEntry>({
 DiaryEntrySchema.index({ user: 1, date: 1 });
 DiaryEntrySchema.index({ type: 1, isCompleted: 1 });
 
-const DiaryEntry: Model<IDiaryEntry> =
-  mongoose.models.DiaryEntry ||
-  mongoose.model<IDiaryEntry>("DiaryEntry", DiaryEntrySchema);
+const DiaryEntry: Model<IDiaryEntry> = tenantModel<IDiaryEntry>("DiaryEntry", DiaryEntrySchema);
 
 export default DiaryEntry;

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IOrderItem {
   description: string;
@@ -56,10 +57,6 @@ const OrderSchema = new Schema<IOrder>({
 OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
 
-if (mongoose.models.Order) {
-  delete (mongoose.models as any).Order;
-}
-
-const Order: Model<IOrder> = mongoose.model<IOrder>("Order", OrderSchema);
+const Order: Model<IOrder> = tenantModel<IOrder>("Order", OrderSchema);
 
 export default Order;

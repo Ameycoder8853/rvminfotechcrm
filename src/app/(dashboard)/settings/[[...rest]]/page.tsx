@@ -118,86 +118,11 @@ interface GenericSetting {
 // Mock Data Definitions
 // ----------------------------------------------------
 
-const initialSpecializations: Specialization[] = [
-  {
-    _id: "spec1",
-    name: "Development",
-    description: "Web and mobile application development",
-    category: "Technology",
-    level: "Expert",
-    experience: "5 years",
-    certRequired: true,
-    salary: 95000,
-    professionals: 245,
-    demandLevel: "High",
-    status: "Active"
-  },
-  {
-    _id: "spec2",
-    name: "Marketing",
-    description: "Social media marketing and content strategy",
-    category: "Marketing",
-    level: "Intermediate",
-    experience: "3 years",
-    certRequired: false,
-    salary: 65000,
-    professionals: 189,
-    demandLevel: "Medium",
-    status: "Active"
-  },
-  {
-    _id: "spec3",
-    name: "Analytics",
-    description: "Data modeling, statistical analysis and data visualization",
-    category: "Analytics",
-    level: "Expert",
-    experience: "4 years",
-    certRequired: true,
-    salary: 110000,
-    professionals: 156,
-    demandLevel: "High",
-    status: "Active"
-  },
-  {
-    _id: "spec4",
-    name: "Management",
-    description: "Agile and traditional project management",
-    category: "Management",
-    level: "Intermediate",
-    experience: "3 years",
-    certRequired: true,
-    salary: 85000,
-    professionals: 312,
-    demandLevel: "Medium",
-    status: "Active"
-  }
-];
-
-const initialQualifications: Qualification[] = [
-  { _id: "q1", name: "Bachelor of Science in Computer Science", category: "Undergraduate", level: "Bachelor", field: "Computer Science", duration: "4 years" },
-  { _id: "q2", name: "Master of Business Administration", category: "Postgraduate", level: "Master", field: "Business Administration", duration: "2 years" },
-  { _id: "q3", name: "Certified Public Accountant (CPA)", category: "Professional Certification", level: "Professional", field: "Accounting", duration: "1 year" },
-];
-
-const initialTaskTypes: TaskType[] = [
-  { _id: "t1", name: "Follow-up Call", category: "Communication", priority: "High", duration: "30 minutes", usage: 245, status: "Active" },
-  { _id: "t2", name: "Site Visit", category: "Field Work", priority: "High", duration: "2 hours", usage: 89, status: "Active" },
-  { _id: "t3", name: "Email Campaign", category: "Marketing", priority: "Medium", duration: "1 hour", usage: 156, status: "Active" },
-  { _id: "t4", name: "Document Review", category: "Administrative", priority: "Low", duration: "45 minutes", usage: 67, status: "Inactive" },
-];
-
-const initialProducts: Product[] = [
-  { _id: "p1", name: "Software License", code: "SL-101", category: "Software", price: 49999, tax: "18%", status: "Active" },
-  { _id: "p2", name: "Hardware Rack Integration", code: "HWR-202", category: "Hardware", price: 150000, tax: "18%", status: "Active" },
-  { _id: "p3", name: "AMC Plan Annual", code: "AMC-303", category: "Service", price: 25000, tax: "18%", status: "Active" },
-  { _id: "p4", name: "Networking Switch Setup", code: "NET-404", category: "Installation", price: 15000, tax: "18%", status: "Active" },
-];
-
-const initialEmployees: Employee[] = [
-  { _id: "e1", firstName: "Amey", lastName: "Patil", email: "amey35195@gmail.com", department: "Coding", designation: "Senior Lead", role: "Admin", joined: "2026-06-15", status: "Active" },
-  { _id: "e2", firstName: "John", lastName: "Doe", email: "john.doe@example.com", department: "Sales", designation: "Manager", role: "Senior Manager", joined: "2026-05-10", status: "Active" },
-  { _id: "e3", firstName: "Jane", lastName: "Smith", email: "jane.smith@example.com", department: "Marketing", designation: "Specialist", role: "Junior Rep", joined: "2026-06-01", status: "Active" },
-];
+const initialSpecializations: Specialization[] = [];
+const initialQualifications: Qualification[] = [];
+const initialTaskTypes: TaskType[] = [];
+const initialProducts: Product[] = [];
+const initialEmployees: Employee[] = [];
 
 // Left Prerequisite items lists (Customer Tab)
 const customerPrerequisites = [
@@ -215,7 +140,12 @@ const customerPrerequisites = [
   { id: "service_providers", label: "Service Provider" },
   { id: "specializations", label: "Specialization Management" }, // default active
   { id: "features", label: "Feature" },
-  { id: "competitors", label: "Competitor" }
+  { id: "competitors", label: "Competitor" },
+  { id: "follow_types", label: "Follow Type Master" },
+  { id: "task_types", label: "Task Type Master" },
+  { id: "reasons_collection", label: "Reason For Collection" },
+  { id: "bi_reports", label: "BI Reports Setting" },
+  { id: "service_types", label: "Service Type" }
 ];
 
 // Left Prerequisite items lists (Employee Tab)
@@ -252,6 +182,48 @@ export default function SettingsPage() {
   const activeTab = getActiveTab();
 
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [activePrereq, setActivePrereq] = useState("specializations");
+  
+  // Master lists state
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [qualifications, setQualifications] = useState<Qualification[]>([]);
+  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+
+  // Generic Parameter lists state
+  const [categories, setCategories] = useState<GenericSetting[]>([]);
+  const [sources, setSources] = useState<GenericSetting[]>([]);
+  const [locations, setLocations] = useState<GenericSetting[]>([]);
+  const [stages, setStages] = useState<GenericSetting[]>([]);
+  const [complaints, setComplaints] = useState<GenericSetting[]>([]);
+  const [transports, setTransports] = useState<GenericSetting[]>([]);
+  const [expenseHeads, setExpenseHeads] = useState<GenericSetting[]>([]);
+  const [countries, setCountries] = useState<GenericSetting[]>([]);
+  const [definableMasters, setDefinableMasters] = useState<GenericSetting[]>([]);
+  const [definableParameters, setDefinableParameters] = useState<GenericSetting[]>([]);
+  const [districts, setDistricts] = useState<GenericSetting[]>([]);
+  const [serviceProviders, setServiceProviders] = useState<GenericSetting[]>([]);
+  const [features, setFeatures] = useState<GenericSetting[]>([]);
+  const [competitors, setCompetitors] = useState<GenericSetting[]>([]);
+  const [followTypes, setFollowTypes] = useState<GenericSetting[]>([]);
+  const [taskTypesMaster, setTaskTypesMaster] = useState<GenericSetting[]>([]);
+  const [reasonsCollection, setReasonsCollection] = useState<GenericSetting[]>([]);
+  const [biReports, setBiReports] = useState<GenericSetting[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<GenericSetting[]>([]);
+
+  // Specialization filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [levelFilter, setLevelFilter] = useState("");
+  const [demandFilter, setDemandFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // Modal forms state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"new" | "edit">("new");
+  const [formData, setFormData] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -268,29 +240,109 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
-  // Load settings from localStorage or initialize defaults
-  useEffect(() => {
-    const loadState = (key: string, fallback: any, setter: any) => {
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        try {
-          setter(JSON.parse(stored));
-        } catch (e) {
-          console.error(`Failed to parse localStorage key ${key}`, e);
-          setter(fallback);
-        }
-      } else {
-        setter(fallback);
-        localStorage.setItem(key, JSON.stringify(fallback));
-      }
-    };
+  const getSettingKey = (prereqId: string): string => {
+    switch (prereqId) {
+      case "specializations": return "settings_specializations";
+      case "qualifications": return "settings_qualifications";
+      case "products_list": return "settings_products";
+      case "categories": return "settings_categories";
+      case "sources": return "settings_sources";
+      case "locations": return "settings_locations";
+      case "stages": return "settings_stages";
+      case "complaints": return "settings_complaints";
+      case "transports": return "settings_transports";
+      case "expense_heads": return "settings_expenseHeads";
+      case "countries": return "settings_countries";
+      case "definable_masters": return "settings_definableMasters";
+      case "definable_parameters": return "settings_definableParameters";
+      case "districts": return "settings_districts";
+      case "service_providers": return "settings_serviceProviders";
+      case "features": return "settings_features";
+      case "competitors": return "settings_competitors";
+      case "follow_types": return "settings_followTypes";
+      case "task_types": return "settings_taskTypesMaster";
+      case "reasons_collection": return "settings_reasonsCollection";
+      case "bi_reports": return "settings_biReports";
+      case "service_types": return "settings_serviceTypes";
+      default: return "";
+    }
+  };
 
-    loadState("settings_specializations", initialSpecializations, setSpecializations);
-    loadState("settings_qualifications", initialQualifications, setQualifications);
-    loadState("settings_taskTypes", initialTaskTypes, setTaskTypes);
-    loadState("settings_products", initialProducts, setProducts);
-    
-    // For employees, load real users from database
+  const updateStateForPrereq = (prereqId: string, data: any[]) => {
+    switch (prereqId) {
+      case "specializations": setSpecializations(data); break;
+      case "qualifications": setQualifications(data); break;
+      case "products_list": setProducts(data); break;
+      case "categories": setCategories(data); break;
+      case "sources": setSources(data); break;
+      case "locations": setLocations(data); break;
+      case "stages": setStages(data); break;
+      case "complaints": setComplaints(data); break;
+      case "transports": setTransports(data); break;
+      case "expense_heads": setExpenseHeads(data); break;
+      case "countries": setCountries(data); break;
+      case "definable_masters": setDefinableMasters(data); break;
+      case "definable_parameters": setDefinableParameters(data); break;
+      case "districts": setDistricts(data); break;
+      case "service_providers": setServiceProviders(data); break;
+      case "features": setFeatures(data); break;
+      case "competitors": setCompetitors(data); break;
+      case "follow_types": setFollowTypes(data); break;
+      case "task_types": setTaskTypesMaster(data); break;
+      case "reasons_collection": setReasonsCollection(data); break;
+      case "bi_reports": setBiReports(data); break;
+      case "service_types": setServiceTypes(data); break;
+    }
+  };
+
+  const saveSettingInDb = async (prereqId: string, updatedList: any[]) => {
+    const settingKey = getSettingKey(prereqId);
+    if (!settingKey) return;
+
+    try {
+      const res = await fetch(`/api/settings/${settingKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedList)
+      });
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        updateStateForPrereq(prereqId, json.data);
+      }
+    } catch (err) {
+      console.error(`Failed to save settings for key ${settingKey}:`, err);
+    }
+  };
+
+  const [prereqLoading, setPrereqLoading] = useState(true);
+
+  // Load active setting dynamically when activePrereq changes
+  useEffect(() => {
+    if (activePrereq === "employees_list") return;
+
+    const settingKey = getSettingKey(activePrereq);
+    if (!settingKey) return;
+
+    async function loadSetting() {
+      try {
+        setPrereqLoading(true);
+        const res = await fetch(`/api/settings/${settingKey}`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          updateStateForPrereq(activePrereq, json.data);
+        }
+      } catch (err) {
+        console.error(`Failed to load setting for key ${settingKey}:`, err);
+      } finally {
+        setPrereqLoading(false);
+      }
+    }
+
+    loadSetting();
+  }, [activePrereq]);
+
+  // Load real employees from database
+  useEffect(() => {
     async function fetchEmployees() {
       try {
         const res = await fetch("/api/users");
@@ -308,92 +360,15 @@ export default function SettingsPage() {
             status: u.isActive ? "Active" : "Inactive"
           }));
           setEmployees(mapped);
-          localStorage.setItem("settings_employees", JSON.stringify(mapped));
-        } else {
-          loadState("settings_employees", initialEmployees, setEmployees);
         }
       } catch (err) {
-        console.error("Failed to load real employees, loading fallback:", err);
-        loadState("settings_employees", initialEmployees, setEmployees);
+        console.error("Failed to load real employees:", err);
       }
     }
     fetchEmployees();
-
-    loadState("settings_categories", [
-      { _id: "c1", name: "Corporate Client", status: "Active" },
-      { _id: "c2", name: "Government Entity", status: "Active" },
-      { _id: "c3", name: "Retail Customer", status: "Active" }
-    ], setCategories);
-
-    loadState("settings_sources", [
-      { _id: "so1", name: "Google Search", status: "Active" },
-      { _id: "so2", name: "Social Media Campaign", status: "Active" },
-      { _id: "so3", name: "Customer Referral", status: "Active" }
-    ], setSources);
-
-    loadState("settings_locations", [
-      { _id: "l1", name: "Mumbai", status: "Active" },
-      { _id: "l2", name: "Delhi NCR", status: "Active" },
-      { _id: "l3", name: "Bengaluru", status: "Active" }
-    ], setLocations);
-
-    loadState("settings_stages", [
-      { _id: "s1", name: "New Lead", status: "Active" },
-      { _id: "s2", name: "Contacted", status: "Active" },
-      { _id: "s3", name: "Qualified Proposal", status: "Active" }
-    ], setStages);
-
-    loadState("settings_complaints", [
-      { _id: "cp1", name: "Product Delivery Delay", status: "Active" },
-      { _id: "cp2", name: "Software License Issue", status: "Active" }
-    ], setComplaints);
-
-    loadState("settings_transports", [
-      { _id: "tr1", name: "Air Freight", status: "Active" },
-      { _id: "tr2", name: "Local Courier", status: "Active" }
-    ], setTransports);
-
-    loadState("settings_expenseHeads", [
-      { _id: "ex1", name: "Travel Allowance", status: "Active" },
-      { _id: "ex2", name: "Office Supplies", status: "Active" }
-    ], setExpenseHeads);
-
-    loadState("settings_countries", [
-      { _id: "cn1", name: "India", status: "Active" },
-      { _id: "cn2", name: "United States", status: "Active" }
-    ], setCountries);
-
-    loadState("settings_definableMasters", [
-      { _id: "dm1", name: "Custom Project Parameter", status: "Active" }
-    ], setDefinableMasters);
-
-    loadState("settings_definableParameters", [
-      { _id: "dp1", name: "Contract Expiration Period", status: "Active" }
-    ], setDefinableParameters);
-
-    loadState("settings_districts", [
-      { _id: "d1", name: "Pune District", status: "Active" },
-      { _id: "d2", name: "Gurugram", status: "Active" }
-    ], setDistricts);
-
-    loadState("settings_serviceProviders", [
-      { _id: "sp1", name: "Logistics Partner A", status: "Active" },
-      { _id: "sp2", name: "AWS Cloud Support", status: "Active" }
-    ], setServiceProviders);
-
-    loadState("settings_features", [
-      { _id: "f1", name: "Automatic Invoicing", status: "Active" },
-      { _id: "f2", name: "WhatsApp Reminders", status: "Active" }
-    ], setFeatures);
-
-    loadState("settings_competitors", [
-      { _id: "cmp1", name: "Competitor CRM Ltd", status: "Active" }
-    ], setCompetitors);
   }, []);
 
   // Left sidebar active prerequisite item
-  const [activePrereq, setActivePrereq] = useState("specializations");
-
   // Keep track of active prerequisite category when switching main tabs
   useEffect(() => {
     if (activeTab === "system") {
@@ -406,85 +381,6 @@ export default function SettingsPage() {
       setActivePrereq("specializations");
     }
   }, [activeTab]);
-
-  // Master lists state
-  const [specializations, setSpecializations] = useState<Specialization[]>(initialSpecializations);
-  const [qualifications, setQualifications] = useState<Qualification[]>(initialQualifications);
-  const [taskTypes, setTaskTypes] = useState<TaskType[]>(initialTaskTypes);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
-
-  // Generic Parameter lists state
-  const [categories, setCategories] = useState<GenericSetting[]>([
-    { _id: "c1", name: "Corporate Client", status: "Active" },
-    { _id: "c2", name: "Government Entity", status: "Active" },
-    { _id: "c3", name: "Retail Customer", status: "Active" }
-  ]);
-  const [sources, setSources] = useState<GenericSetting[]>([
-    { _id: "so1", name: "Google Search", status: "Active" },
-    { _id: "so2", name: "Social Media Campaign", status: "Active" },
-    { _id: "so3", name: "Customer Referral", status: "Active" }
-  ]);
-  const [locations, setLocations] = useState<GenericSetting[]>([
-    { _id: "l1", name: "Mumbai", status: "Active" },
-    { _id: "l2", name: "Delhi NCR", status: "Active" },
-    { _id: "l3", name: "Bengaluru", status: "Active" }
-  ]);
-  const [stages, setStages] = useState<GenericSetting[]>([
-    { _id: "s1", name: "New Lead", status: "Active" },
-    { _id: "s2", name: "Contacted", status: "Active" },
-    { _id: "s3", name: "Qualified Proposal", status: "Active" }
-  ]);
-  const [complaints, setComplaints] = useState<GenericSetting[]>([
-    { _id: "cp1", name: "Product Delivery Delay", status: "Active" },
-    { _id: "cp2", name: "Software License Issue", status: "Active" }
-  ]);
-  const [transports, setTransports] = useState<GenericSetting[]>([
-    { _id: "tr1", name: "Air Freight", status: "Active" },
-    { _id: "tr2", name: "Local Courier", status: "Active" }
-  ]);
-  const [expenseHeads, setExpenseHeads] = useState<GenericSetting[]>([
-    { _id: "ex1", name: "Travel Allowance", status: "Active" },
-    { _id: "ex2", name: "Office Supplies", status: "Active" }
-  ]);
-  const [countries, setCountries] = useState<GenericSetting[]>([
-    { _id: "cn1", name: "India", status: "Active" },
-    { _id: "cn2", name: "United States", status: "Active" }
-  ]);
-  const [definableMasters, setDefinableMasters] = useState<GenericSetting[]>([
-    { _id: "dm1", name: "Custom Project Parameter", status: "Active" }
-  ]);
-  const [definableParameters, setDefinableParameters] = useState<GenericSetting[]>([
-    { _id: "dp1", name: "Contract Expiration Period", status: "Active" }
-  ]);
-  const [districts, setDistricts] = useState<GenericSetting[]>([
-    { _id: "d1", name: "Pune District", status: "Active" },
-    { _id: "d2", name: "Gurugram", status: "Active" }
-  ]);
-  const [serviceProviders, setServiceProviders] = useState<GenericSetting[]>([
-    { _id: "sp1", name: "Logistics Partner A", status: "Active" },
-    { _id: "sp2", name: "AWS Cloud Support", status: "Active" }
-  ]);
-  const [features, setFeatures] = useState<GenericSetting[]>([
-    { _id: "f1", name: "Automatic Invoicing", status: "Active" },
-    { _id: "f2", name: "WhatsApp Reminders", status: "Active" }
-  ]);
-  const [competitors, setCompetitors] = useState<GenericSetting[]>([
-    { _id: "cmp1", name: "Competitor CRM Ltd", status: "Active" }
-  ]);
-
-  // Specialization filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [levelFilter, setLevelFilter] = useState("");
-  const [demandFilter, setDemandFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-
-  // Modal forms state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formMode, setFormMode] = useState<"new" | "edit">("new");
-  const [formData, setFormData] = useState<any>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Switch tabs (routes)
   const handleTabChange = (tabId: string) => {
@@ -502,20 +398,9 @@ export default function SettingsPage() {
   const handleOpenAddModal = () => {
     setFormMode("new");
     if (activePrereq === "specializations") {
-      setFormData({
-        name: "",
-        description: "",
-        category: "Technology",
-        level: "Expert",
-        experience: "3 years",
-        certRequired: false,
-        salary: 75000,
-        professionals: 10,
-        demandLevel: "Medium",
-        status: "Active"
-      });
+      setFormData({ name: "", description: "", category: "Technology", level: "Expert", experience: "1 year", certRequired: false, salary: "", professionals: "", demandLevel: "Medium", status: "Active" });
     } else if (activePrereq === "qualifications") {
-      setFormData({ name: "", category: "Undergraduate", level: "Bachelor", field: "", duration: "" });
+      setFormData({ name: "", category: "Undergraduate", level: "Bachelor", field: "", duration: "4 years" });
     } else if (activePrereq === "products_list") {
       setFormData({ name: "", code: "", category: "Software", price: "", tax: "18%", status: "Active" });
     } else if (activePrereq === "employees_list") {
@@ -532,231 +417,59 @@ export default function SettingsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
     if (!confirm("Are you sure you want to delete this setting record?")) return;
 
-    if (activePrereq === "specializations") {
-      const filtered = specializations.filter(s => s._id !== id);
-      setSpecializations(filtered);
-      localStorage.setItem("settings_specializations", JSON.stringify(filtered));
-    } else if (activePrereq === "qualifications") {
-      const filtered = qualifications.filter(q => q._id !== id);
-      setQualifications(filtered);
-      localStorage.setItem("settings_qualifications", JSON.stringify(filtered));
-    } else if (activePrereq === "products_list") {
-      const filtered = products.filter(p => p._id !== id);
-      setProducts(filtered);
-      localStorage.setItem("settings_products", JSON.stringify(filtered));
-    } else if (activePrereq === "employees_list") {
+    if (activePrereq === "employees_list") {
       const filtered = employees.filter(e => e._id !== id);
       setEmployees(filtered);
-      localStorage.setItem("settings_employees", JSON.stringify(filtered));
-    } else {
-      // Generic state triggers
-      switch (activePrereq) {
-        case "categories": {
-          const filtered = categories.filter(c => c._id !== id);
-          setCategories(filtered);
-          localStorage.setItem("settings_categories", JSON.stringify(filtered));
-          break;
-        }
-        case "sources": {
-          const filtered = sources.filter(s => s._id !== id);
-          setSources(filtered);
-          localStorage.setItem("settings_sources", JSON.stringify(filtered));
-          break;
-        }
-        case "locations": {
-          const filtered = locations.filter(l => l._id !== id);
-          setLocations(filtered);
-          localStorage.setItem("settings_locations", JSON.stringify(filtered));
-          break;
-        }
-        case "stages": {
-          const filtered = stages.filter(s => s._id !== id);
-          setStages(filtered);
-          localStorage.setItem("settings_stages", JSON.stringify(filtered));
-          break;
-        }
-        case "complaints": {
-          const filtered = complaints.filter(c => c._id !== id);
-          setComplaints(filtered);
-          localStorage.setItem("settings_complaints", JSON.stringify(filtered));
-          break;
-        }
-        case "transports": {
-          const filtered = transports.filter(t => t._id !== id);
-          setTransports(filtered);
-          localStorage.setItem("settings_transports", JSON.stringify(filtered));
-          break;
-        }
-        case "expense_heads": {
-          const filtered = expenseHeads.filter(e => e._id !== id);
-          setExpenseHeads(filtered);
-          localStorage.setItem("settings_expenseHeads", JSON.stringify(filtered));
-          break;
-        }
-        case "countries": {
-          const filtered = countries.filter(c => c._id !== id);
-          setCountries(filtered);
-          localStorage.setItem("settings_countries", JSON.stringify(filtered));
-          break;
-        }
-        case "definable_masters": {
-          const filtered = definableMasters.filter(d => d._id !== id);
-          setDefinableMasters(filtered);
-          localStorage.setItem("settings_definableMasters", JSON.stringify(filtered));
-          break;
-        }
-        case "definable_parameters": {
-          const filtered = definableParameters.filter(d => d._id !== id);
-          setDefinableParameters(filtered);
-          localStorage.setItem("settings_definableParameters", JSON.stringify(filtered));
-          break;
-        }
-        case "districts": {
-          const filtered = districts.filter(d => d._id !== id);
-          setDistricts(filtered);
-          localStorage.setItem("settings_districts", JSON.stringify(filtered));
-          break;
-        }
-        case "service_providers": {
-          const filtered = serviceProviders.filter(s => s._id !== id);
-          setServiceProviders(filtered);
-          localStorage.setItem("settings_serviceProviders", JSON.stringify(filtered));
-          break;
-        }
-        case "features": {
-          const filtered = features.filter(f => f._id !== id);
-          setFeatures(filtered);
-          localStorage.setItem("settings_features", JSON.stringify(filtered));
-          break;
-        }
-        case "competitors": {
-          const filtered = competitors.filter(c => c._id !== id);
-          setCompetitors(filtered);
-          localStorage.setItem("settings_competitors", JSON.stringify(filtered));
-          break;
-        }
-      }
+      return;
     }
+
+    let updatedList: any[] = [];
+    if (activePrereq === "specializations") {
+      updatedList = specializations.filter(s => s._id !== id);
+    } else if (activePrereq === "qualifications") {
+      updatedList = qualifications.filter(q => q._id !== id);
+    } else if (activePrereq === "products_list") {
+      updatedList = products.filter(p => p._id !== id);
+    } else {
+      updatedList = getGenericList().filter(item => item._id !== id);
+    }
+
+    await saveSettingInDb(activePrereq, updatedList);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
       if (formMode === "new") {
         const newRecord = { ...formData, _id: `record_${Date.now()}` };
+        
         if (activePrereq === "specializations") {
-          const updated = [...specializations, {
+          const specRecord = {
             ...newRecord,
             salary: Number(formData.salary || 0),
             professionals: Number(formData.professionals || 0)
-          }];
-          setSpecializations(updated);
-          localStorage.setItem("settings_specializations", JSON.stringify(updated));
+          };
+          const updated = [...specializations, specRecord];
+          await saveSettingInDb(activePrereq, updated);
         } else if (activePrereq === "qualifications") {
           const updated = [...qualifications, newRecord];
-          setQualifications(updated);
-          localStorage.setItem("settings_qualifications", JSON.stringify(updated));
+          await saveSettingInDb(activePrereq, updated);
         } else if (activePrereq === "products_list") {
-          const updated = [...products, { ...newRecord, price: Number(formData.price || 0) }];
-          setProducts(updated);
-          localStorage.setItem("settings_products", JSON.stringify(updated));
+          const prodRecord = { ...newRecord, price: Number(formData.price || 0) };
+          const updated = [...products, prodRecord];
+          await saveSettingInDb(activePrereq, updated);
         } else if (activePrereq === "employees_list") {
           const updated = [...employees, { ...newRecord, joined: new Date().toISOString().split("T")[0] }];
           setEmployees(updated);
-          localStorage.setItem("settings_employees", JSON.stringify(updated));
         } else {
           const genericRecord: GenericSetting = { _id: `record_${Date.now()}`, name: formData.name, status: formData.status };
-          switch (activePrereq) {
-            case "categories": {
-              const updated = [...categories, genericRecord];
-              setCategories(updated);
-              localStorage.setItem("settings_categories", JSON.stringify(updated));
-              break;
-            }
-            case "sources": {
-              const updated = [...sources, genericRecord];
-              setSources(updated);
-              localStorage.setItem("settings_sources", JSON.stringify(updated));
-              break;
-            }
-            case "locations": {
-              const updated = [...locations, genericRecord];
-              setLocations(updated);
-              localStorage.setItem("settings_locations", JSON.stringify(updated));
-              break;
-            }
-            case "stages": {
-              const updated = [...stages, genericRecord];
-              setStages(updated);
-              localStorage.setItem("settings_stages", JSON.stringify(updated));
-              break;
-            }
-            case "complaints": {
-              const updated = [...complaints, genericRecord];
-              setComplaints(updated);
-              localStorage.setItem("settings_complaints", JSON.stringify(updated));
-              break;
-            }
-            case "transports": {
-              const updated = [...transports, genericRecord];
-              setTransports(updated);
-              localStorage.setItem("settings_transports", JSON.stringify(updated));
-              break;
-            }
-            case "expense_heads": {
-              const updated = [...expenseHeads, genericRecord];
-              setExpenseHeads(updated);
-              localStorage.setItem("settings_expenseHeads", JSON.stringify(updated));
-              break;
-            }
-            case "countries": {
-              const updated = [...countries, genericRecord];
-              setCountries(updated);
-              localStorage.setItem("settings_countries", JSON.stringify(updated));
-              break;
-            }
-            case "definable_masters": {
-              const updated = [...definableMasters, genericRecord];
-              setDefinableMasters(updated);
-              localStorage.setItem("settings_definableMasters", JSON.stringify(updated));
-              break;
-            }
-            case "definable_parameters": {
-              const updated = [...definableParameters, genericRecord];
-              setDefinableParameters(updated);
-              localStorage.setItem("settings_definableParameters", JSON.stringify(updated));
-              break;
-            }
-            case "districts": {
-              const updated = [...districts, genericRecord];
-              setDistricts(updated);
-              localStorage.setItem("settings_districts", JSON.stringify(updated));
-              break;
-            }
-            case "service_providers": {
-              const updated = [...serviceProviders, genericRecord];
-              setServiceProviders(updated);
-              localStorage.setItem("settings_serviceProviders", JSON.stringify(updated));
-              break;
-            }
-            case "features": {
-              const updated = [...features, genericRecord];
-              setFeatures(updated);
-              localStorage.setItem("settings_features", JSON.stringify(updated));
-              break;
-            }
-            case "competitors": {
-              const updated = [...competitors, genericRecord];
-              setCompetitors(updated);
-              localStorage.setItem("settings_competitors", JSON.stringify(updated));
-              break;
-            }
-          }
+          const updated = [...getGenericList(), genericRecord];
+          await saveSettingInDb(activePrereq, updated);
         }
       } else {
         // Edit mode
@@ -766,113 +479,28 @@ export default function SettingsPage() {
             salary: Number(formData.salary || 0),
             professionals: Number(formData.professionals || 0)
           } : s);
-          setSpecializations(updated);
-          localStorage.setItem("settings_specializations", JSON.stringify(updated));
+          await saveSettingInDb(activePrereq, updated);
         } else if (activePrereq === "qualifications") {
           const updated = qualifications.map(q => q._id === formData._id ? formData : q);
-          setQualifications(updated);
-          localStorage.setItem("settings_qualifications", JSON.stringify(updated));
+          await saveSettingInDb(activePrereq, updated);
         } else if (activePrereq === "products_list") {
           const updated = products.map(p => p._id === formData._id ? { ...formData, price: Number(formData.price || 0) } : p);
-          setProducts(updated);
-          localStorage.setItem("settings_products", JSON.stringify(updated));
+          await saveSettingInDb(activePrereq, updated);
         } else if (activePrereq === "employees_list") {
           const updated = employees.map(emp => emp._id === formData._id ? formData : emp);
           setEmployees(updated);
-          localStorage.setItem("settings_employees", JSON.stringify(updated));
         } else {
           const updatedGeneric = { _id: formData._id, name: formData.name, status: formData.status };
-          switch (activePrereq) {
-            case "categories": {
-              const updated = categories.map(c => c._id === formData._id ? updatedGeneric : c);
-              setCategories(updated);
-              localStorage.setItem("settings_categories", JSON.stringify(updated));
-              break;
-            }
-            case "sources": {
-              const updated = sources.map(s => s._id === formData._id ? updatedGeneric : s);
-              setSources(updated);
-              localStorage.setItem("settings_sources", JSON.stringify(updated));
-              break;
-            }
-            case "locations": {
-              const updated = locations.map(l => l._id === formData._id ? updatedGeneric : l);
-              setLocations(updated);
-              localStorage.setItem("settings_locations", JSON.stringify(updated));
-              break;
-            }
-            case "stages": {
-              const updated = stages.map(s => s._id === formData._id ? updatedGeneric : s);
-              setStages(updated);
-              localStorage.setItem("settings_stages", JSON.stringify(updated));
-              break;
-            }
-            case "complaints": {
-              const updated = complaints.map(c => c._id === formData._id ? updatedGeneric : c);
-              setComplaints(updated);
-              localStorage.setItem("settings_complaints", JSON.stringify(updated));
-              break;
-            }
-            case "transports": {
-              const updated = transports.map(t => t._id === formData._id ? updatedGeneric : t);
-              setTransports(updated);
-              localStorage.setItem("settings_transports", JSON.stringify(updated));
-              break;
-            }
-            case "expense_heads": {
-              const updated = expenseHeads.map(e => e._id === formData._id ? updatedGeneric : e);
-              setExpenseHeads(updated);
-              localStorage.setItem("settings_expenseHeads", JSON.stringify(updated));
-              break;
-            }
-            case "countries": {
-              const updated = countries.map(c => c._id === formData._id ? updatedGeneric : c);
-              setCountries(updated);
-              localStorage.setItem("settings_countries", JSON.stringify(updated));
-              break;
-            }
-            case "definable_masters": {
-              const updated = definableMasters.map(d => d._id === formData._id ? updatedGeneric : d);
-              setDefinableMasters(updated);
-              localStorage.setItem("settings_definableMasters", JSON.stringify(updated));
-              break;
-            }
-            case "definable_parameters": {
-              const updated = definableParameters.map(d => d._id === formData._id ? updatedGeneric : d);
-              setDefinableParameters(updated);
-              localStorage.setItem("settings_definableParameters", JSON.stringify(updated));
-              break;
-            }
-            case "districts": {
-              const updated = districts.map(d => d._id === formData._id ? updatedGeneric : d);
-              setDistricts(updated);
-              localStorage.setItem("settings_districts", JSON.stringify(updated));
-              break;
-            }
-            case "service_providers": {
-              const updated = serviceProviders.map(s => s._id === formData._id ? updatedGeneric : s);
-              setServiceProviders(updated);
-              localStorage.setItem("settings_serviceProviders", JSON.stringify(updated));
-              break;
-            }
-            case "features": {
-              const updated = features.map(f => f._id === formData._id ? updatedGeneric : f);
-              setFeatures(updated);
-              localStorage.setItem("settings_features", JSON.stringify(updated));
-              break;
-            }
-            case "competitors": {
-              const updated = competitors.map(c => c._id === formData._id ? updatedGeneric : c);
-              setCompetitors(updated);
-              localStorage.setItem("settings_competitors", JSON.stringify(updated));
-              break;
-            }
-          }
+          const updated = getGenericList().map(item => item._id === formData._id ? updatedGeneric : item);
+          await saveSettingInDb(activePrereq, updated);
         }
       }
+    } catch (err) {
+      console.error("Failed to submit form:", err);
+    } finally {
       setIsSubmitting(false);
       setIsModalOpen(false);
-    }, 300);
+    }
   };
 
   // Get active menu selection list items
@@ -881,6 +509,12 @@ export default function SettingsPage() {
     if (activeTab === "customers") return customerPrerequisites;
     if (activeTab === "system") return systemPrerequisites;
     return [];
+  };
+
+  const getPrereqTitle = () => {
+    const list = [...customerPrerequisites, ...employeePrerequisites, ...systemPrerequisites];
+    const found = list.find(item => item.id === activePrereq);
+    return found ? found.label : activePrereq.replace("_", " ");
   };
 
   // Get current active generic list
@@ -900,6 +534,11 @@ export default function SettingsPage() {
       case "service_providers": return serviceProviders;
       case "features": return features;
       case "competitors": return competitors;
+      case "follow_types": return followTypes;
+      case "task_types": return taskTypesMaster;
+      case "reasons_collection": return reasonsCollection;
+      case "bi_reports": return biReports;
+      case "service_types": return serviceTypes;
       default: return [];
     }
   };
@@ -1005,74 +644,107 @@ export default function SettingsPage() {
 
       {/* -------------------- PRODUCT MASTER VIEW -------------------- */}
       {activeTab === "products" && (
-        <div className="space-y-6 opacity-0 animate-fade-in">
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-1">
-              <Briefcase size={20} className="text-accent" />
-              Product Master Catalog
-            </h2>
-            <p className="text-xs text-foreground-secondary">Manage products, software licenses, integrations and AMCs</p>
+        prereqLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-surface border border-border rounded-2xl shadow-sm">
+            <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+            <p className="text-sm font-bold text-foreground-muted uppercase tracking-wider animate-pulse font-sans">Loading Products...</p>
           </div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-4 shadow-sm">
-            <div className="relative flex items-center max-w-sm flex-1">
-              <Search className="absolute left-3.5 text-foreground-muted" size={15} />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none"
-              />
+        ) : (
+          <div className="space-y-6 opacity-0 animate-fade-in">
+            <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-1">
+                <Briefcase size={20} className="text-accent" />
+                Product Master Catalog
+              </h2>
+              <p className="text-xs text-foreground-secondary">Manage products, software licenses, integrations and AMCs</p>
             </div>
-            <button
-              onClick={() => { setActivePrereq("products_list"); handleOpenAddModal(); }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
-            >
-              <Plus size={14} />
-              <span>Add Product</span>
-            </button>
-          </div>
 
-          <div className="bg-surface border border-border rounded-2xl overflow-x-auto shadow-sm">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-border bg-background-secondary/30 text-[10px] font-bold uppercase tracking-wider text-foreground-muted text-left">
-                  <th className="px-6 py-3">Product Name</th>
-                  <th className="px-6 py-3">Code</th>
-                  <th className="px-6 py-3">Category</th>
-                  <th className="px-6 py-3">Price</th>
-                  <th className="px-6 py-3">Tax</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((p, idx) => (
-                  <tr key={p._id} className={`hover:bg-surface-hover/30 transition-colors opacity-0 animate-fade-in ${idx < 5 ? `stagger-${idx + 1}` : ""}`}>
-                    <td className="px-6 py-3.5 font-bold text-foreground">{p.name}</td>
-                    <td className="px-6 py-3.5 font-mono text-foreground-secondary">{p.code}</td>
-                    <td className="px-6 py-3.5"><span className="px-2.5 py-0.5 rounded-full bg-accent-muted/40 text-accent font-bold text-[9px] uppercase">{p.category}</span></td>
-                    <td className="px-6 py-3.5 font-bold text-foreground">₹{p.price.toLocaleString()}</td>
-                    <td className="px-6 py-3.5 text-foreground-secondary">{p.tax}</td>
-                    <td className="px-6 py-3.5">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${p.status === "Active" ? "bg-success-muted text-success" : "bg-danger-muted text-danger"}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${p.status === "Active" ? "bg-success animate-pulse" : "bg-danger"}`} />
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3.5">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => { setActivePrereq("products_list"); handleOpenEditModal(p); }} className="w-7 h-7 rounded-full flex items-center justify-center bg-accent-muted/20 border border-accent/10 text-accent hover:bg-accent-muted/40 cursor-pointer"><Edit size={12} /></button>
-                        <button onClick={() => { setActivePrereq("products_list"); handleDeleteItem(p._id); }} className="w-7 h-7 rounded-full flex items-center justify-center bg-danger-muted/20 border border-danger/10 text-danger hover:bg-danger-muted/40 cursor-pointer"><Trash2 size={12} /></button>
-                      </div>
-                    </td>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-border rounded-2xl p-4 shadow-sm">
+              <div className="relative flex items-center max-w-sm flex-1">
+                <Search className="absolute left-3.5 text-foreground-muted" size={15} />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-background-secondary border border-border rounded-xl pl-10! py-2.5 text-xs text-foreground focus:border-accent outline-none"
+                />
+              </div>
+              <button
+                onClick={handleOpenAddModal}
+                className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-all active:scale-95 shrink-0 self-start md:self-center"
+              >
+                <Plus size={14} className="stroke-[2.5]" />
+                <span>Add Product</span>
+              </button>
+            </div>
+
+            <div className="bg-surface border border-border rounded-2xl shadow-sm overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs text-foreground">
+                <thead className="bg-background-secondary border-b border-border text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">
+                  <tr>
+                    <th className="px-6 py-4">Product Name</th>
+                    <th className="px-6 py-4">Product Code</th>
+                    <th className="px-6 py-4">Category</th>
+                    <th className="px-6 py-4">Price</th>
+                    <th className="px-6 py-4">Tax Rate</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4 text-center">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border font-medium">
+                  {products.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center text-foreground-muted">
+                        No product catalogs defined yet. Click "Add Product" to get started.
+                      </td>
+                    </tr>
+                  ) : products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.code.toLowerCase().includes(searchQuery.toLowerCase())).map((p, idx) => (
+                    <tr key={p._id || idx} className="hover:bg-surface-hover/30 transition-colors">
+                      <td className="px-6 py-4.5 font-bold text-foreground">{p.name}</td>
+                      <td className="px-6 py-4.5 text-foreground-secondary font-mono">{p.code}</td>
+                      <td className="px-6 py-4.5">
+                        <span className="px-2.5 py-0.5 rounded-full bg-background-secondary border border-border font-semibold text-[10px] text-foreground-secondary">
+                          {p.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4.5 text-foreground font-bold">₹{p.price.toLocaleString("en-IN")}</td>
+                      <td className="px-6 py-4.5 text-foreground-secondary">{p.tax}</td>
+                      <td className="px-6 py-4.5">
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold inline-flex items-center gap-1.5 ${
+                          p.status === "Active" 
+                            ? "bg-green-500/10 text-green-500 border border-green-500/20" 
+                            : "bg-foreground-muted/10 text-foreground-muted border border-border"
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${p.status === "Active" ? "bg-green-500 animate-pulse" : "bg-foreground-muted"}`} />
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4.5">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleOpenEditModal(p)}
+                            className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg cursor-pointer transition-colors"
+                            title="Edit Product"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(p._id)}
+                            className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                            title="Delete Product"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* -------------------- DYNAMIC MASTER SETTINGS VIEW -------------------- */}
@@ -1109,8 +781,14 @@ export default function SettingsPage() {
 
           {/* Right Column: Master Details Dashboard Panel */}
           <div className="lg:col-span-3 space-y-6">
-            
-            {/* 1. Specialization Management Details */}
+            {prereqLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-surface border border-border rounded-2xl shadow-sm animate-fade-in">
+                <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+                <p className="text-sm font-bold text-foreground-muted uppercase tracking-wider animate-pulse font-sans">Loading Setting...</p>
+              </div>
+            ) : (
+              <>
+                {/* 1. Specialization Management Details */}
             {activePrereq === "specializations" && (
               <div className="space-y-6 opacity-0 animate-fade-in">
                 
@@ -1434,9 +1112,9 @@ export default function SettingsPage() {
               <div className="space-y-6 opacity-0 animate-fade-in">
                 <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-bold text-foreground flex items-center gap-2 capitalize">
+                    <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                       <Tag size={20} className="text-accent" />
-                      Configure {activePrereq.replace("_", " ")}
+                      Configure {getPrereqTitle()}
                     </h2>
                     <p className="text-xs text-foreground-secondary">Manage parameter indices and status configurations</p>
                   </div>
@@ -1486,10 +1164,11 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
-
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
+    </div>
+  )}
 
       {/* -------------------- ADD / EDIT MODALS -------------------- */}
       <Modal

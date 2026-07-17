@@ -14,6 +14,7 @@ interface Organization {
   name: string;
   slug: string;
   status: "active" | "suspended";
+  dbConnectionString?: string;
   createdAt: string;
 }
 
@@ -88,6 +89,7 @@ export default function SuperAdminPage() {
   const [newOrgName, setNewOrgName] = useState("");
   const [newOrgSlug, setNewOrgSlug] = useState("");
   const [orgStatus, setOrgStatus] = useState<"active" | "suspended">("active");
+  const [newOrgDbString, setNewOrgDbString] = useState("");
 
   // Form states: User Enroll/Edit
   const [currentUserEdit, setCurrentUserEdit] = useState<Partial<UserProfile> | null>(null);
@@ -181,11 +183,13 @@ export default function SuperAdminPage() {
       setNewOrgName(org.name);
       setNewOrgSlug(org.slug);
       setOrgStatus(org.status);
+      setNewOrgDbString(org.dbConnectionString || "");
     } else {
       setEditingOrgId(null);
       setNewOrgName("");
       setNewOrgSlug("");
       setOrgStatus("active");
+      setNewOrgDbString("");
     }
     setIsOrgModalOpen(true);
   };
@@ -198,7 +202,11 @@ export default function SuperAdminPage() {
       setIsSubmitting(true);
       const url = editingOrgId ? `/api/organizations/${editingOrgId}` : "/api/organizations";
       const method = editingOrgId ? "PATCH" : "POST";
-      const body: Record<string, any> = { name: newOrgName, slug: newOrgSlug };
+      const body: Record<string, any> = { 
+        name: newOrgName, 
+        slug: newOrgSlug, 
+        dbConnectionString: newOrgDbString 
+      };
       if (editingOrgId) {
         body.status = orgStatus;
       }
@@ -655,12 +663,18 @@ export default function SuperAdminPage() {
                             {org.status}
                           </span>
                         </div>
-                        <p className="text-xs text-foreground-secondary font-medium mt-0.5">
-                          Slug: <span className="text-foreground font-bold">{org.slug}.rvmcrm.com</span>
+                        <p className="text-xs text-foreground-secondary font-medium mt-0.5 flex flex-wrap items-center gap-y-1">
+                          <span>Slug: <span className="text-foreground font-bold">{org.slug}.rvmcrm.com</span></span>
                           <span className="mx-2">•</span>
-                          {orgTeams.length} Teams
+                          <span>{orgTeams.length} Teams</span>
                           <span className="mx-2">•</span>
-                          {orgUsers.length} Users
+                          <span>{orgUsers.length} Users</span>
+                          {org.dbConnectionString && (
+                            <>
+                              <span className="mx-2">•</span>
+                              <span className="px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-500 font-bold text-[9px] uppercase tracking-wider">Custom DB Cluster</span>
+                            </>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -995,6 +1009,17 @@ export default function SuperAdminPage() {
               <span className="absolute right-4 text-xs font-bold text-foreground-muted">.rvmcrm.com</span>
             </div>
             <span className="text-[10px] text-foreground-muted mt-1.5 block">Determines subdomain URL prefix. Must contain only lowercase alphanumeric characters.</span>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1.5 block">Custom MongoDB Connection String (Optional)</label>
+            <input
+              value={newOrgDbString}
+              onChange={(e) => setNewOrgDbString(e.target.value)}
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:border-accent outline-none font-semibold font-mono"
+              placeholder="mongodb+srv://user:pass@cluster.mongodb.net/dbname"
+            />
+            <span className="text-[10px] text-foreground-muted mt-1.5 block">Leave blank to use the default shared database cluster.</span>
           </div>
 
           {editingOrgId && (

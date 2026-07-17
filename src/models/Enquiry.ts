@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IEnquiry extends Document {
   name: string;
@@ -63,10 +64,6 @@ const EnquirySchema = new Schema<IEnquiry>(
 
 EnquirySchema.index({ createdAt: -1 });
 
-if (mongoose.models.Enquiry) {
-  delete (mongoose.models as any).Enquiry;
-}
-
-const Enquiry: Model<IEnquiry> = mongoose.model<IEnquiry>("Enquiry", EnquirySchema);
+const Enquiry: Model<IEnquiry> = tenantModel<IEnquiry>("Enquiry", EnquirySchema);
 
 export default Enquiry;

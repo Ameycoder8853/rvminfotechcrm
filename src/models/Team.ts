@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface ITeam extends Document {
   orgId: mongoose.Types.ObjectId;
@@ -29,10 +30,6 @@ const TeamSchema = new Schema<ITeam>(
   { timestamps: true }
 );
 
-if (mongoose.models.Team) {
-  delete (mongoose.models as any).Team;
-}
-
-const Team: Model<ITeam> = mongoose.model<ITeam>("Team", TeamSchema);
+const Team: Model<ITeam> = tenantModel<ITeam>("Team", TeamSchema);
 
 export default Team;

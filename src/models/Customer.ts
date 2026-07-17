@@ -131,10 +131,8 @@ const CustomerSchema = new Schema<ICustomer>(
 
 CustomerSchema.index({ firstName: "text", lastName: "text", company: "text" });
 
-if (mongoose.models.Customer) {
-  delete (mongoose.models as any).Customer;
-}
+import { tenantModel } from "@/lib/mongodb-tenant";
 
-const Customer: Model<ICustomer> = mongoose.model<ICustomer>("Customer", CustomerSchema);
+const Customer: Model<ICustomer> = tenantModel<ICustomer>("Customer", CustomerSchema);
 
 export default Customer;

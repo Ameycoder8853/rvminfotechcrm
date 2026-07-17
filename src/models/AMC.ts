@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IServiceScheduleEntry {
   scheduledDate: Date;
@@ -58,7 +59,6 @@ const AMCSchema = new Schema<IAMC>({
 AMCSchema.index({ contractNumber: 1 });
 AMCSchema.index({ status: 1, endDate: 1 });
 
-const AMC: Model<IAMC> =
-  mongoose.models.AMC || mongoose.model<IAMC>("AMC", AMCSchema);
+const AMC: Model<IAMC> = tenantModel<IAMC>("AMC", AMCSchema);
 
 export default AMC;

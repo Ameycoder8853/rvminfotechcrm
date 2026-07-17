@@ -57,6 +57,10 @@ export async function PATCH(
       org.status = body.status;
     }
 
+    if (body.dbConnectionString !== undefined) {
+      org.dbConnectionString = body.dbConnectionString;
+    }
+
     await org.save();
 
     return NextResponse.json({ success: true, data: org });

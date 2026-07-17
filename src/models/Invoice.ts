@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IInvoice extends Document {
   invoiceNumber: string;
@@ -57,10 +58,6 @@ InvoiceSchema.index({ invoiceNumber: 1 });
 InvoiceSchema.index({ customer: 1 });
 InvoiceSchema.index({ status: 1 });
 
-if (mongoose.models.Invoice) {
-  delete (mongoose.models as any).Invoice;
-}
-
-const Invoice: Model<IInvoice> = mongoose.model<IInvoice>("Invoice", InvoiceSchema);
+const Invoice: Model<IInvoice> = tenantModel<IInvoice>("Invoice", InvoiceSchema);
 
 export default Invoice;

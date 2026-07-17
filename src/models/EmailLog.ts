@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { tenantModel } from "@/lib/mongodb-tenant";
 
 export interface IEmailLog extends Document {
   user: Types.ObjectId;
@@ -28,10 +29,6 @@ const EmailLogSchema = new Schema<IEmailLog>({
   }, { timestamps: true }
 );
 
-if (mongoose.models.EmailLog) {
-  delete (mongoose.models as any).EmailLog;
-}
-
-const EmailLog: Model<IEmailLog> = mongoose.model<IEmailLog>("EmailLog", EmailLogSchema);
+const EmailLog: Model<IEmailLog> = tenantModel<IEmailLog>("EmailLog", EmailLogSchema);
 
 export default EmailLog;

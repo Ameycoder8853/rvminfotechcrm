@@ -4,6 +4,7 @@ export interface IOrganization extends Document {
   name: string;
   slug: string; // Subdomain or identifier
   status: "active" | "suspended";
+  dbConnectionString?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,6 +14,7 @@ const OrganizationSchema = new Schema<IOrganization>(
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
     status: { type: String, enum: ["active", "suspended"], default: "active" },
+    dbConnectionString: { type: String, default: "" },
   },
   { timestamps: true }
 );
